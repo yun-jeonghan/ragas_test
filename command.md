@@ -60,14 +60,24 @@ vLLM endpoint를 명시해서 평가:
       --api-key vllm \
       --model <vllm-model-name>
 
-## 4. 문법 확인
+## 4. 질문 생성
+
+문서에서 평가 질문을 만들기:
+
+    grev generate-questions --source examples/sample_docs --output data/benchmarks/generated_questions.json --num-questions 10 --modes local global
+
+multi-hop, unanswerable도 포함하려면:
+
+    grev generate-questions --source examples/sample_docs --output data/benchmarks/generated_questions.json --num-questions 10 --modes local global multi-hop unanswerable
+
+## 5. 문법 확인
 
     python3 -m compileall -q src tests
 
-## 5. 자주 보는 파일
+## 6. 자주 보는 파일
 
 - README.md - 전체 요약
 - docs/sample-workflow.md - 전체 흐름
 - docs/evaluation-modes.md - 평가 항목과 질문 모드
+- docs/question-generation.md - 질문 생성 방식
 - docs/graphrag-workspace.md - GraphRAG 작업공간 설명
-

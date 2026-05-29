@@ -108,6 +108,16 @@ Responsibilities:
 - Load replayable search result JSON.
 - Convert saved results into GraphRAGSearchResult objects.
 
+### src/graphrag_ragas_eval/generation/builder.py
+
+Question generation from source documents.
+
+Responsibilities:
+
+- Load source documents from a path or directory.
+- Produce benchmark samples in local, global, multi-hop, and unanswerable modes.
+- Save generated questions as JSON for a benchmark repo.
+
 ### src/graphrag_ragas_eval/llm.py
 
 LLM provider selection and Ragas client construction.
@@ -129,6 +139,7 @@ Responsibilities:
 - graphrag init - initialize a GraphRAG workspace after staging documents.
 - graphrag index - run GraphRAG indexing end to end.
 - evaluate - score saved search results with Ragas.
+- generate-questions - create benchmark questions from source documents.
 
 ### command.md
 

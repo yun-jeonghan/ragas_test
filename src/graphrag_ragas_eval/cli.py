@@ -6,6 +6,7 @@ import typer
 
 from .config import ProjectPaths
 from .eval import DEFAULT_RAGAS_METRICS, RagasRunner, load_benchmark_samples, load_search_results
+from .generation.builder import GenerationMode, QuestionGenerationPlan, generate_questions
 from .graphrag.loaders import load_graphrag_tables
 from .graphrag.workspace import GraphRAGWorkspace, ensure_graph_rag_project, run_graph_rag_index, stage_documents
 from .graphrag_runner import ingest_and_index_documents
@@ -94,6 +95,31 @@ def evaluate(
     run.write_json(output)
     typer.echo(f"wrote evaluation results to {output}")
     typer.echo(f"aggregate: {run.aggregate()}")
+
+
+@app.command()
+def generate_questions(
+    source: Path = typer.Option(..., exists=True, file_okay=True, dir_okay=True, help="문서 또는 문서 디렉터리"),
+    output: Path = typer.Option(Path("data/benchmarks/generated_questions.json"), file_okay=True, dir_okay=False, help="질문 생성 결과 저장 경로"),
+    num_questions: int = typer.Option(10, min=1, help="생성할 질문 개수"),
+    modes: list[str] = typer.Option(["local", "global"], help="local, global, multi-hop, unanswerable 중 선택"),
+) -> None:
+    mode_map = {
+        "local": GenerationMode.LOCAL,
+        "global": GenerationMode.GLOBAL,
+        "multi-hop": GenerationMode.MULTI_HOP,
+        "unanswerable": GenerationMode.UNANSWERABLE,
+    }
+    selected_modes = tuple(mode_map[mode] for mode in modes if mode in mode_map)
+    plan = QuestionGenerationPlan(
+        source=source,
+        output=output,
+        num_questions=num_questions,
+        modes=selected_modes or (GenerationMode.LOCAL, GenerationMode.GLOBAL),
+        subrepo_name="benchmark",
+    )
+    samples = generate_questions(plan)
+    typer.echo(f"wrote {len(samples)} questions to {output}")
 
 
 @app.command()
