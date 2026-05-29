@@ -15,6 +15,8 @@ from .graphrag.loaders import load_graphrag_tables
 from .graphrag.workspace import GraphRAGWorkspace, ensure_graph_rag_project, run_graph_rag_index, stage_documents
 from .graphrag_runner import ingest_and_index_documents
 from .llm import build_ragas_embeddings, build_ragas_llm, load_llm_runtime_config
+from .ontology_handler import materialize_graph_rag_prompts
+from .post_processor import split_long_nodes_and_append_edges
 from .schemas import GraphRAGTableSet
 
 app = typer.Typer(no_args_is_help=True, add_completion=False)
@@ -45,6 +47,7 @@ def init_graphrag(
     workspace = GraphRAGWorkspace(root=workspace_root)
     staged = stage_documents(source, workspace, clean=clean)
     ensure_graph_rag_project(workspace, model=model, embedding=embedding, force=force)
+    materialize_graph_rag_prompts(workspace)
     typer.echo(f"staged {len(staged)} files and initialized {workspace.root}")
 
 
@@ -58,6 +61,22 @@ def index_graphrag(
     embedding: str = typer.Option("text-embedding-3-large"),
     method: str = typer.Option("standard"),
     skip_validation: bool = typer.Option(False),
+    ontology_path: Path | None = typer.Option(
+        None,
+        exists=True,
+        file_okay=True,
+        dir_okay=False,
+        help="사용자 온톨로지 JSON 경로. 기본값은 workspace/config/user_ontology.json",
+    ),
+    postprocess: bool = typer.Option(
+        False,
+        help="인덱싱 후 긴 description 노드를 분할하고 part_of 엣지를 추가",
+    ),
+    description_limit: int = typer.Option(
+        200,
+        min=1,
+        help="노드 description 분할 기준 글자 수",
+    ),
 ) -> None:
     result = ingest_and_index_documents(
         source,
@@ -68,8 +87,34 @@ def index_graphrag(
         embedding=embedding,
         method=method,
         skip_validation=skip_validation,
+        ontology_path=ontology_path,
+        postprocess=postprocess,
+        description_limit=description_limit,
     )
     typer.echo(f"staged {len(result.staged_files)} files and indexed {result.workspace_root}")
+
+
+@graphrag_app.command("postprocess")
+def postprocess_graphrag(
+    workspace_root: Path = typer.Option(Path("workspaces/graphrag"), file_okay=False, dir_okay=True),
+    description_limit: int = typer.Option(
+        200,
+        min=1,
+        help="노드 description 분할 기준 글자 수",
+    ),
+) -> None:
+    workspace = GraphRAGWorkspace(root=workspace_root)
+    result = split_long_nodes_and_append_edges(workspace, max_description_length=description_limit)
+    typer.echo(
+        "postprocessed nodes=%s edges=%s split_parents=%d child_nodes=%d appended_edges=%d"
+        % (
+            result.nodes_path,
+            result.edges_path,
+            result.split_parent_count,
+            result.created_child_node_count,
+            result.created_edge_count,
+        )
+    )
 
 
 @app.command()

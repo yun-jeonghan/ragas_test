@@ -51,6 +51,14 @@ vLLM로 바꿀 때는 아래처럼 바꿉니다.
     grev graphrag init --source examples/sample_docs --workspace-root workspaces/graphrag --force
     grev graphrag index --source examples/sample_docs --workspace-root workspaces/graphrag
 
+사용자 온톨로지와 후처리를 함께 쓰려면:
+
+    grev graphrag index +      --source examples/sample_docs +      --workspace-root workspaces/graphrag +      --ontology-path workspaces/graphrag/config/user_ontology.json +      --postprocess +      --description-limit 200
+
+인덱싱이 끝난 뒤 후처리만 다시 돌리려면:
+
+    grev graphrag postprocess --workspace-root workspaces/graphrag --description-limit 200
+
 ## 2. GraphRAG 결과 확인
 
     grev inspect --graphrag-root workspaces/graphrag/output

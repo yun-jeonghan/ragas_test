@@ -27,6 +27,10 @@ class GraphRAGWorkspace:
         return self.root / "prompts"
 
     @property
+    def config_dir(self) -> Path:
+        return self.root / "config"
+
+    @property
     def settings_path(self) -> Path:
         return self.root / "settings.yaml"
 
