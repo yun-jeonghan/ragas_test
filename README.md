@@ -26,6 +26,21 @@ GraphRAG로 만든 그래프 기반 검색과 생성 결과를 Ragas로 평가�
 - grev graphrag index - 문서 반영 후 인덱싱 실행
 - grev evaluate - 저장된 검색 결과를 Ragas로 평가
 
+## LLM 전환
+
+현재는 OpenAI API를 기본으로 씁니다.
+
+- 테스트와 검증은 OpenAI
+- 나중에 실서빙이나 로컬 추론은 vLLM OpenAI-compatible endpoint
+
+전환할 때는 .env.example 기준으로 아래만 바꾸면 됩니다.
+
+- GREV_LLM_PROVIDER=openai -> vllm
+- GREV_LLM_BASE_URL=http://<vllm-host>:8000/v1
+- GREV_LLM_API_KEY=vllm 또는 서버가 요구하는 값
+
+코드 쪽은 src/graphrag_ragas_eval/llm.py 한 곳만 보면 됩니다.
+
 ## 문서 입력 흐름
 
 1. 문서를 docs 같은 디렉터리에 둡니다.

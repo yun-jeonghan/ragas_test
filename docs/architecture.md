@@ -107,6 +107,16 @@ Responsibilities:
 - Load replayable search result JSON.
 - Convert saved results into GraphRAGSearchResult objects.
 
+### src/graphrag_ragas_eval/llm.py
+
+LLM provider selection and Ragas client construction.
+
+Responsibilities:
+
+- Read OpenAI or vLLM settings from environment variables.
+- Build an OpenAI-compatible client for Ragas.
+- Keep the provider swap isolated to one file.
+
 ### src/graphrag_ragas_eval/cli.py
 
 Command line entry points.
