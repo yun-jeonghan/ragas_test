@@ -26,6 +26,8 @@ GraphRAG로 만든 그래프 기반 검색과 생성 결과를 Ragas로 평가�
 - grev graphrag index - 문서 반영 후 인덱싱 실행
 - grev evaluate - 저장된 검색 결과를 Ragas로 평가
 
+자세한 실행 예시는 command.md를 보시면 됩니다.
+
 ## LLM 전환
 
 현재는 OpenAI API를 기본으로 씁니다.
@@ -51,5 +53,7 @@ GraphRAG로 만든 그래프 기반 검색과 생성 결과를 Ragas로 평가�
 6. grev evaluate로 점수화합니다.
 
 샘플 흐름은 docs/sample-workflow.md를 보면 됩니다.
+
+평가 항목과 질문 모드는 docs/evaluation-modes.md를 보면 됩니다.
 
 자세한 설계는 docs/architecture.md, docs/benchmark-schema.md, docs/search-design.md, docs/graphrag-workspace.md를 보시면 됩니다.

@@ -6,6 +6,7 @@ This project is a benchmark and evaluation harness, not a user facing chatbot.
 
 - pyproject.toml - package metadata, dependencies, scripts, formatting, test config.
 - README.md - short project overview.
+- command.md - copy-paste execution commands.
 - src/graphrag_ragas_eval/ - application code.
 - tests/ - unit tests for loaders, schemas, and metric wiring.
 - data/
@@ -128,6 +129,16 @@ Responsibilities:
 - graphrag init - initialize a GraphRAG workspace after staging documents.
 - graphrag index - run GraphRAG indexing end to end.
 - evaluate - score saved search results with Ragas.
+
+### command.md
+
+Human-friendly runbook.
+
+Responsibilities:
+
+- Keep the copy-paste commands in one place.
+- Show the default OpenAI path and the vLLM path.
+- Collect the common steps in the right order.
 
 ## Data flow
 
