@@ -1,0 +1,11 @@
+[
+  {
+    "sample_id": "q1",
+    "question": "Who is Scrooge?",
+    "query_type": "local",
+    "search_mode": "local",
+    "reference_answer": "Scrooge is a miser.",
+    "reference_contexts": ["Scrooge is a miser."]
+  }
+]
+
