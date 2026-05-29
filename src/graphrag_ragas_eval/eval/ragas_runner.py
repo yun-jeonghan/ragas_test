@@ -101,8 +101,17 @@ def _filter_kwargs(func: Callable[..., Any], kwargs: dict[str, Any]) -> dict[str
     return {key: value for key, value in kwargs.items() if key in accepted}
 
 
-def _try_instantiate_metric(metric_cls: type[Any], llm: Any) -> Any:
-    for candidate_kwargs in ({"llm": llm}, {}):
+def _try_instantiate_metric(metric_cls: type[Any], llm: Any, embeddings: Any | None = None) -> Any:
+    candidate_kwargs_list: list[dict[str, Any]] = []
+    if llm is not None and embeddings is not None:
+        candidate_kwargs_list.append({"llm": llm, "embeddings": embeddings})
+    if llm is not None:
+        candidate_kwargs_list.append({"llm": llm})
+    if embeddings is not None:
+        candidate_kwargs_list.append({"embeddings": embeddings})
+    candidate_kwargs_list.append({})
+
+    for candidate_kwargs in candidate_kwargs_list:
         try:
             return metric_cls(**candidate_kwargs)
         except TypeError:
@@ -146,12 +155,13 @@ def _resolve_metric_class(metric_name: str) -> type[Any]:
 class RagasRunner:
     llm: Any
     metrics: tuple[str, ...]
+    embeddings: Any | None = None
 
     def build_metric_objects(self) -> tuple[Any, ...]:
         metric_objects: list[Any] = []
         for metric_name in self.metrics:
             metric_cls = _resolve_metric_class(metric_name)
-            metric_objects.append(_try_instantiate_metric(metric_cls, self.llm))
+            metric_objects.append(_try_instantiate_metric(metric_cls, self.llm, self.embeddings))
         return tuple(metric_objects)
 
     async def aevaluate_sample(self, sample: BenchmarkSample, result: GraphRAGSearchResult) -> list[EvaluationScore]:
@@ -220,4 +230,3 @@ def evaluate_sample_set(
 ) -> EvaluationRun:
     runner = RagasRunner(llm=llm, metrics=metrics)
     return runner.evaluate_results(samples, search_results)
-

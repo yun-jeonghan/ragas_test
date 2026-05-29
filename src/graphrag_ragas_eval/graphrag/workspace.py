@@ -5,8 +5,9 @@ import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 
+from pypdf import PdfReader
 
-SUPPORTED_INPUT_EXTENSIONS = {".txt", ".md", ".csv", ".json"}
+SUPPORTED_INPUT_EXTENSIONS = {".txt", ".md", ".csv", ".json", ".pdf"}
 
 
 @dataclass(frozen=True, slots=True)
@@ -53,7 +54,23 @@ def stage_documents(source_dir: Path, workspace: GraphRAGWorkspace, *, clean: bo
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(path, target)
         staged.append(target)
+        if path.suffix.lower() == ".pdf":
+            extracted = _extract_pdf_text(path)
+            if extracted.strip():
+                txt_target = target.with_suffix(".txt")
+                txt_target.write_text(extracted, encoding="utf-8")
+                staged.append(txt_target)
     return staged
+
+
+def _extract_pdf_text(path: Path) -> str:
+    reader = PdfReader(str(path))
+    pages: list[str] = []
+    for page in reader.pages:
+        text = page.extract_text() or ""
+        if text.strip():
+            pages.append(text.strip())
+    return "\n\n".join(pages)
 
 
 def ensure_graph_rag_project(
@@ -96,4 +113,3 @@ def run_graph_rag_index(
     if skip_validation:
         cmd.append("--skip-validation")
     subprocess.run(cmd, check=True)
-

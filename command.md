@@ -23,6 +23,7 @@ vLLM로 바꿀 때는 아래처럼 바꿉니다.
 - `GREV_RAGAS_MODEL=<vllm-model-name>`
 - `GREV_RAGAS_BASE_URL=http://<vllm-host>:8000/v1`
 - `GREV_RAGAS_API_KEY=vllm`
+- `GREV_RAGAS_EXTRA_BODY={"chat_template_kwargs":{"enable_thinking":false}}`
 
 BenchmarkQED 스타일 AutoE도 같은 방식으로 별도 설정을 씁니다.
 
@@ -36,6 +37,7 @@ vLLM로 바꿀 때는 아래처럼 바꿉니다.
 - `GREV_BENCHMARKQED_MODEL=<vllm-model-name>`
 - `GREV_BENCHMARKQED_BASE_URL=http://<vllm-host>:8000/v1`
 - `GREV_BENCHMARKQED_API_KEY=vllm`
+- `GREV_BENCHMARKQED_EXTRA_BODY={"chat_template_kwargs":{"enable_thinking":false}}`
 
 ## 1. 문서 넣고 GraphRAG 인덱싱
 

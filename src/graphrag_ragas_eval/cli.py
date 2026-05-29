@@ -14,7 +14,7 @@ from .generation.builder import GenerationMode, QuestionGenerationPlan, generate
 from .graphrag.loaders import load_graphrag_tables
 from .graphrag.workspace import GraphRAGWorkspace, ensure_graph_rag_project, run_graph_rag_index, stage_documents
 from .graphrag_runner import ingest_and_index_documents
-from .llm import build_ragas_llm, load_llm_runtime_config
+from .llm import build_ragas_embeddings, build_ragas_llm, load_llm_runtime_config
 from .schemas import GraphRAGTableSet
 
 app = typer.Typer(no_args_is_help=True, add_completion=False)
@@ -96,7 +96,8 @@ def evaluate(
         runtime_env["GREV_RAGAS_API_KEY"] = api_key
     runtime = load_llm_runtime_config(runtime_env, prefix="GREV_RAGAS")
     llm = build_ragas_llm(runtime)
-    runner = RagasRunner(llm=llm, metrics=tuple(metrics))
+    embeddings = build_ragas_embeddings(runtime)
+    runner = RagasRunner(llm=llm, embeddings=embeddings, metrics=tuple(metrics))
     run = runner.evaluate_results(samples, results)
     run.write_json(output)
     typer.echo(f"wrote evaluation results to {output}")

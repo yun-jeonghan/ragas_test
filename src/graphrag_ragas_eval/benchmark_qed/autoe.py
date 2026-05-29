@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Any
 
 from ..eval import DEFAULT_RAGAS_METRICS, RagasRunner, load_benchmark_samples, load_search_results
-from ..llm import build_ragas_llm, load_llm_runtime_config
+from ..llm import build_ragas_embeddings, build_ragas_llm, load_llm_runtime_config
 
 
 @dataclass(frozen=True, slots=True)
@@ -36,7 +36,8 @@ def evaluate_answers(plan: AutoEPlan):
         runtime_env["GREV_BENCHMARKQED_API_KEY"] = plan.api_key
     runtime = load_llm_runtime_config(runtime_env, prefix="GREV_BENCHMARKQED")
     llm = build_ragas_llm(runtime)
-    runner = RagasRunner(llm=llm, metrics=plan.metrics)
+    embeddings = build_ragas_embeddings(runtime)
+    runner = RagasRunner(llm=llm, embeddings=embeddings, metrics=plan.metrics)
     run = runner.evaluate_results(samples, results)
     run.write_json(plan.output)
     return run
