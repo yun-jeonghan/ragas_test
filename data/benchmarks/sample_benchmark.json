@@ -1,0 +1,18 @@
+[
+  {
+    "sample_id": "scrooge-1",
+    "question": "Who is Scrooge?",
+    "query_type": "local",
+    "search_mode": "local",
+    "reference_answer": "Scrooge is a miser who loves money more than people.",
+    "reference_contexts": [
+      "Scrooge is a miser who loves money more than people."
+    ],
+    "expected_entities": ["Scrooge"],
+    "expected_relationships": [],
+    "expected_community_ids": [],
+    "source_doc_ids": ["scrooge.txt"],
+    "difficulty": "easy"
+  }
+]
+

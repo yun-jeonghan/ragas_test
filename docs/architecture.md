@@ -98,6 +98,15 @@ Responsibilities:
 - Select and run metrics.
 - Persist raw scores and aggregates.
 
+### src/graphrag_ragas_eval/eval/replay.py
+
+Helpers for loading saved GraphRAG search results.
+
+Responsibilities:
+
+- Load replayable search result JSON.
+- Convert saved results into GraphRAGSearchResult objects.
+
 ### src/graphrag_ragas_eval/cli.py
 
 Command line entry points.
@@ -108,6 +117,7 @@ Responsibilities:
 - graphrag stage - copy source documents into the workspace.
 - graphrag init - initialize a GraphRAG workspace after staging documents.
 - graphrag index - run GraphRAG indexing end to end.
+- evaluate - score saved search results with Ragas.
 
 ## Data flow
 

@@ -24,6 +24,7 @@ GraphRAG로 만든 그래프 기반 검색과 생성 결과를 Ragas로 평가�
 - grev graphrag stage - 문서를 GraphRAG 워크스페이스로 복사
 - grev graphrag init - GraphRAG 작업공간 초기화
 - grev graphrag index - 문서 반영 후 인덱싱 실행
+- grev evaluate - 저장된 검색 결과를 Ragas로 평가
 
 ## 문서 입력 흐름
 
@@ -31,7 +32,9 @@ GraphRAG로 만든 그래프 기반 검색과 생성 결과를 Ragas로 평가�
 2. grev graphrag stage로 GraphRAG 워크스페이스 입력 폴더에 복사합니다.
 3. grev graphrag init으로 GraphRAG 프로젝트를 초기화합니다.
 4. grev graphrag index로 지식 그래프를 생성합니다.
-5. 생성된 parquet를 평가 러너가 읽어서 Ragas로 점수화합니다.
+5. GraphRAG 검색 결과를 JSON으로 저장합니다.
+6. grev evaluate로 점수화합니다.
+
+샘플 흐름은 docs/sample-workflow.md를 보면 됩니다.
 
 자세한 설계는 docs/architecture.md, docs/benchmark-schema.md, docs/search-design.md, docs/graphrag-workspace.md를 보시면 됩니다.
-

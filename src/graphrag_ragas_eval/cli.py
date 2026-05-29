@@ -5,6 +5,7 @@ from pathlib import Path
 import typer
 
 from .config import ProjectPaths
+from .eval import DEFAULT_RAGAS_METRICS, RagasRunner, load_benchmark_samples, load_search_results
 from .graphrag.loaders import load_graphrag_tables
 from .graphrag.workspace import GraphRAGWorkspace, ensure_graph_rag_project, run_graph_rag_index, stage_documents
 from .graphrag_runner import ingest_and_index_documents
@@ -65,6 +66,24 @@ def index_graphrag(
 
 
 @app.command()
+def evaluate(
+    benchmark: Path = typer.Option(..., exists=True, file_okay=True, dir_okay=False, help="평가 질문셋 JSON 또는 JSONL"),
+    search_results: Path = typer.Option(..., exists=True, file_okay=True, dir_okay=False, help="GraphRAG 검색 결과 JSON"),
+    output: Path = typer.Option(Path("data/results/evaluation.json"), file_okay=True, dir_okay=False, help="평가 결과 저장 경로"),
+    model: str = typer.Option("gpt-4o-mini", help="Ragas에서 사용할 LLM 모델"),
+    metrics: list[str] = typer.Option(list(DEFAULT_RAGAS_METRICS), help="평가할 metric 이름"),
+) -> None:
+    samples = load_benchmark_samples(benchmark)
+    results = load_search_results(search_results)
+    llm = _build_ragas_llm(model)
+    runner = RagasRunner(llm=llm, metrics=tuple(metrics))
+    run = runner.evaluate_results(samples, results)
+    run.write_json(output)
+    typer.echo(f"wrote evaluation results to {output}")
+    typer.echo(f"aggregate: {run.aggregate()}")
+
+
+@app.command()
 def inspect(graphrag_root: Path = typer.Option(..., exists=True, file_okay=False, dir_okay=True)) -> None:
     """Inspect GraphRAG parquet outputs."""
     tables = load_graphrag_tables(GraphRAGTableSet(root=graphrag_root))
@@ -89,3 +108,14 @@ def _main() -> None:
 
 
 app.add_typer(graphrag_app, name="graphrag")
+
+
+def _build_ragas_llm(model: str) -> object:
+    try:
+        from openai import AsyncOpenAI
+        from ragas.llms import llm_factory
+    except ImportError as exc:  # pragma: no cover - runtime dependency error path
+        raise typer.BadParameter("openai or ragas is not installed") from exc
+
+    client = AsyncOpenAI()
+    return llm_factory(model, client=client)
