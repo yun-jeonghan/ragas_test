@@ -46,6 +46,8 @@ GraphRAG로 만든 그래프 기반 검색과 생성 결과를 Ragas로 평가�
 
 코드 쪽은 src/graphrag_ragas_eval/llm.py 한 곳만 보면 됩니다.
 
+자세한 변수 설명은 docs/environment.md를 보시면 됩니다.
+
 ## 문서 입력 흐름
 
 1. 문서를 docs 같은 디렉터리에 둡니다.
@@ -63,4 +65,4 @@ GraphRAG로 만든 그래프 기반 검색과 생성 결과를 Ragas로 평가�
 
 BenchmarkQED 스타일 구조는 docs/benchmark-qed.md를 보면 됩니다.
 
-자세한 설계는 docs/architecture.md, docs/benchmark-schema.md, docs/search-design.md, docs/graphrag-workspace.md를 보시면 됩니다.
+자세한 설계는 docs/architecture.md, docs/benchmark-schema.md, docs/search-design.md, docs/graphrag-workspace.md, docs/environment.md를 보시면 됩니다.

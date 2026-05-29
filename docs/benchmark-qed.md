@@ -31,6 +31,8 @@ BenchmarkQED는 RAG 벤치마크를 자동화하는 도구 묶음이다.
 - docs/benchmark-repo: AutoD/AutoQ 결과 보관
 - docs/eval-repo: AutoE 결과 보관
 
+AutoE는 GREV_BENCHMARKQED_* 환경변수를 읽도록 맞춰져 있다.
+평가 쪽 Ragas는 GREV_RAGAS_* 환경변수를 사용한다.
+
 현재 이 저장소는 세 역할을 모두 한 번에 실행할 수 있는 오케스트레이터 역할도 겸한다.
 하지만 결과 파일 자체는 분리된 레포로 옮겨도 동작하도록 설계했다.
-

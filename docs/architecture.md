@@ -7,6 +7,7 @@ This project is a benchmark and evaluation harness, not a user facing chatbot.
 - pyproject.toml - package metadata, dependencies, scripts, formatting, test config.
 - README.md - short project overview.
 - command.md - copy-paste execution commands.
+- docs/environment.md - Ragas and BenchmarkQED LLM environment variables.
 - docs/benchmark-qed.md - BenchmarkQED-style AutoD/AutoQ/AutoE mapping.
 - src/graphrag_ragas_eval/ - application code.
 - tests/ - unit tests for loaders, schemas, and metric wiring.
@@ -125,7 +126,7 @@ LLM provider selection and Ragas client construction.
 
 Responsibilities:
 
-- Read OpenAI or vLLM settings from environment variables.
+- Read GREV_RAGAS_* settings first, with GREV_LLM_* fallback for compatibility.
 - Build an OpenAI-compatible client for Ragas.
 - Keep the provider swap isolated to one file.
 
