@@ -13,6 +13,7 @@ This project is a benchmark and evaluation harness, not a user facing chatbot.
   - benchmarks/ - question sets and reference labels.
   - results/ - evaluation outputs and score tables.
 - reports/ - human readable summaries and charts.
+- workspaces/graphrag/ - document staging and GraphRAG index workspace.
 - scripts/ - one off utilities and batch jobs.
 
 ## Modules
@@ -58,6 +59,25 @@ Responsibilities:
 - Provide local and global search adapters.
 - Return both answer text and retrieved contexts in a Ragas friendly shape.
 
+### src/graphrag_ragas_eval/graphrag/workspace.py
+
+GraphRAG workspace management and CLI bridge.
+
+Responsibilities:
+
+- Stage input documents into a GraphRAG compatible workspace.
+- Initialize the workspace through the GraphRAG CLI.
+- Run GraphRAG indexing from the staged documents.
+
+### src/graphrag_ragas_eval/graphrag_runner.py
+
+Higher level orchestration for document ingestion and indexing.
+
+Responsibilities:
+
+- Combine stage, init, and index into one repeatable flow.
+- Return the workspace path and staged file list for downstream steps.
+
 ### src/graphrag_ragas_eval/eval/dataset.py
 
 Benchmark dataset loading and conversion.
@@ -85,9 +105,9 @@ Command line entry points.
 Responsibilities:
 
 - inspect - check input tables and benchmark files.
-- run search - execute local and global GraphRAG queries.
-- run eval - run Ragas scoring over the benchmark.
-- report - summarize outputs.
+- graphrag stage - copy source documents into the workspace.
+- graphrag init - initialize a GraphRAG workspace after staging documents.
+- graphrag index - run GraphRAG indexing end to end.
 
 ## Data flow
 
@@ -106,4 +126,3 @@ Responsibilities:
 - Keep benchmark samples immutable once published.
 - Store raw outputs and derived metrics separately.
 - Make local and global search interchangeable behind one interface.
-

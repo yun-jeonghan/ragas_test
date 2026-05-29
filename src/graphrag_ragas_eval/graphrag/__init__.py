@@ -1,11 +1,9 @@
-from .loaders import GraphRAGDataError, load_graphrag_tables
-from .search import GraphRAGSearcher, GlobalGraphRAGSearcher, LocalGraphRAGSearcher
+from .workspace import GraphRAGWorkspace, ensure_graph_rag_project, run_graph_rag_index, stage_documents
 
 __all__ = [
-    "GraphRAGDataError",
-    "GraphRAGSearcher",
-    "GlobalGraphRAGSearcher",
-    "LocalGraphRAGSearcher",
-    "load_graphrag_tables",
+    "GraphRAGWorkspace",
+    "ensure_graph_rag_project",
+    "run_graph_rag_index",
+    "stage_documents",
 ]
 
