@@ -4,6 +4,9 @@ from pathlib import Path
 
 import typer
 
+from .benchmark_qed.autod import AutoDPlan, summarize_dataset
+from .benchmark_qed.autoe import AutoEPlan, evaluate_answers
+from .benchmark_qed.autoq import AutoQPlan, generate_queries
 from .config import ProjectPaths
 from .eval import DEFAULT_RAGAS_METRICS, RagasRunner, load_benchmark_samples, load_search_results
 from .generation.builder import GenerationMode, QuestionGenerationPlan, generate_questions
@@ -15,6 +18,7 @@ from .schemas import GraphRAGTableSet
 
 app = typer.Typer(no_args_is_help=True, add_completion=False)
 graphrag_app = typer.Typer(no_args_is_help=True, add_completion=False)
+benchmark_qed_app = typer.Typer(no_args_is_help=True, add_completion=False)
 
 
 @graphrag_app.command("stage")
@@ -97,6 +101,51 @@ def evaluate(
     typer.echo(f"aggregate: {run.aggregate()}")
 
 
+@benchmark_qed_app.command("autod")
+def benchmark_qed_autod(
+    source: Path = typer.Option(..., exists=True, file_okay=True, dir_okay=True, help="문서 또는 문서 디렉터리"),
+    output: Path = typer.Option(Path("data/benchmark-qed/autod-summary.json"), file_okay=True, dir_okay=False, help="AutoD 결과 저장 경로"),
+    target_size: int = typer.Option(10, min=1, help="요약할 문서 개수"),
+) -> None:
+    payload = summarize_dataset(AutoDPlan(source=source, output=output, target_size=target_size))
+    typer.echo(f"wrote AutoD summary to {output}")
+    typer.echo(f"documents: {len(payload.get('documents', []))}")
+
+
+@benchmark_qed_app.command("autoq")
+def benchmark_qed_autoq(
+    source: Path = typer.Option(..., exists=True, file_okay=True, dir_okay=True, help="문서 또는 문서 디렉터리"),
+    output: Path = typer.Option(Path("data/benchmark-qed/autoq-questions.json"), file_okay=True, dir_okay=False, help="AutoQ 결과 저장 경로"),
+    num_questions: int = typer.Option(10, min=1, help="생성할 질문 개수"),
+    modes: list[str] = typer.Option(["local", "global"], help="local, global, multi-hop, unanswerable"),
+) -> None:
+    mode_map = {
+        "local": GenerationMode.LOCAL,
+        "global": GenerationMode.GLOBAL,
+        "multi-hop": GenerationMode.MULTI_HOP,
+        "unanswerable": GenerationMode.UNANSWERABLE,
+    }
+    selected_modes = tuple(mode_map[mode] for mode in modes if mode in mode_map)
+    plan = AutoQPlan(source=source, output=output, num_questions=num_questions, modes=selected_modes or (GenerationMode.LOCAL, GenerationMode.GLOBAL))
+    samples = generate_queries(plan)
+    typer.echo(f"wrote {len(samples)} AutoQ questions to {output}")
+
+
+@benchmark_qed_app.command("autoe")
+def benchmark_qed_autoe(
+    benchmark: Path = typer.Option(..., exists=True, file_okay=True, dir_okay=False, help="질문셋 JSON 또는 JSONL"),
+    search_results: Path = typer.Option(..., exists=True, file_okay=True, dir_okay=False, help="답변 JSON"),
+    output: Path = typer.Option(Path("data/benchmark-qed/autoe-evaluation.json"), file_okay=True, dir_okay=False, help="AutoE 결과 저장 경로"),
+    provider: str = typer.Option("openai", help="openai 또는 vllm"),
+    model: str = typer.Option("gpt-4o-mini", help="평가용 LLM 모델"),
+    base_url: str | None = typer.Option(None, help="OpenAI-compatible endpoint, vLLM용"),
+    api_key: str | None = typer.Option(None, help="OpenAI 또는 vLLM API key"),
+) -> None:
+    run = evaluate_answers(AutoEPlan(benchmark=benchmark, search_results=search_results, output=output, provider=provider, model=model, base_url=base_url, api_key=api_key))
+    typer.echo(f"wrote AutoE evaluation to {output}")
+    typer.echo(f"aggregate: {run.aggregate()}")
+
+
 @app.command()
 def generate_questions(
     source: Path = typer.Option(..., exists=True, file_okay=True, dir_okay=True, help="문서 또는 문서 디렉터리"),
@@ -147,3 +196,4 @@ def _main() -> None:
 
 
 app.add_typer(graphrag_app, name="graphrag")
+app.add_typer(benchmark_qed_app, name="benchmark-qed")

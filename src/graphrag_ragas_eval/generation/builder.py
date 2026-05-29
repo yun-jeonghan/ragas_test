@@ -59,7 +59,7 @@ def _load_documents(source: Path) -> list[dict[str, str]]:
 
 
 def _first_sentence(text: str) -> str:
-    parts = re.split(r"[.!?]s+", text.strip(), maxsplit=1)
+    parts = re.split(r"[.!?]\s+", text.strip(), maxsplit=1)
     return parts[0].strip() if parts else ""
 
 
@@ -187,4 +187,3 @@ def generate_questions(plan: QuestionGenerationPlan) -> list[BenchmarkSample]:
     }
     plan.output.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     return samples
-

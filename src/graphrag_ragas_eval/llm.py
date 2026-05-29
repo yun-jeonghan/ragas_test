@@ -4,7 +4,6 @@ import os
 from dataclasses import dataclass
 from typing import Any
 
-import typer
 
 
 @dataclass(frozen=True, slots=True)
@@ -43,7 +42,7 @@ def build_ragas_llm(config: LLMRuntimeConfig | None = None) -> Any:
         from openai import AsyncOpenAI
         from ragas.llms import llm_factory
     except ImportError as exc:  # pragma: no cover - runtime dependency error path
-        raise typer.BadParameter("openai or ragas is not installed") from exc
+        raise RuntimeError("openai or ragas is not installed") from exc
 
     if runtime.provider == "vllm":
         # vLLM은 OpenAI-compatible 서버로 붙이는 전제를 둔다.

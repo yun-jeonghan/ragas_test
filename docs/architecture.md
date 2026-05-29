@@ -7,6 +7,7 @@ This project is a benchmark and evaluation harness, not a user facing chatbot.
 - pyproject.toml - package metadata, dependencies, scripts, formatting, test config.
 - README.md - short project overview.
 - command.md - copy-paste execution commands.
+- docs/benchmark-qed.md - BenchmarkQED-style AutoD/AutoQ/AutoE mapping.
 - src/graphrag_ragas_eval/ - application code.
 - tests/ - unit tests for loaders, schemas, and metric wiring.
 - data/

@@ -70,6 +70,20 @@ multi-hop, unanswerable도 포함하려면:
 
     grev generate-questions --source examples/sample_docs --output data/benchmarks/generated_questions.json --num-questions 10 --modes local global multi-hop unanswerable
 
+## 5. BenchmarkQED 스타일 명령
+
+AutoD 요약:
+
+    grev benchmark-qed autod --source examples/sample_docs --output data/benchmark-qed/autod-summary.json
+
+AutoQ 질문 생성:
+
+    grev benchmark-qed autoq --source examples/sample_docs --output data/benchmark-qed/autoq-questions.json --num-questions 10 --modes local global
+
+AutoE 평가:
+
+    grev benchmark-qed autoe --benchmark data/benchmarks/sample_benchmark.json --search-results data/results/sample_search_results.json --output data/benchmark-qed/autoe-evaluation.json
+
 ## 5. 문법 확인
 
     python3 -m compileall -q src tests
