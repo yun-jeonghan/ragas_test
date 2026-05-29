@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 import typer
@@ -76,23 +77,24 @@ def evaluate(
     benchmark: Path = typer.Option(..., exists=True, file_okay=True, dir_okay=False, help="평가 질문셋 JSON 또는 JSONL"),
     search_results: Path = typer.Option(..., exists=True, file_okay=True, dir_okay=False, help="GraphRAG 검색 결과 JSON"),
     output: Path = typer.Option(Path("data/results/evaluation.json"), file_okay=True, dir_okay=False, help="평가 결과 저장 경로"),
-    model: str = typer.Option("gpt-4o-mini", help="Ragas에서 사용할 LLM 모델"),
-    provider: str = typer.Option("openai", help="openai 또는 vllm"),
+    model: str | None = typer.Option(None, help="Ragas에서 사용할 LLM 모델"),
+    provider: str | None = typer.Option(None, help="openai 또는 vllm"),
     base_url: str | None = typer.Option(None, help="OpenAI-compatible endpoint, vLLM용"),
     api_key: str | None = typer.Option(None, help="OpenAI 또는 vLLM API key"),
     metrics: list[str] = typer.Option(list(DEFAULT_RAGAS_METRICS), help="평가할 metric 이름"),
 ) -> None:
     samples = load_benchmark_samples(benchmark)
     results = load_search_results(search_results)
-    runtime_env = {
-        "GREV_LLM_PROVIDER": provider,
-        "GREV_LLM_MODEL": model,
-    }
+    runtime_env = dict(os.environ)
+    if provider is not None:
+        runtime_env["GREV_RAGAS_PROVIDER"] = provider
+    if model is not None:
+        runtime_env["GREV_RAGAS_MODEL"] = model
     if base_url is not None:
-        runtime_env["GREV_LLM_BASE_URL"] = base_url
+        runtime_env["GREV_RAGAS_BASE_URL"] = base_url
     if api_key is not None:
-        runtime_env["GREV_LLM_API_KEY"] = api_key
-    runtime = load_llm_runtime_config(runtime_env)
+        runtime_env["GREV_RAGAS_API_KEY"] = api_key
+    runtime = load_llm_runtime_config(runtime_env, prefix="GREV_RAGAS")
     llm = build_ragas_llm(runtime)
     runner = RagasRunner(llm=llm, metrics=tuple(metrics))
     run = runner.evaluate_results(samples, results)
@@ -136,8 +138,8 @@ def benchmark_qed_autoe(
     benchmark: Path = typer.Option(..., exists=True, file_okay=True, dir_okay=False, help="질문셋 JSON 또는 JSONL"),
     search_results: Path = typer.Option(..., exists=True, file_okay=True, dir_okay=False, help="답변 JSON"),
     output: Path = typer.Option(Path("data/benchmark-qed/autoe-evaluation.json"), file_okay=True, dir_okay=False, help="AutoE 결과 저장 경로"),
-    provider: str = typer.Option("openai", help="openai 또는 vllm"),
-    model: str = typer.Option("gpt-4o-mini", help="평가용 LLM 모델"),
+    provider: str | None = typer.Option(None, help="openai 또는 vllm"),
+    model: str | None = typer.Option(None, help="평가용 LLM 모델"),
     base_url: str | None = typer.Option(None, help="OpenAI-compatible endpoint, vLLM용"),
     api_key: str | None = typer.Option(None, help="OpenAI 또는 vLLM API key"),
 ) -> None:

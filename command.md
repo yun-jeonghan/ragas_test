@@ -11,18 +11,31 @@
     pip install graphrag
     cp .env.example .env
 
-`.env`에서 기본값은 OpenAI 테스트용입니다.
+- `.env`에서 기본값은 OpenAI 테스트용입니다.
 
-- `GREV_LLM_PROVIDER=openai`
-- `GREV_LLM_MODEL=gpt-4o-mini`
-- `GREV_LLM_API_KEY=<your-openai-key>`
+- `GREV_RAGAS_PROVIDER=openai`
+- `GREV_RAGAS_MODEL=gpt-4o-mini`
+- `GREV_RAGAS_API_KEY=<your-openai-key>`
 
 vLLM로 바꿀 때는 아래처럼 바꿉니다.
 
-- `GREV_LLM_PROVIDER=vllm`
-- `GREV_LLM_MODEL=<vllm-model-name>`
-- `GREV_LLM_BASE_URL=http://<vllm-host>:8000/v1`
-- `GREV_LLM_API_KEY=vllm`
+- `GREV_RAGAS_PROVIDER=vllm`
+- `GREV_RAGAS_MODEL=<vllm-model-name>`
+- `GREV_RAGAS_BASE_URL=http://<vllm-host>:8000/v1`
+- `GREV_RAGAS_API_KEY=vllm`
+
+BenchmarkQED 스타일 AutoE도 같은 방식으로 별도 설정을 씁니다.
+
+- `GREV_BENCHMARKQED_PROVIDER=openai`
+- `GREV_BENCHMARKQED_MODEL=gpt-4o-mini`
+- `GREV_BENCHMARKQED_API_KEY=<your-openai-key>`
+
+vLLM로 바꿀 때는 아래처럼 바꿉니다.
+
+- `GREV_BENCHMARKQED_PROVIDER=vllm`
+- `GREV_BENCHMARKQED_MODEL=<vllm-model-name>`
+- `GREV_BENCHMARKQED_BASE_URL=http://<vllm-host>:8000/v1`
+- `GREV_BENCHMARKQED_API_KEY=vllm`
 
 ## 1. 문서 넣고 GraphRAG 인덱싱
 

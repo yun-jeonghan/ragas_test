@@ -14,16 +14,31 @@ class LLMRuntimeConfig:
     api_key: str | None = None
 
 
-def load_llm_runtime_config(env: dict[str, str] | None = None) -> LLMRuntimeConfig:
+def load_llm_runtime_config(
+    env: dict[str, str] | None = None,
+    *,
+    prefix: str = "GREV_RAGAS",
+    fallback_prefix: str = "GREV_LLM",
+    default_model: str = "gpt-4o-mini",
+) -> LLMRuntimeConfig:
     source = os.environ if env is None else env
-    provider = source.get("GREV_LLM_PROVIDER", "openai").strip().lower()
-    model = source.get("GREV_LLM_MODEL", "gpt-4o-mini").strip()
-    base_url = source.get("GREV_LLM_BASE_URL") or None
-    api_key = source.get("GREV_LLM_API_KEY") or None
+
+    def get(name: str, default: str | None = None) -> str | None:
+        value = source.get(f"{prefix}_{name}")
+        if value is None and fallback_prefix:
+            value = source.get(f"{fallback_prefix}_{name}")
+        if value is None:
+            return default
+        return value
+
+    provider = (get("PROVIDER", "openai") or "openai").strip().lower()
+    model = (get("MODEL", default_model) or default_model).strip()
+    base_url = get("BASE_URL") or None
+    api_key = get("API_KEY") or None
 
     # 기본은 OpenAI API다.
-    # 나중에 vLLM으로 바꿀 때는 GREV_LLM_PROVIDER=vllm 과
-    # GREV_LLM_BASE_URL=http://<vllm-host>:8000/v1 같은 식으로 바꾸면 된다.
+    # 나중에 vLLM으로 바꿀 때는 GREV_RAGAS_PROVIDER=vllm 과
+    # GREV_RAGAS_BASE_URL=http://<vllm-host>:8000/v1 같은 식으로 바꾸면 된다.
     if provider == "vllm" and base_url is None:
         base_url = "http://127.0.0.1:8000/v1"
 

@@ -39,9 +39,10 @@ GraphRAG로 만든 그래프 기반 검색과 생성 결과를 Ragas로 평가�
 
 전환할 때는 .env.example 기준으로 아래만 바꾸면 됩니다.
 
-- GREV_LLM_PROVIDER=openai -> vllm
-- GREV_LLM_BASE_URL=http://<vllm-host>:8000/v1
-- GREV_LLM_API_KEY=vllm 또는 서버가 요구하는 값
+- Ragas 평가용: `GREV_RAGAS_PROVIDER`, `GREV_RAGAS_MODEL`, `GREV_RAGAS_BASE_URL`, `GREV_RAGAS_API_KEY`
+- BenchmarkQED용: `GREV_BENCHMARKQED_PROVIDER`, `GREV_BENCHMARKQED_MODEL`, `GREV_BENCHMARKQED_BASE_URL`, `GREV_BENCHMARKQED_API_KEY`
+
+각 영역은 서로 독립적으로 바꿀 수 있습니다. 평가만 vLLM으로 돌리고, BenchmarkQED는 OpenAI로 남겨둘 수도 있습니다.
 
 코드 쪽은 src/graphrag_ragas_eval/llm.py 한 곳만 보면 됩니다.
 
