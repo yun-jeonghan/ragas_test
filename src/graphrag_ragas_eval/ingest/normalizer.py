@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-import os
 import shutil
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -9,7 +8,7 @@ from typing import Any
 import re
 
 from .models import ExtractionManifestEntry, NormalizedDocument
-from .pdf import PdfExtractionPolicy, extract_pdf_text, load_pdf_ocr_backend
+from .pdf import PdfExtractionPolicy, extract_pdf_document
 
 
 SUPPORTED_SOURCE_EXTENSIONS = {".txt", ".md", ".csv", ".json", ".pdf"}
@@ -144,16 +143,7 @@ class DocumentNormalizer:
     def _normalize_pdf(
         self, source_path: Path
     ) -> tuple[list[NormalizedDocument], list[ExtractionManifestEntry]]:
-        backend = self.pdf_policy.ocr_backend
-        if backend is None:
-            backend = load_pdf_ocr_backend(os.getenv("GREV_PDF_OCR_BACKEND"))
-        policy = PdfExtractionPolicy(
-            min_text_chars=self.pdf_policy.min_text_chars,
-            preserve_layout=self.pdf_policy.preserve_layout,
-            include_page_markers=self.pdf_policy.include_page_markers,
-            ocr_backend=backend,
-        )
-        result = extract_pdf_text(source_path, policy)
+        result = extract_pdf_document(source_path, self.pdf_policy)
         canonical_path = self._canonical_path(source_path).with_suffix(".txt")
         self._write_text(canonical_path, result.text)
         document = NormalizedDocument(
@@ -164,6 +154,7 @@ class DocumentNormalizer:
             canonical_path=canonical_path,
             kind="pdf",
             metadata={
+                "strategy": result.strategy,
                 "page_count": result.page_count,
                 "text_page_count": result.text_page_count,
                 "ocr_page_count": result.ocr_page_count,
@@ -174,13 +165,14 @@ class DocumentNormalizer:
             source_path=source_path,
             canonical_path=canonical_path,
             kind="pdf",
-            strategy="page-level-hybrid",
+            strategy=result.strategy,
             page_count=result.page_count,
             text_page_count=result.text_page_count,
             ocr_page_count=result.ocr_page_count,
             text_chars=result.char_count,
             warnings=result.warnings,
             metadata={
+                "strategy": result.strategy,
                 "pages": [
                     {
                         "page_number": page.page_number,
@@ -188,7 +180,17 @@ class DocumentNormalizer:
                         "source": page.source,
                     }
                     for page in result.pages
-                ]
+                ],
+                "blocks": [
+                    {
+                        "kind": block.kind,
+                        "text": block.text,
+                        "page_index": block.page_index,
+                        "bbox": list(block.bbox) if block.bbox is not None else None,
+                        "metadata": block.metadata,
+                    }
+                    for block in result.blocks
+                ],
             },
         )
         return [document], [entry]

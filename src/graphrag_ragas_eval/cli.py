@@ -9,7 +9,7 @@ from .benchmark_qed.autod import AutoDPlan, summarize_dataset
 from .benchmark_qed.autoe import AutoEPlan, evaluate_answers
 from .benchmark_qed.autoq import AutoQPlan, generate_queries
 from .config import ProjectPaths
-from .ingest import PdfExtractionPolicy, load_pdf_ocr_backend, normalize_source_tree
+from .ingest import PdfExtractionPolicy, load_pdf_extraction_policy, normalize_source_tree
 from .eval import DEFAULT_RAGAS_METRICS, RagasRunner, load_benchmark_samples, load_search_results
 from .generation.builder import GenerationMode, QuestionGenerationPlan, generate_questions
 from .graphrag.loaders import load_graphrag_tables
@@ -25,14 +25,25 @@ graphrag_app = typer.Typer(no_args_is_help=True, add_completion=False)
 benchmark_qed_app = typer.Typer(no_args_is_help=True, add_completion=False)
 
 
+def _build_pdf_policy(pdf_mode: str | None = None) -> PdfExtractionPolicy:
+    runtime_env = dict(os.environ)
+    if pdf_mode is not None:
+        runtime_env["GREV_PDF_EXTRACTOR_MODE"] = pdf_mode
+    return load_pdf_extraction_policy(runtime_env)
+
+
 @graphrag_app.command("stage")
 def stage(
     source: Path = typer.Option(..., exists=True, file_okay=False, dir_okay=True),
     workspace_root: Path = typer.Option(Path("workspaces/graphrag"), file_okay=False, dir_okay=True),
     clean: bool = typer.Option(False),
+    pdf_mode: str | None = typer.Option(
+        None,
+        help="PDF 추출 모드: chandra_only 또는 mineru_hybrid",
+    ),
 ) -> None:
     workspace = GraphRAGWorkspace(root=workspace_root)
-    staged = stage_documents(source, workspace, clean=clean)
+    staged = stage_documents(source, workspace, clean=clean, pdf_policy=_build_pdf_policy(pdf_mode))
     typer.echo(f"staged {len(staged)} canonical txt files into {workspace.input_dir}")
 
 
@@ -41,17 +52,20 @@ def normalize(
     source: Path = typer.Option(..., exists=True, file_okay=False, dir_okay=True),
     workspace_root: Path = typer.Option(Path("workspaces/graphrag"), file_okay=False, dir_okay=True),
     clean: bool = typer.Option(False),
+    pdf_mode: str | None = typer.Option(
+        None,
+        help="PDF 추출 모드: chandra_only 또는 mineru_hybrid",
+    ),
 ) -> None:
     """Normalize mixed source files into canonical TXT and write an extraction manifest."""
 
     workspace = GraphRAGWorkspace(root=workspace_root)
-    backend = load_pdf_ocr_backend(os.getenv("GREV_PDF_OCR_BACKEND"))
     documents = normalize_source_tree(
         source_root=source,
         canonical_root=workspace.canonical_dir,
         manifest_path=workspace.manifests_dir / "extraction.jsonl",
         clean=clean,
-        pdf_policy=PdfExtractionPolicy(ocr_backend=backend),
+        pdf_policy=_build_pdf_policy(pdf_mode),
     )
     typer.echo(f"normalized {len(documents)} documents into {workspace.canonical_dir}")
 
@@ -61,12 +75,16 @@ def init_graphrag(
     source: Path = typer.Option(..., exists=True, file_okay=False, dir_okay=True),
     workspace_root: Path = typer.Option(Path("workspaces/graphrag"), file_okay=False, dir_okay=True),
     clean: bool = typer.Option(False),
+    pdf_mode: str | None = typer.Option(
+        None,
+        help="PDF 추출 모드: chandra_only 또는 mineru_hybrid",
+    ),
     force: bool = typer.Option(True),
     model: str = typer.Option("gpt-4.1"),
     embedding: str = typer.Option("text-embedding-3-large"),
 ) -> None:
     workspace = GraphRAGWorkspace(root=workspace_root)
-    staged = stage_documents(source, workspace, clean=clean)
+    staged = stage_documents(source, workspace, clean=clean, pdf_policy=_build_pdf_policy(pdf_mode))
     ensure_graph_rag_project(workspace, model=model, embedding=embedding, force=force)
     materialize_graph_rag_prompts(workspace)
     typer.echo(f"staged {len(staged)} canonical txt files and initialized {workspace.root}")
@@ -77,6 +95,10 @@ def index_graphrag(
     source: Path = typer.Option(..., exists=True, file_okay=False, dir_okay=True),
     workspace_root: Path = typer.Option(Path("workspaces/graphrag"), file_okay=False, dir_okay=True),
     clean: bool = typer.Option(False),
+    pdf_mode: str | None = typer.Option(
+        None,
+        help="PDF 추출 모드: chandra_only 또는 mineru_hybrid",
+    ),
     force: bool = typer.Option(True),
     model: str = typer.Option("gpt-4.1"),
     embedding: str = typer.Option("text-embedding-3-large"),
@@ -111,6 +133,7 @@ def index_graphrag(
         ontology_path=ontology_path,
         postprocess=postprocess,
         description_limit=description_limit,
+        pdf_policy=_build_pdf_policy(pdf_mode),
     )
     typer.echo(f"staged {len(result.staged_files)} canonical txt files and indexed {result.workspace_root}")
 

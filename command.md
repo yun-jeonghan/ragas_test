@@ -25,6 +25,17 @@ GPU 서버의 vLLM endpoint를 쓸 때는 `.env`에서 공용 블록만 채워�
 - `GREV_VLLM_EMBEDDINGS_BASE_URL=http://<vllm-host>:8000/v1`
 - `GREV_VLLM_EMBEDDINGS_API_KEY=vllm`
 
+PDF 추출 모드도 `.env`에서 바로 고를 수 있습니다.
+
+- `GREV_PDF_EXTRACTOR_MODE=chandra_only`
+- `GREV_PDF_OCR_BACKEND=chandra`
+
+MinerU 하이브리드로 갈 때는:
+
+- `GREV_PDF_EXTRACTOR_MODE=mineru_hybrid`
+- `GREV_PDF_MINERU_COMMAND=mineru`
+- `GREV_PDF_OCR_BACKEND=chandra`
+
 개별 prefix를 쓰고 싶으면 아래처럼 덮어쓸 수 있습니다.
 
 - `GREV_RAGAS_PROVIDER=vllm`
@@ -80,6 +91,13 @@ vLLM로 바꿀 때는 아래처럼 바꿉니다.
     grev graphrag normalize --source examples/sample_docs --workspace-root workspaces/graphrag --clean
     grev graphrag stage --source examples/sample_docs --workspace-root workspaces/graphrag
     grev graphrag index --source examples/sample_docs --workspace-root workspaces/graphrag --force
+
+MinerU 하이브리드 모드로 돌리려면:
+
+    GREV_PDF_EXTRACTOR_MODE=mineru_hybrid \
+    GREV_PDF_MINERU_COMMAND=mineru \
+    GREV_PDF_OCR_BACKEND=chandra \
+    grev graphrag normalize --source examples/sample_docs --workspace-root workspaces/graphrag --clean
 
 단계별로 나눠서 돌리려면:
 

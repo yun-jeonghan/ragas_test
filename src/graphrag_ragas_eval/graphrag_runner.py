@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 
+from .ingest import PdfExtractionPolicy, load_pdf_extraction_policy
 from .ontology_handler import materialize_graph_rag_prompts
 from .post_processor import split_long_nodes_and_append_edges
 from .graphrag.workspace import GraphRAGWorkspace, ensure_graph_rag_project, run_graph_rag_index, stage_documents
@@ -27,9 +28,10 @@ def ingest_and_index_documents(
     ontology_path: Path | None = None,
     postprocess: bool = False,
     description_limit: int = 200,
+    pdf_policy: PdfExtractionPolicy | None = None,
 ) -> GraphRAGRunResult:
     workspace = GraphRAGWorkspace(root=workspace_root)
-    staged = stage_documents(source_dir, workspace, clean=clean)
+    staged = stage_documents(source_dir, workspace, clean=clean, pdf_policy=pdf_policy or load_pdf_extraction_policy())
     ensure_graph_rag_project(workspace, model=model, embedding=embedding, force=force_init)
     materialize_graph_rag_prompts(workspace, ontology_path=ontology_path)
     run_graph_rag_index(workspace, method=method, skip_validation=skip_validation)

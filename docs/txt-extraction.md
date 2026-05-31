@@ -13,9 +13,20 @@
 
 PDF는 페이지별로 처리한다.
 
+이 프로젝트는 두 가지 모드를 지원한다.
+
+### `chandra_only`
+
 1. `pypdf`로 텍스트 레이어를 먼저 읽는다.
 2. 페이지 텍스트가 너무 짧으면 OCR backend를 호출한다.
 3. 최종 TXT에는 페이지 마커를 넣어서 provenance를 유지한다.
+
+### `mineru_hybrid`
+
+1. MinerU로 대략적 텍스트와 레이아웃 블록을 추출한다.
+2. 텍스트 블록은 그대로 canonical TXT에 반영한다.
+3. image / figure / graph / chart / table / equation 같은 블록은 chandra description backend로 보강한다.
+4. 최종 TXT에는 페이지 마커와 블록 마커를 같이 넣어서 provenance를 유지한다.
 
 예시:
 
@@ -34,6 +45,12 @@ OCR backend는 교체 가능하다.
 - `GREV_PDF_OCR_BACKEND=chandra` 로 chandra adapter를 사용한다.
 - 다른 모듈 이름도 지정할 수 있다.
 - OCR backend가 없으면 짧은 페이지는 경고만 남긴다.
+
+MinerU hybrid 를 쓸 때는:
+
+- `GREV_PDF_EXTRACTOR_MODE=mineru_hybrid`
+- `GREV_PDF_MINERU_COMMAND=mineru`
+- `GREV_PDF_OCR_BACKEND=chandra`
 
 ## 출력 구조
 

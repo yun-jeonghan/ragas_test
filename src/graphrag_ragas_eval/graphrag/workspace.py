@@ -6,7 +6,7 @@ import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 
-from ..ingest import PdfExtractionPolicy, load_pdf_ocr_backend, normalize_source_tree
+from ..ingest import PdfExtractionPolicy, load_pdf_extraction_policy, normalize_source_tree
 
 
 @dataclass(frozen=True, slots=True)
@@ -51,7 +51,13 @@ def _safe_relative_name(path: Path, base_dir: Path) -> str:
     return "__".join(relative.parts)
 
 
-def stage_documents(source_dir: Path, workspace: GraphRAGWorkspace, *, clean: bool = False) -> list[Path]:
+def stage_documents(
+    source_dir: Path,
+    workspace: GraphRAGWorkspace,
+    *,
+    clean: bool = False,
+    pdf_policy: PdfExtractionPolicy | None = None,
+) -> list[Path]:
     """Normalize a mixed source tree and stage the canonical TXT files for GraphRAG."""
 
     if not source_dir.exists():
@@ -62,14 +68,12 @@ def stage_documents(source_dir: Path, workspace: GraphRAGWorkspace, *, clean: bo
         shutil.rmtree(workspace.manifests_dir, ignore_errors=True)
     workspace.root.mkdir(parents=True, exist_ok=True)
     manifest_path = workspace.manifests_dir / "extraction.jsonl"
-    # OCR stays optional so local text-only runs do not need chandra installed.
-    pdf_ocr_backend = load_pdf_ocr_backend(os.getenv("GREV_PDF_OCR_BACKEND"))
     normalize_source_tree(
         source_root=source_dir,
         canonical_root=workspace.canonical_dir,
         manifest_path=manifest_path,
         clean=False,
-        pdf_policy=PdfExtractionPolicy(ocr_backend=pdf_ocr_backend),
+        pdf_policy=pdf_policy or load_pdf_extraction_policy(os.environ),
     )
 
     if workspace.input_dir.exists():

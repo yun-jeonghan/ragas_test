@@ -46,7 +46,18 @@ Qwen 계열 생각 끄기는 GREV_BENCHMARKQED_EXTRA_BODY={"chat_template_kwargs
 
 ## PDF 추출
 
+- GREV_PDF_EXTRACTOR_MODE
 - GREV_PDF_OCR_BACKEND
+- GREV_PDF_DESCRIPTION_BACKEND
+- GREV_PDF_MINERU_COMMAND
+- GREV_PDF_MINERU_OUTPUT_ARTIFACT
 
-PDF 페이지의 텍스트 레이어가 부족할 때 호출할 OCR backend 이름입니다.
-현재 코드는 `chandra` 모듈을 기본 어댑터로 기대하며, 다른 모듈 이름도 지정할 수 있습니다.
+`GREV_PDF_EXTRACTOR_MODE` 는 다음 값을 받습니다.
+
+- `chandra_only` - 페이지별 OCR 기반 추출
+- `mineru_hybrid` - MinerU로 대략적 레이아웃과 텍스트를 추출하고, 이미지/그래프 요소는 chandra 설명 backend로 보강
+
+`GREV_PDF_OCR_BACKEND` 는 페이지 OCR과 block description에 쓰는 backend 이름입니다. 현재 코드는 `chandra` 모듈을 기본 어댑터로 기대하며, 다른 모듈 이름도 지정할 수 있습니다.
+`GREV_PDF_DESCRIPTION_BACKEND` 를 따로 주면 MinerU 하이브리드의 structural block 설명에만 별도 backend를 쓸 수 있습니다.
+`GREV_PDF_MINERU_COMMAND` 는 MinerU CLI 이름입니다. 기본값은 `mineru` 입니다.
+`GREV_PDF_MINERU_OUTPUT_ARTIFACT` 는 MinerU output directory에서 content list JSON을 찾을 glob 패턴입니다. 기본값은 `*content_list*.json` 입니다.
