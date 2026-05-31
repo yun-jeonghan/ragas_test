@@ -37,3 +37,10 @@ Qwen 계열 생각 끄기는 GREV_BENCHMARKQED_EXTRA_BODY={"chat_template_kwargs
 
 - 예전 설정값 GREV_LLM_* 은 fallback으로 아직 읽습니다.
 - 새로 시작하는 경우에는 GREV_RAGAS_* 와 GREV_BENCHMARKQED_* 만 쓰는 편이 좋습니다.
+
+## PDF 추출
+
+- GREV_PDF_OCR_BACKEND
+
+PDF 페이지의 텍스트 레이어가 부족할 때 호출할 OCR backend 이름입니다.
+현재 코드는 `chandra` 모듈을 기본 어댑터로 기대하며, 다른 모듈 이름도 지정할 수 있습니다.

@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 import re
 from dataclasses import dataclass
 from pathlib import Path
@@ -16,6 +15,12 @@ class LoadedDocument:
 
 
 def load_documents(source: Path) -> list[LoadedDocument]:
+    """Load canonical TXT documents from a file or directory.
+
+    Downstream evaluation code now expects the normalized TXT tree produced by the
+    ingestion layer, so this loader intentionally ignores non-TXT inputs.
+    """
+
     if not source.exists():
         raise FileNotFoundError(source)
 
@@ -23,20 +28,7 @@ def load_documents(source: Path) -> list[LoadedDocument]:
     files = [source] if source.is_file() else [path for path in sorted(source.rglob("*")) if path.is_file()]
     for path in files:
         suffix = path.suffix.lower()
-        if suffix not in {".txt", ".md", ".json"}:
-            continue
-        if suffix == ".json":
-            payload = json.loads(path.read_text(encoding="utf-8"))
-            rows = payload if isinstance(payload, list) else payload.get("documents", [])
-            for row in rows:
-                documents.append(
-                    LoadedDocument(
-                        id=str(row.get("id") or path.name),
-                        title=str(row.get("title") or path.stem),
-                        text=str(row.get("text") or ""),
-                        source_path=path,
-                    )
-                )
+        if suffix != ".txt":
             continue
         documents.append(
             LoadedDocument(

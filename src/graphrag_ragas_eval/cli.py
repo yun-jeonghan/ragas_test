@@ -9,6 +9,7 @@ from .benchmark_qed.autod import AutoDPlan, summarize_dataset
 from .benchmark_qed.autoe import AutoEPlan, evaluate_answers
 from .benchmark_qed.autoq import AutoQPlan, generate_queries
 from .config import ProjectPaths
+from .ingest import PdfExtractionPolicy, load_pdf_ocr_backend, normalize_source_tree
 from .eval import DEFAULT_RAGAS_METRICS, RagasRunner, load_benchmark_samples, load_search_results
 from .generation.builder import GenerationMode, QuestionGenerationPlan, generate_questions
 from .graphrag.loaders import load_graphrag_tables
@@ -32,7 +33,27 @@ def stage(
 ) -> None:
     workspace = GraphRAGWorkspace(root=workspace_root)
     staged = stage_documents(source, workspace, clean=clean)
-    typer.echo(f"staged {len(staged)} files into {workspace.input_dir}")
+    typer.echo(f"staged {len(staged)} canonical txt files into {workspace.input_dir}")
+
+
+@graphrag_app.command("normalize")
+def normalize(
+    source: Path = typer.Option(..., exists=True, file_okay=False, dir_okay=True),
+    workspace_root: Path = typer.Option(Path("workspaces/graphrag"), file_okay=False, dir_okay=True),
+    clean: bool = typer.Option(False),
+) -> None:
+    """Normalize mixed source files into canonical TXT and write an extraction manifest."""
+
+    workspace = GraphRAGWorkspace(root=workspace_root)
+    backend = load_pdf_ocr_backend(os.getenv("GREV_PDF_OCR_BACKEND"))
+    documents = normalize_source_tree(
+        source_root=source,
+        canonical_root=workspace.canonical_dir,
+        manifest_path=workspace.manifests_dir / "extraction.jsonl",
+        clean=clean,
+        pdf_policy=PdfExtractionPolicy(ocr_backend=backend),
+    )
+    typer.echo(f"normalized {len(documents)} documents into {workspace.canonical_dir}")
 
 
 @graphrag_app.command("init")
@@ -48,7 +69,7 @@ def init_graphrag(
     staged = stage_documents(source, workspace, clean=clean)
     ensure_graph_rag_project(workspace, model=model, embedding=embedding, force=force)
     materialize_graph_rag_prompts(workspace)
-    typer.echo(f"staged {len(staged)} files and initialized {workspace.root}")
+    typer.echo(f"staged {len(staged)} canonical txt files and initialized {workspace.root}")
 
 
 @graphrag_app.command("index")
@@ -91,7 +112,7 @@ def index_graphrag(
         postprocess=postprocess,
         description_limit=description_limit,
     )
-    typer.echo(f"staged {len(result.staged_files)} files and indexed {result.workspace_root}")
+    typer.echo(f"staged {len(result.staged_files)} canonical txt files and indexed {result.workspace_root}")
 
 
 @graphrag_app.command("postprocess")

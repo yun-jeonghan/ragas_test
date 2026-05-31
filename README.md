@@ -63,6 +63,8 @@ GraphRAG로 만든 그래프 기반 검색과 생성 결과를 Ragas로 평가�
 
 질문 생성은 docs/question-generation.md를 보면 됩니다.
 
+TXT 추출과 PDF OCR 흐름은 docs/txt-extraction.md를 보면 됩니다.
+
 BenchmarkQED 스타일 구조는 docs/benchmark-qed.md를 보면 됩니다.
 
 자세한 설계는 docs/architecture.md, docs/benchmark-schema.md, docs/search-design.md, docs/graphrag-workspace.md, docs/environment.md를 보시면 됩니다.

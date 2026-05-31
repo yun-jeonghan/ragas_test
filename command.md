@@ -43,10 +43,13 @@ vLLM로 바꿀 때는 아래처럼 바꿉니다.
 
 예시 문서를 그대로 쓰려면:
 
+    grev graphrag normalize --source examples/sample_docs --workspace-root workspaces/graphrag --clean
+    grev graphrag stage --source examples/sample_docs --workspace-root workspaces/graphrag
     grev graphrag index --source examples/sample_docs --workspace-root workspaces/graphrag --force
 
 단계별로 나눠서 돌리려면:
 
+    grev graphrag normalize --source examples/sample_docs --workspace-root workspaces/graphrag
     grev graphrag stage --source examples/sample_docs --workspace-root workspaces/graphrag
     grev graphrag init --source examples/sample_docs --workspace-root workspaces/graphrag --force
     grev graphrag index --source examples/sample_docs --workspace-root workspaces/graphrag

@@ -1,18 +1,29 @@
 from __future__ import annotations
 
+import os
 import shutil
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 
-from pypdf import PdfReader
-
-SUPPORTED_INPUT_EXTENSIONS = {".txt", ".md", ".csv", ".json", ".pdf"}
+from ..ingest import PdfExtractionPolicy, load_pdf_ocr_backend, normalize_source_tree
 
 
 @dataclass(frozen=True, slots=True)
 class GraphRAGWorkspace:
     root: Path
+
+    @property
+    def source_dir(self) -> Path:
+        return self.root / "source"
+
+    @property
+    def canonical_dir(self) -> Path:
+        return self.root / "canonical"
+
+    @property
+    def manifests_dir(self) -> Path:
+        return self.root / "manifests"
 
     @property
     def input_dir(self) -> Path:
@@ -41,40 +52,37 @@ def _safe_relative_name(path: Path, base_dir: Path) -> str:
 
 
 def stage_documents(source_dir: Path, workspace: GraphRAGWorkspace, *, clean: bool = False) -> list[Path]:
+    """Normalize a mixed source tree and stage the canonical TXT files for GraphRAG."""
+
     if not source_dir.exists():
         raise FileNotFoundError(source_dir)
-    if clean and workspace.input_dir.exists():
-        shutil.rmtree(workspace.input_dir)
+    if clean:
+        shutil.rmtree(workspace.input_dir, ignore_errors=True)
+        shutil.rmtree(workspace.canonical_dir, ignore_errors=True)
+        shutil.rmtree(workspace.manifests_dir, ignore_errors=True)
     workspace.root.mkdir(parents=True, exist_ok=True)
+    manifest_path = workspace.manifests_dir / "extraction.jsonl"
+    # OCR stays optional so local text-only runs do not need chandra installed.
+    pdf_ocr_backend = load_pdf_ocr_backend(os.getenv("GREV_PDF_OCR_BACKEND"))
+    normalize_source_tree(
+        source_root=source_dir,
+        canonical_root=workspace.canonical_dir,
+        manifest_path=manifest_path,
+        clean=False,
+        pdf_policy=PdfExtractionPolicy(ocr_backend=pdf_ocr_backend),
+    )
+
+    if workspace.input_dir.exists():
+        shutil.rmtree(workspace.input_dir)
     workspace.input_dir.mkdir(parents=True, exist_ok=True)
 
     staged: list[Path] = []
-    for path in sorted(source_dir.rglob("*")):
-        if not path.is_file():
-            continue
-        if path.suffix.lower() not in SUPPORTED_INPUT_EXTENSIONS:
-            continue
-        target = workspace.input_dir / _safe_relative_name(path, source_dir)
+    for path in sorted(workspace.canonical_dir.rglob("*.txt")):
+        target = workspace.input_dir / _safe_relative_name(path, workspace.canonical_dir)
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(path, target)
         staged.append(target)
-        if path.suffix.lower() == ".pdf":
-            extracted = _extract_pdf_text(path)
-            if extracted.strip():
-                txt_target = target.with_suffix(".txt")
-                txt_target.write_text(extracted, encoding="utf-8")
-                staged.append(txt_target)
     return staged
-
-
-def _extract_pdf_text(path: Path) -> str:
-    reader = PdfReader(str(path))
-    pages: list[str] = []
-    for page in reader.pages:
-        text = page.extract_text() or ""
-        if text.strip():
-            pages.append(text.strip())
-    return "\n\n".join(pages)
 
 
 def ensure_graph_rag_project(

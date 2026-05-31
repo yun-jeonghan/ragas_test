@@ -7,6 +7,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Any
 
+from ..documents import load_documents
 from ..schemas import BenchmarkSample, SearchMode
 
 
@@ -28,34 +29,15 @@ class QuestionGenerationPlan:
 
 
 def _load_documents(source: Path) -> list[dict[str, str]]:
-    if not source.exists():
-        raise FileNotFoundError(source)
-
-    documents: list[dict[str, str]] = []
-    files = [source] if source.is_file() else [path for path in sorted(source.rglob("*")) if path.is_file()]
-    for path in files:
-        if path.suffix.lower() not in {".txt", ".md", ".json"}:
-            continue
-        if path.suffix.lower() == ".json":
-            payload = json.loads(path.read_text(encoding="utf-8"))
-            rows = payload if isinstance(payload, list) else payload.get("documents", [])
-            for row in rows:
-                documents.append(
-                    {
-                        "id": str(row.get("id") or path.name),
-                        "title": str(row.get("title") or path.stem),
-                        "text": str(row.get("text") or ""),
-                    }
-                )
-            continue
-        documents.append(
-            {
-                "id": path.name,
-                "title": path.stem,
-                "text": path.read_text(encoding="utf-8"),
-            }
-        )
-    return documents
+    loaded = load_documents(source)
+    return [
+        {
+            "id": document.id,
+            "title": document.title,
+            "text": document.text,
+        }
+        for document in loaded
+    ]
 
 
 def _first_sentence(text: str) -> str:
