@@ -40,6 +40,25 @@ GraphRAG로 만든 그래프 기반 검색과 생성 결과를 Ragas로 평가�
 
 이미 vLLM, MinerU, Chandra 같은 외부 서비스가 따로 있으면 이 저장소에는 추가 GPU 의존성이 없습니다. 이 레포는 그 엔드포인트들을 호출하는 클라이언트 역할입니다.
 
+## 빠른 시작
+
+1. 저장소를 설치합니다.
+   - `pip install -e ".[dev]"`
+   - GraphRAG CLI도 별도라면 같이 설치합니다.
+2. `.env.example`을 `.env`로 복사하고, 아래 값만 환경에 맞게 수정합니다.
+   - LLM 모델 이름
+   - LLM/embedding BASE_URL
+   - API_KEY
+   - 필요하면 `EXTRA_BODY`
+   - PDF 추출 모드와 OCR/문서 모델 주소
+3. 문서를 `examples/sample_docs` 같은 폴더에 둡니다.
+4. 한 번에 끝내려면 `grev graphrag index --source <docs> --workspace-root workspaces/graphrag` 를 실행합니다.
+   - 이 명령은 내부적으로 canonical TXT를 만들고, GraphRAG 워크스페이스를 초기화한 뒤, 인덱싱까지 수행합니다.
+5. canonical TXT만 따로 확인하고 싶으면 `grev graphrag normalize --source <docs> --workspace-root workspaces/graphrag` 를 먼저 실행합니다.
+6. GraphRAG 검색 결과 JSON을 저장한 다음 `grev evaluate --benchmark ... --search-results ...` 를 실행합니다.
+
+가장 자주 바꾸는 건 `.env` 의 모델 주소/모델 이름입니다. 아래 섹션만 보면 됩니다.
+
 ## LLM 전환
 
 현재는 OpenAI API를 기본으로 씁니다.
@@ -70,6 +89,25 @@ GraphRAG로 만든 그래프 기반 검색과 생성 결과를 Ragas로 평가�
 
 자세한 변수 설명은 docs/environment.md를 보시면 됩니다.
 
+## env에서 실제로 바꾸는 곳
+
+모델 교체할 때는 아래만 바꾸면 됩니다.
+
+- Ragas LLM: `GREV_RAGAS_PROVIDER`, `GREV_RAGAS_MODEL`, `GREV_RAGAS_BASE_URL`, `GREV_RAGAS_API_KEY`
+- Ragas embeddings: `GREV_RAGAS_EMBEDDINGS_PROVIDER`, `GREV_RAGAS_EMBEDDINGS_MODEL`, `GREV_RAGAS_EMBEDDINGS_BASE_URL`, `GREV_RAGAS_EMBEDDINGS_API_KEY`
+- BenchmarkQED LLM: `GREV_BENCHMARKQED_PROVIDER`, `GREV_BENCHMARKQED_MODEL`, `GREV_BENCHMARKQED_BASE_URL`, `GREV_BENCHMARKQED_API_KEY`
+- BenchmarkQED embeddings: `GREV_BENCHMARKQED_EMBEDDINGS_PROVIDER`, `GREV_BENCHMARKQED_EMBEDDINGS_MODEL`, `GREV_BENCHMARKQED_EMBEDDINGS_BASE_URL`, `GREV_BENCHMARKQED_EMBEDDINGS_API_KEY`
+- 공용 vLLM 블록을 쓰면 `GREV_VLLM_*` 만 바꿔서 두 경로에 같이 먹일 수 있습니다.
+- Qwen 생각 끄기 같은 추가 옵션은 `GREV_*_EXTRA_BODY` 또는 `GREV_*_EMBEDDINGS_EXTRA_BODY` 로 넣습니다.
+
+PDF 쪽은 다음만 바꾸면 됩니다.
+
+- `GREV_PDF_EXTRACTOR_MODE`
+- `GREV_PDF_OCR_BACKEND`
+- `GREV_PDF_DESCRIPTION_BACKEND`
+- `GREV_PDF_MINERU_COMMAND`
+- `GREV_PDF_MINERU_OUTPUT_ARTIFACT`
+
 ## 문서 입력 흐름
 
 1. 문서를 docs 같은 디렉터리에 둡니다.
@@ -92,3 +130,11 @@ GitHub SSH push 절차는 docs/github-push-ssh.md를 보면 됩니다.
 BenchmarkQED 스타일 구조는 docs/benchmark-qed.md를 보면 됩니다.
 
 자세한 설계는 docs/architecture.md, docs/benchmark-schema.md, docs/search-design.md, docs/graphrag-workspace.md, docs/environment.md를 보시면 됩니다.
+
+## GraphRAG 버전
+
+이 레포는 GraphRAG 자체를 vendoring 하지 않고 CLI를 호출하는 wrapper입니다.
+현재 코드와 문서는 `graphrag init` / `graphrag index` / `--root` / `--model` / `--embedding` / `--method` / `--skip-validation` 흐름을 기준으로 작성되어 있습니다.
+즉, 특정 버전 번호를 pyproject에 고정하지는 않았고, 실제 설치한 GraphRAG CLI가 이 인자들을 지원해야 합니다.
+실무적으로는 GraphRAG 0.4.x 계열에서 잘 맞는 구조이지만, 이 저장소가 "0.4.0만" 딱 고정해서 검증된 상태라고 보기는 어렵습니다.
+버전이 다르면 `src/graphrag_ragas_eval/graphrag/workspace.py` 의 CLI 인자만 먼저 확인하면 됩니다.
