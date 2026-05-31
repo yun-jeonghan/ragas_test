@@ -108,6 +108,43 @@ PDF 쪽은 다음만 바꾸면 됩니다.
 - `GREV_PDF_MINERU_COMMAND`
 - `GREV_PDF_MINERU_OUTPUT_ARTIFACT`
 
+### 최소 `.env` 템플릿
+
+아래 값만 채우면 가장 먼저 돌아가는 구성이 됩니다. 나머지는 `GREV_VLLM_*` 공용 블록이나 `EXTRA_BODY`만 필요할 때 추가하세요.
+
+```env
+# Ragas LLM
+GREV_RAGAS_PROVIDER=vllm
+GREV_RAGAS_MODEL=your-llm-model-name
+GREV_RAGAS_BASE_URL=http://your-host:8000/v1
+GREV_RAGAS_API_KEY=vllm
+
+# Ragas embeddings
+GREV_RAGAS_EMBEDDINGS_PROVIDER=vllm
+GREV_RAGAS_EMBEDDINGS_MODEL=your-embedding-model-name
+GREV_RAGAS_EMBEDDINGS_BASE_URL=http://your-host:8001/v1
+GREV_RAGAS_EMBEDDINGS_API_KEY=vllm
+
+# BenchmarkQED LLM
+GREV_BENCHMARKQED_PROVIDER=vllm
+GREV_BENCHMARKQED_MODEL=your-llm-model-name
+GREV_BENCHMARKQED_BASE_URL=http://your-host:8000/v1
+GREV_BENCHMARKQED_API_KEY=vllm
+
+# BenchmarkQED embeddings
+GREV_BENCHMARKQED_EMBEDDINGS_PROVIDER=vllm
+GREV_BENCHMARKQED_EMBEDDINGS_MODEL=your-embedding-model-name
+GREV_BENCHMARKQED_EMBEDDINGS_BASE_URL=http://your-host:8001/v1
+GREV_BENCHMARKQED_EMBEDDINGS_API_KEY=vllm
+
+# PDF extraction
+GREV_PDF_EXTRACTOR_MODE=chandra_only
+GREV_PDF_OCR_BACKEND=chandra
+```
+
+여기서 보통 바꾸는 건 `MODEL`, `BASE_URL`, `API_KEY` 입니다.
+`MODEL`은 서버가 실제로 서빙하는 이름, `BASE_URL`은 `/v1`까지 포함한 주소, `API_KEY`는 서버 종류에 따라 비워두거나 토큰을 넣으면 됩니다.
+
 ## 문서 입력 흐름
 
 1. 문서를 docs 같은 디렉터리에 둡니다.
