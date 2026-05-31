@@ -35,6 +35,7 @@ GraphRAG로 만든 그래프 기반 검색과 생성 결과를 Ragas로 평가�
 이 프로젝트는 Python 3.11 이상을 기준으로 합니다.
 
 - 개발 설치: `pip install -e ".[dev]"`
+- 로컬 CPU 임베딩까지 쓸 거면 `pip install -e ".[dev,cpu]"`
 - GraphRAG가 별도 설치 환경이면 `pip install graphrag` 도 필요할 수 있습니다.
 - CLI는 설치 후 `grev` 로 실행합니다.
 
@@ -99,6 +100,12 @@ GraphRAG로 만든 그래프 기반 검색과 생성 결과를 Ragas로 평가�
 - BenchmarkQED embeddings: `GREV_BENCHMARKQED_EMBEDDINGS_PROVIDER`, `GREV_BENCHMARKQED_EMBEDDINGS_MODEL`, `GREV_BENCHMARKQED_EMBEDDINGS_BASE_URL`, `GREV_BENCHMARKQED_EMBEDDINGS_API_KEY`
 - 공용 vLLM 블록을 쓰면 `GREV_VLLM_*` 만 바꿔서 두 경로에 같이 먹일 수 있습니다.
 - Qwen 생각 끄기 같은 추가 옵션은 `GREV_*_EXTRA_BODY` 또는 `GREV_*_EMBEDDINGS_EXTRA_BODY` 로 넣습니다.
+
+CPU 테스트를 할 때는 이렇게 생각하면 됩니다.
+
+- LLM: Ollama나 vLLM CPU처럼 OpenAI-compatible 서버가 있으면 `GREV_RAGAS_BASE_URL` 만 로컬 주소로 바꿉니다.
+- embeddings: `GREV_RAGAS_EMBEDDINGS_PROVIDER=local` 로 두고 `GREV_RAGAS_EMBEDDINGS_MODEL=intfloat/multilingual-e5-small`, `GREV_RAGAS_EMBEDDINGS_DEVICE=cpu` 를 넣습니다. BenchmarkQED도 같은 방식으로 `GREV_BENCHMARKQED_EMBEDDINGS_PROVIDER=local` 을 쓰면 됩니다.
+- E5 계열은 기본으로 `query: ` / `passage: ` 접두사를 자동으로 붙입니다. 필요하면 `GREV_*_EMBEDDINGS_QUERY_PREFIX`, `GREV_*_EMBEDDINGS_DOCUMENT_PREFIX` 로 덮어쓸 수 있습니다.
 
 PDF 쪽은 다음만 바꾸면 됩니다.
 

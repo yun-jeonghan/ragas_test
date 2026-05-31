@@ -24,6 +24,16 @@ chat/completions와 embeddings를 같은 서버에 띄우면 둘 다 같은 BASE
 Qwen 계열에서 생각 과정을 끄고 싶으면 `GREV_RAGAS_EXTRA_BODY={"chat_template_kwargs":{"enable_thinking":false}}` 형태로 넣으면 됩니다.
 answer_relevancy 같은 metric은 embeddings 설정도 필요합니다.
 
+CPU 로컬 embedding 테스트를 하려면 `GREV_*_EMBEDDINGS_PROVIDER=local` 을 쓰면 됩니다.
+이때 주요 값은 아래입니다.
+
+- `GREV_*_EMBEDDINGS_MODEL`: `intfloat/multilingual-e5-small` 같은 sentence-transformers 모델 이름
+- `GREV_*_EMBEDDINGS_DEVICE`: `cpu`
+- `GREV_*_EMBEDDINGS_NORMALIZE`: `true` 권장
+- `GREV_*_EMBEDDINGS_QUERY_PREFIX`: E5 계열 query prefix, 기본은 `query: `
+- `GREV_*_EMBEDDINGS_DOCUMENT_PREFIX`: E5 계열 passage prefix, 기본은 `passage: `
+Ragas와 BenchmarkQED 둘 다 같은 방식으로 쓸 수 있습니다.
+
 ## BenchmarkQED 스타일 AutoE용
 
 - GREV_BENCHMARKQED_PROVIDER

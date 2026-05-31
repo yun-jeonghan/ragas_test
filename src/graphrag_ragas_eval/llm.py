@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import os
 import json
 from dataclasses import dataclass
@@ -19,6 +20,10 @@ class LLMRuntimeConfig:
     embeddings_base_url: str | None = None
     embeddings_api_key: str | None = None
     embeddings_extra_body: dict[str, Any] | None = None
+    embeddings_device: str | None = None
+    embeddings_query_prefix: str | None = None
+    embeddings_document_prefix: str | None = None
+    embeddings_normalize: bool = True
 
 
 class _CompletionsProxy:
@@ -54,6 +59,77 @@ class _OpenAIClientProxy:
 
     def __getattr__(self, name: str) -> Any:
         return getattr(self._client, name)
+
+
+class _SentenceTransformerEmbeddings:
+    def __init__(
+        self,
+        model_name: str,
+        *,
+        device: str | None = None,
+        query_prefix: str = "",
+        document_prefix: str = "",
+        normalize: bool = True,
+    ) -> None:
+        try:
+            from sentence_transformers import SentenceTransformer
+        except ImportError as exc:  # pragma: no cover - optional dependency path
+            raise RuntimeError(
+                "sentence-transformers is required for GREV_*_EMBEDDINGS_PROVIDER=local"
+            ) from exc
+
+        self._model_name = model_name
+        self._device = device
+        self._query_prefix = query_prefix
+        self._document_prefix = document_prefix
+        self._normalize = normalize
+        self._model = SentenceTransformer(model_name, device=device)
+
+    def _encode(self, texts: list[str], *, is_query: bool) -> list[list[float]]:
+        prefix = self._query_prefix if is_query else self._document_prefix
+        prepared = [f"{prefix}{text}" if prefix else text for text in texts]
+        embeddings = self._model.encode(
+            prepared,
+            convert_to_numpy=True,
+            normalize_embeddings=self._normalize,
+            show_progress_bar=False,
+        )
+        return [embedding.tolist() for embedding in embeddings]
+
+    def embed_documents(self, texts: list[str]) -> list[list[float]]:
+        return self._encode(texts, is_query=False)
+
+    def embed_query(self, text: str) -> list[float]:
+        return self._encode([text], is_query=True)[0]
+
+    async def aembed_documents(self, texts: list[str]) -> list[list[float]]:
+        return await asyncio.to_thread(self.embed_documents, texts)
+
+    async def aembed_query(self, text: str) -> list[float]:
+        return await asyncio.to_thread(self.embed_query, text)
+
+
+def _parse_bool(value: str | None, *, default: bool = False) -> bool:
+    if value is None:
+        return default
+    normalized = value.strip().lower()
+    if normalized in {"1", "true", "yes", "on"}:
+        return True
+    if normalized in {"0", "false", "no", "off"}:
+        return False
+    return default
+
+
+def _openai_client(base_url: str | None, api_key: str | None) -> Any:
+    from openai import AsyncOpenAI
+
+    kwargs: dict[str, Any] = {}
+    if base_url:
+        kwargs["base_url"] = base_url
+        kwargs["api_key"] = api_key or "EMPTY"
+    else:
+        kwargs["api_key"] = api_key
+    return AsyncOpenAI(**kwargs)
 
 
 def load_llm_runtime_config(
@@ -106,6 +182,10 @@ def load_llm_runtime_config(
     embeddings_model = (get("EMBEDDINGS_MODEL", "text-embedding-3-large") or "text-embedding-3-large").strip()
     embeddings_base_url = get("EMBEDDINGS_BASE_URL") or None
     embeddings_api_key = get("EMBEDDINGS_API_KEY") or None
+    embeddings_device = get("EMBEDDINGS_DEVICE") or None
+    embeddings_query_prefix = get("EMBEDDINGS_QUERY_PREFIX") or None
+    embeddings_document_prefix = get("EMBEDDINGS_DOCUMENT_PREFIX") or None
+    embeddings_normalize = _parse_bool(get("EMBEDDINGS_NORMALIZE"), default=True)
 
     # 기본은 OpenAI API다.
     # 나중에 vLLM으로 바꿀 때는 GREV_RAGAS_PROVIDER=vllm 과
@@ -124,6 +204,10 @@ def load_llm_runtime_config(
         embeddings_base_url=embeddings_base_url,
         embeddings_api_key=embeddings_api_key,
         embeddings_extra_body=embeddings_extra_body,
+        embeddings_device=embeddings_device,
+        embeddings_query_prefix=embeddings_query_prefix,
+        embeddings_document_prefix=embeddings_document_prefix,
+        embeddings_normalize=embeddings_normalize,
     )
 
 
@@ -131,20 +215,13 @@ def build_ragas_llm(config: LLMRuntimeConfig | None = None) -> Any:
     runtime = config or load_llm_runtime_config()
 
     try:
-        from openai import AsyncOpenAI
         from ragas.llms import llm_factory
     except ImportError as exc:  # pragma: no cover - runtime dependency error path
         raise RuntimeError("openai or ragas is not installed") from exc
 
-    if runtime.provider == "vllm":
-        # vLLM은 OpenAI-compatible 서버로 붙이는 전제를 둔다.
-        # 따라서 나중에 서버만 바꾸면 이 코드는 유지된다.
-        client = AsyncOpenAI(
-            base_url=runtime.base_url,
-            api_key=runtime.api_key or "vllm",
-        )
-    else:
-        client = AsyncOpenAI(api_key=runtime.api_key)
+    # OpenAI-compatible server라면 provider와 무관하게 base_url만 주면 된다.
+    # vLLM, Ollama, 내부 게이트웨이 모두 이 경로를 타게 한다.
+    client = _openai_client(runtime.base_url, runtime.api_key)
 
     if runtime.extra_body:
         original_create = client.chat.completions.create
@@ -165,21 +242,26 @@ def build_ragas_embeddings(config: LLMRuntimeConfig | None = None) -> Any:
     runtime = config or load_llm_runtime_config()
 
     try:
-        from openai import AsyncOpenAI
         from ragas.embeddings import OpenAIEmbeddings
     except ImportError as exc:  # pragma: no cover - runtime dependency error path
         raise RuntimeError("openai or ragas is not installed") from exc
 
-    if runtime.embeddings_provider == "vllm":
-        client = AsyncOpenAI(
-            base_url=runtime.embeddings_base_url or "http://127.0.0.1:8000/v1",
-            api_key=runtime.embeddings_api_key or "vllm",
+    if runtime.embeddings_provider in {"local", "sentence-transformers", "sentence_transformers", "cpu"}:
+        query_prefix = runtime.embeddings_query_prefix
+        document_prefix = runtime.embeddings_document_prefix
+        if query_prefix is None and "e5" in runtime.embeddings_model.lower():
+            query_prefix = "query: "
+        if document_prefix is None and "e5" in runtime.embeddings_model.lower():
+            document_prefix = "passage: "
+        return _SentenceTransformerEmbeddings(
+            runtime.embeddings_model,
+            device=runtime.embeddings_device,
+            query_prefix=query_prefix or "",
+            document_prefix=document_prefix or "",
+            normalize=runtime.embeddings_normalize,
         )
-    else:
-        client = AsyncOpenAI(
-            base_url=runtime.embeddings_base_url,
-            api_key=runtime.embeddings_api_key or runtime.api_key,
-        )
+
+    client = _openai_client(runtime.embeddings_base_url, runtime.embeddings_api_key or runtime.api_key)
 
     if runtime.embeddings_extra_body:
         original_create = client.embeddings.create
