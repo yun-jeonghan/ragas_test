@@ -13,12 +13,15 @@
 - GREV_RAGAS_EMBEDDINGS_MODEL
 - GREV_RAGAS_EMBEDDINGS_BASE_URL
 - GREV_RAGAS_EMBEDDINGS_API_KEY
+- GREV_RAGAS_EMBEDDINGS_EXTRA_BODY
 
-기본은 OpenAI API이고, vLLM로 바꿀 때는 GREV_RAGAS_PROVIDER=vllm 과 OpenAI-compatible BASE_URL만 바꾸면 됩니다.
-BASE_URL은 보통 `http://<vllm-host>:8000/v1` 같은 형태로 넣습니다.
+기본은 OpenAI API이고, vLLM로 바꿀 때는 `GREV_RAGAS_PROVIDER=vllm` 과 OpenAI-compatible `BASE_URL`만 바꾸면 됩니다.
+`BASE_URL`은 보통 `http://<vllm-host>:8000/v1` 같은 형태로 넣습니다. `/v1/chat/completions` 와 `/v1/embeddings` 를 기준으로 호출하므로, `/v1` 까지 포함한 루트 주소를 넣어야 합니다.
+`MODEL` 값은 Hugging Face repo id가 아니라, 서버가 실제로 서빙하는 모델 이름이어야 합니다. vLLM에서 `--served-model-name` 을 따로 줬다면 그 값을 넣으세요.
 chat/completions와 embeddings를 같은 서버에 띄우면 둘 다 같은 BASE_URL을 써도 됩니다.
 여러 모드가 같은 GPU endpoint를 공유하면 `GREV_VLLM_*` 공용 블록만 채워도 됩니다. 이 공용 값이 `GREV_RAGAS_*` 와 `GREV_BENCHMARKQED_*` 에 fallback 됩니다.
-Qwen 계열에서 생각 과정을 끄고 싶으면 GREV_RAGAS_EXTRA_BODY={"chat_template_kwargs":{"enable_thinking":false}} 형태로 넣으면 됩니다.
+`GREV_*_EXTRA_BODY` 는 chat/completions 요청에만 병합됩니다. `GREV_*_EMBEDDINGS_EXTRA_BODY` 는 embeddings 요청에만 병합됩니다.
+Qwen 계열에서 생각 과정을 끄고 싶으면 `GREV_RAGAS_EXTRA_BODY={"chat_template_kwargs":{"enable_thinking":false}}` 형태로 넣으면 됩니다.
 answer_relevancy 같은 metric은 embeddings 설정도 필요합니다.
 
 ## BenchmarkQED 스타일 AutoE용
@@ -32,6 +35,7 @@ answer_relevancy 같은 metric은 embeddings 설정도 필요합니다.
 - GREV_BENCHMARKQED_EMBEDDINGS_MODEL
 - GREV_BENCHMARKQED_EMBEDDINGS_BASE_URL
 - GREV_BENCHMARKQED_EMBEDDINGS_API_KEY
+- GREV_BENCHMARKQED_EMBEDDINGS_EXTRA_BODY
 
 이쪽도 Ragas 평가와 별개로 운영할 수 있습니다.
 마찬가지로 BASE_URL은 `http://<vllm-host>:8000/v1` 같은 OpenAI-compatible endpoint 전체를 넣습니다.

@@ -30,6 +30,16 @@ GraphRAG로 만든 그래프 기반 검색과 생성 결과를 Ragas로 평가�
 
 자세한 실행 예시는 command.md를 보시면 됩니다.
 
+## 설치
+
+이 프로젝트는 Python 3.11 이상을 기준으로 합니다.
+
+- 개발 설치: `pip install -e ".[dev]"`
+- GraphRAG가 별도 설치 환경이면 `pip install graphrag` 도 필요할 수 있습니다.
+- CLI는 설치 후 `grev` 로 실행합니다.
+
+이미 vLLM, MinerU, Chandra 같은 외부 서비스가 따로 있으면 이 저장소에는 추가 GPU 의존성이 없습니다. 이 레포는 그 엔드포인트들을 호출하는 클라이언트 역할입니다.
+
 ## LLM 전환
 
 현재는 OpenAI API를 기본으로 씁니다.
@@ -40,7 +50,19 @@ GraphRAG로 만든 그래프 기반 검색과 생성 결과를 Ragas로 평가�
 전환할 때는 .env.example 기준으로 아래만 바꾸면 됩니다.
 
 - Ragas 평가용: `GREV_RAGAS_PROVIDER`, `GREV_RAGAS_MODEL`, `GREV_RAGAS_BASE_URL`, `GREV_RAGAS_API_KEY`
+- Ragas embeddings: `GREV_RAGAS_EMBEDDINGS_PROVIDER`, `GREV_RAGAS_EMBEDDINGS_MODEL`, `GREV_RAGAS_EMBEDDINGS_BASE_URL`, `GREV_RAGAS_EMBEDDINGS_API_KEY`
 - BenchmarkQED용: `GREV_BENCHMARKQED_PROVIDER`, `GREV_BENCHMARKQED_MODEL`, `GREV_BENCHMARKQED_BASE_URL`, `GREV_BENCHMARKQED_API_KEY`
+- BenchmarkQED embeddings: `GREV_BENCHMARKQED_EMBEDDINGS_PROVIDER`, `GREV_BENCHMARKQED_EMBEDDINGS_MODEL`, `GREV_BENCHMARKQED_EMBEDDINGS_BASE_URL`, `GREV_BENCHMARKQED_EMBEDDINGS_API_KEY`
+
+엔드포인트를 다른 서버로 옮길 때는 아래를 같이 맞추는 게 핵심입니다.
+
+- `MODEL`: 서버가 실제로 서빙하는 모델 이름
+- `BASE_URL`: `/v1` 까지 포함한 OpenAI-compatible 루트 주소
+- `API_KEY`: OpenAI 또는 RunPod / gateway 인증 토큰
+- `EXTRA_BODY`: chat/completions 요청에만 추가되는 JSON 객체
+- `EMBEDDINGS_EXTRA_BODY`: embeddings 요청에만 추가되는 JSON 객체
+
+즉, `messages` 같은 본문 JSON에 `extra_body`가 섞이는 게 아니라, OpenAI client 호출 시 `extra_body` 파라미터로 별도 전달됩니다.
 
 각 영역은 서로 독립적으로 바꿀 수 있습니다. 평가만 vLLM으로 돌리고, BenchmarkQED는 OpenAI로 남겨둘 수도 있습니다.
 

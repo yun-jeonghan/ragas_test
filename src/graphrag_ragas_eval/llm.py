@@ -18,6 +18,7 @@ class LLMRuntimeConfig:
     embeddings_model: str = "text-embedding-3-large"
     embeddings_base_url: str | None = None
     embeddings_api_key: str | None = None
+    embeddings_extra_body: dict[str, Any] | None = None
 
 
 class _CompletionsProxy:
@@ -90,6 +91,17 @@ def load_llm_runtime_config(
             raise ValueError(f"{prefix}_EXTRA_BODY must decode to a JSON object")
         extra_body = parsed
 
+    embeddings_extra_body_raw = get("EMBEDDINGS_EXTRA_BODY") or None
+    embeddings_extra_body = None
+    if embeddings_extra_body_raw:
+        try:
+            parsed = json.loads(embeddings_extra_body_raw)
+        except json.JSONDecodeError as exc:
+            raise ValueError(f"Invalid JSON for {prefix}_EMBEDDINGS_EXTRA_BODY") from exc
+        if not isinstance(parsed, dict):
+            raise ValueError(f"{prefix}_EMBEDDINGS_EXTRA_BODY must decode to a JSON object")
+        embeddings_extra_body = parsed
+
     embeddings_provider = (get("EMBEDDINGS_PROVIDER", provider) or provider).strip().lower()
     embeddings_model = (get("EMBEDDINGS_MODEL", "text-embedding-3-large") or "text-embedding-3-large").strip()
     embeddings_base_url = get("EMBEDDINGS_BASE_URL") or None
@@ -111,6 +123,7 @@ def load_llm_runtime_config(
         embeddings_model=embeddings_model,
         embeddings_base_url=embeddings_base_url,
         embeddings_api_key=embeddings_api_key,
+        embeddings_extra_body=embeddings_extra_body,
     )
 
 
@@ -167,5 +180,17 @@ def build_ragas_embeddings(config: LLMRuntimeConfig | None = None) -> Any:
             base_url=runtime.embeddings_base_url,
             api_key=runtime.embeddings_api_key or runtime.api_key,
         )
+
+    if runtime.embeddings_extra_body:
+        original_create = client.embeddings.create
+
+        async def _create_with_extra_body(**kwargs: Any) -> Any:
+            extra_body = dict(kwargs.pop("extra_body", {}) or {})
+            extra_body.update(runtime.embeddings_extra_body or {})
+            if extra_body:
+                kwargs["extra_body"] = extra_body
+            return await original_create(**kwargs)
+
+        client.embeddings.create = _create_with_extra_body  # type: ignore[method-assign]
 
     return OpenAIEmbeddings(client=client, model=runtime.embeddings_model)
