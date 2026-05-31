@@ -241,11 +241,6 @@ def build_ragas_llm(config: LLMRuntimeConfig | None = None) -> Any:
 def build_ragas_embeddings(config: LLMRuntimeConfig | None = None) -> Any:
     runtime = config or load_llm_runtime_config()
 
-    try:
-        from ragas.embeddings import OpenAIEmbeddings
-    except ImportError as exc:  # pragma: no cover - runtime dependency error path
-        raise RuntimeError("openai or ragas is not installed") from exc
-
     if runtime.embeddings_provider in {"local", "sentence-transformers", "sentence_transformers", "cpu"}:
         query_prefix = runtime.embeddings_query_prefix
         document_prefix = runtime.embeddings_document_prefix
@@ -260,6 +255,11 @@ def build_ragas_embeddings(config: LLMRuntimeConfig | None = None) -> Any:
             document_prefix=document_prefix or "",
             normalize=runtime.embeddings_normalize,
         )
+
+    try:
+        from ragas.embeddings import OpenAIEmbeddings
+    except ImportError as exc:  # pragma: no cover - runtime dependency error path
+        raise RuntimeError("openai or ragas is not installed") from exc
 
     client = _openai_client(runtime.embeddings_base_url, runtime.embeddings_api_key or runtime.api_key)
 
