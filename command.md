@@ -13,6 +13,40 @@
 
 - `.env`에서 기본값은 OpenAI 테스트용입니다.
 
+GPU 서버의 vLLM endpoint를 쓸 때는 `.env`에서 공용 블록만 채워도 됩니다.
+
+- `GREV_VLLM_PROVIDER=vllm`
+- `GREV_VLLM_MODEL=<vllm-model-name>`
+- `GREV_VLLM_BASE_URL=http://<vllm-host>:8000/v1`
+- `GREV_VLLM_API_KEY=vllm`
+- `GREV_VLLM_EXTRA_BODY={"chat_template_kwargs":{"enable_thinking":false}}`
+- `GREV_VLLM_EMBEDDINGS_PROVIDER=vllm`
+- `GREV_VLLM_EMBEDDINGS_MODEL=<embedding-model-name>`
+- `GREV_VLLM_EMBEDDINGS_BASE_URL=http://<vllm-host>:8000/v1`
+- `GREV_VLLM_EMBEDDINGS_API_KEY=vllm`
+
+개별 prefix를 쓰고 싶으면 아래처럼 덮어쓸 수 있습니다.
+
+- `GREV_RAGAS_PROVIDER=vllm`
+- `GREV_RAGAS_MODEL=<vllm-model-name>`
+- `GREV_RAGAS_BASE_URL=http://<vllm-host>:8000/v1`
+- `GREV_RAGAS_API_KEY=vllm`
+- `GREV_BENCHMARKQED_PROVIDER=vllm`
+- `GREV_BENCHMARKQED_MODEL=<vllm-model-name>`
+- `GREV_BENCHMARKQED_BASE_URL=http://<vllm-host>:8000/v1`
+- `GREV_BENCHMARKQED_API_KEY=vllm`
+
+같은 서버에 embeddings 엔드포인트도 같이 열려 있으면 아래도 같은 값으로 맞추면 됩니다.
+
+- `GREV_RAGAS_EMBEDDINGS_PROVIDER=vllm`
+- `GREV_RAGAS_EMBEDDINGS_MODEL=<embedding-model-name>`
+- `GREV_RAGAS_EMBEDDINGS_BASE_URL=http://<vllm-host>:8000/v1`
+- `GREV_RAGAS_EMBEDDINGS_API_KEY=vllm`
+- `GREV_BENCHMARKQED_EMBEDDINGS_PROVIDER=vllm`
+- `GREV_BENCHMARKQED_EMBEDDINGS_MODEL=<embedding-model-name>`
+- `GREV_BENCHMARKQED_EMBEDDINGS_BASE_URL=http://<vllm-host>:8000/v1`
+- `GREV_BENCHMARKQED_EMBEDDINGS_API_KEY=vllm`
+
 - `GREV_RAGAS_PROVIDER=openai`
 - `GREV_RAGAS_MODEL=gpt-4o-mini`
 - `GREV_RAGAS_API_KEY=<your-openai-key>`
@@ -85,6 +119,8 @@ vLLM endpoint를 명시해서 평가:
       --base-url http://127.0.0.1:8000/v1 \
       --api-key vllm \
       --model <vllm-model-name>
+
+`.env`에 이미 위 값들을 넣어두면 `--provider/--base-url/--api-key/--model` 플래그는 생략해도 됩니다.
 
 ## 4. 질문 생성
 

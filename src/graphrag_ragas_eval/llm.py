@@ -59,6 +59,7 @@ def load_llm_runtime_config(
     env: dict[str, str] | None = None,
     *,
     prefix: str = "GREV_RAGAS",
+    shared_prefix: str = "GREV_VLLM",
     fallback_prefix: str = "GREV_LLM",
     default_model: str = "gpt-4o-mini",
 ) -> LLMRuntimeConfig:
@@ -66,6 +67,8 @@ def load_llm_runtime_config(
 
     def get(name: str, default: str | None = None) -> str | None:
         value = source.get(f"{prefix}_{name}")
+        if value is None and shared_prefix:
+            value = source.get(f"{shared_prefix}_{name}")
         if value is None and fallback_prefix:
             value = source.get(f"{fallback_prefix}_{name}")
         if value is None:
