@@ -75,6 +75,17 @@
 
 - 질문 타입에 맞는 local/global 모드를 골랐는지
 
+## KG correctness / MINE 스타일 평가
+
+### correctness
+
+- retrieved context가 reference answer를 실제로 지지하는지 본다
+- MINE 스타일의 binary judge다
+- 문장 품질보다 정답 근거 포함 여부를 더 직접적으로 본다
+
+이 프레임워크는 `grev kg-correctness evaluate` 로 실행한다.
+결과는 sample별 0/1 판정과 aggregate accuracy로 요약된다.
+
 ## 질문 자동 생성
 
 가능하다.
@@ -93,4 +104,3 @@
 
 중요한 점은 자동 생성 질문도 사람이 한 번은 샘플링해서 검수해야 한다는 것이다.
 자동 생성만 믿으면 질문이 너무 쉬워지거나, 정답 라벨이 애매해질 수 있다.
-

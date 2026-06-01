@@ -40,6 +40,20 @@ CPU 로컬 embedding 테스트를 하려면 `GREV_*_EMBEDDINGS_PROVIDER=local` �
 - `GREV_*_EMBEDDINGS_MAX_SEQ_LENGTH`: 로컬 임베딩의 입력 길이 상한. 이 저장소의 기본값은 128이다.
 Ragas와 BenchmarkQED 둘 다 같은 방식으로 쓸 수 있습니다.
 
+## KG correctness / MINE 스타일 판정용
+
+- GREV_KGCORRECTNESS_PROVIDER
+- GREV_KGCORRECTNESS_MODEL
+- GREV_KGCORRECTNESS_BASE_URL
+- GREV_KGCORRECTNESS_API_KEY
+- GREV_KGCORRECTNESS_EXTRA_BODY
+- GREV_KGCORRECTNESS_MAX_TOKENS
+
+이쪽은 retrieved context가 reference answer를 지지하는지 binary로 판정하는 judge입니다.
+기본값은 Ragas / BenchmarkQED와 같은 로컬 Ollama 계열을 따릅니다.
+`GREV_KGCORRECTNESS_EXTRA_BODY` 역시 chat/completions 요청에만 병합됩니다.
+`GREV_KGCORRECTNESS_MAX_TOKENS` 도 기본값이 256이라서 짧게 판정만 하도록 둡니다.
+
 ## BenchmarkQED 스타일 AutoE용
 
 - GREV_BENCHMARKQED_PROVIDER
@@ -61,7 +75,8 @@ Qwen 계열 생각 끄기는 GREV_BENCHMARKQED_EXTRA_BODY={"chat_template_kwargs
 ## 호환성
 
 - 예전 설정값 GREV_LLM_* 은 더 이상 읽지 않습니다.
-- 새로 시작하는 경우에는 GREV_RAGAS_* 와 GREV_BENCHMARKQED_* 만 쓰는 편이 좋습니다.
+- 새로 시작하는 경우에는 GREV_RAGAS_* 와 GREV_BENCHMARKQED_*,
+  그리고 필요하면 GREV_KGCORRECTNESS_* 만 쓰는 편이 좋습니다.
 
 ## PDF 추출
 
