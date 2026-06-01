@@ -16,12 +16,15 @@ BenchmarkQED는 RAG 벤치마크를 자동화하는 도구 묶음이다.
 - local, global, multi-hop, unanswerable 질문을 만든다.
 - 문서 레포 또는 AutoD 결과를 입력으로 받는다.
 - benchmark 레포에 저장할 질문 JSON을 생성한다.
+- 스모크 테스트는 `--num-questions 1 --modes local` 이 가장 가볍다.
 
 ### AutoE
 
 - 질문과 답변을 비교해서 점수를 매긴다.
 - 현재 구현은 reference-based Ragas 평가를 AutoE 스타일로 제공한다.
 - answers JSON과 benchmark JSON을 파일 경계로 연결한다.
+- 이 저장소는 metric 객체를 샘플마다 새로 만들지 않고 한 번만 구성한다.
+- CLI에서 `--metrics context_precision` 처럼 줄일 수 있다.
 
 ## 서브 레포 관점
 

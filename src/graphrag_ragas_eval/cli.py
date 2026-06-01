@@ -18,11 +18,13 @@ from .graphrag_runner import ingest_and_index_documents
 from .llm import build_ragas_embeddings, build_ragas_llm, load_llm_runtime_config
 from .ontology_handler import materialize_graph_rag_prompts
 from .post_processor import split_long_nodes_and_append_edges
+from .reporting import render_smoke_report
 from .schemas import GraphRAGTableSet
 
 app = typer.Typer(no_args_is_help=True, add_completion=False)
 graphrag_app = typer.Typer(no_args_is_help=True, add_completion=False)
 benchmark_qed_app = typer.Typer(no_args_is_help=True, add_completion=False)
+report_app = typer.Typer(no_args_is_help=True, add_completion=False)
 
 
 def _build_pdf_policy(pdf_mode: str | None = None) -> PdfExtractionPolicy:
@@ -232,8 +234,20 @@ def benchmark_qed_autoe(
     model: str | None = typer.Option(None, help="평가용 LLM 모델"),
     base_url: str | None = typer.Option(None, help="OpenAI-compatible endpoint, vLLM용"),
     api_key: str | None = typer.Option(None, help="OpenAI 또는 vLLM API key"),
+    metrics: list[str] = typer.Option(list(DEFAULT_RAGAS_METRICS), help="평가할 metric 이름"),
 ) -> None:
-    run = evaluate_answers(AutoEPlan(benchmark=benchmark, search_results=search_results, output=output, provider=provider, model=model, base_url=base_url, api_key=api_key))
+    run = evaluate_answers(
+        AutoEPlan(
+            benchmark=benchmark,
+            search_results=search_results,
+            output=output,
+            provider=provider,
+            model=model,
+            base_url=base_url,
+            api_key=api_key,
+            metrics=tuple(metrics),
+        )
+    )
     typer.echo(f"wrote AutoE evaluation to {output}")
     typer.echo(f"aggregate: {run.aggregate()}")
 
@@ -282,6 +296,55 @@ def init(root: Path = typer.Option(Path.cwd(), file_okay=False, dir_okay=True)) 
     typer.echo(f"reports: {paths.reports}")
 
 
+@report_app.command("smoke")
+def report_smoke(
+    evaluation: Path = typer.Option(
+        Path("data/results/sample_evaluation.json"),
+        exists=True,
+        file_okay=True,
+        dir_okay=False,
+        help="Ragas evaluation JSON",
+    ),
+    generated_questions: Path | None = typer.Option(
+        None,
+        exists=True,
+        file_okay=True,
+        dir_okay=False,
+        help="Generated questions JSON",
+    ),
+    autod_summary: Path | None = typer.Option(
+        None,
+        exists=True,
+        file_okay=True,
+        dir_okay=False,
+        help="AutoD summary JSON",
+    ),
+    autoq_questions: Path | None = typer.Option(
+        None,
+        exists=True,
+        file_okay=True,
+        dir_okay=False,
+        help="AutoQ questions JSON",
+    ),
+    output: Path = typer.Option(
+        Path("reports/pdf-smoke-test-report.html"),
+        file_okay=True,
+        dir_okay=False,
+        help="HTML report output path",
+    ),
+    title: str = typer.Option("GraphRAG + Ragas Smoke Report", help="Report title"),
+) -> None:
+    render_smoke_report(
+        evaluation=evaluation,
+        output=output,
+        generated_questions=generated_questions,
+        autod_summary=autod_summary,
+        autoq_questions=autoq_questions,
+        title=title,
+    )
+    typer.echo(f"wrote smoke report to {output}")
+
+
 @app.callback()
 def _main() -> None:
     pass
@@ -289,3 +352,4 @@ def _main() -> None:
 
 app.add_typer(graphrag_app, name="graphrag")
 app.add_typer(benchmark_qed_app, name="benchmark-qed")
+app.add_typer(report_app, name="report")

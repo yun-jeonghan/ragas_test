@@ -115,6 +115,7 @@ def test_cpu_local_embeddings_and_llm_runtime(monkeypatch) -> None:
 
     asyncio.run(fake_client.chat.completions.create(messages=[{"role": "user", "content": "hi"}]))
     assert captured["kwargs"]["extra_body"] == {"reasoning": {"effort": "low"}}
+    assert captured["kwargs"]["max_tokens"] == 256
 
 
 def test_cpu_index_and_evaluate_smoke(monkeypatch, tmp_path: Path) -> None:
@@ -185,24 +186,46 @@ def test_cpu_index_and_evaluate_smoke(monkeypatch, tmp_path: Path) -> None:
         "split_long_nodes_and_append_edges",
     ]
 
-    sample = BenchmarkSample(
-        sample_id="q1",
-        question="Who is Scrooge?",
-        query_type="local",
-        search_mode=SearchMode.LOCAL,
-        reference_answer="Scrooge is a miser.",
-        reference_contexts=("Scrooge is a miser.",),
-    )
-    search_result = GraphRAGSearchResult(
-        sample_id="q1",
-        question="Who is Scrooge?",
-        search_mode=SearchMode.LOCAL,
-        answer="Scrooge is a miser.",
-        retrieved_contexts=(
-            RetrievedContext(text="Scrooge is a miser.", source="sample.txt", score=1.0),
+    samples = [
+        BenchmarkSample(
+            sample_id="q1",
+            question="Who is Scrooge?",
+            query_type="local",
+            search_mode=SearchMode.LOCAL,
+            reference_answer="Scrooge is a miser.",
+            reference_contexts=("Scrooge is a miser.",),
         ),
-        citations=("sample.txt",),
-    )
+        BenchmarkSample(
+            sample_id="q2",
+            question="What is Scrooge like?",
+            query_type="local",
+            search_mode=SearchMode.LOCAL,
+            reference_answer="Scrooge is a miser.",
+            reference_contexts=("Scrooge is a miser.",),
+        ),
+    ]
+    search_results = [
+        GraphRAGSearchResult(
+            sample_id="q1",
+            question="Who is Scrooge?",
+            search_mode=SearchMode.LOCAL,
+            answer="Scrooge is a miser.",
+            retrieved_contexts=(
+                RetrievedContext(text="Scrooge is a miser.", source="sample.txt", score=1.0),
+            ),
+            citations=("sample.txt",),
+        ),
+        GraphRAGSearchResult(
+            sample_id="q2",
+            question="What is Scrooge like?",
+            search_mode=SearchMode.LOCAL,
+            answer="Scrooge is a miser.",
+            retrieved_contexts=(
+                RetrievedContext(text="Scrooge is a miser.", source="sample.txt", score=1.0),
+            ),
+            citations=("sample.txt",),
+        ),
+    ]
 
     metric_instances: list[object] = []
 
@@ -223,8 +246,9 @@ def test_cpu_index_and_evaluate_smoke(monkeypatch, tmp_path: Path) -> None:
     )
 
     runner = RagasRunner(llm="cpu-llm", embeddings="cpu-embeddings", metrics=("faithfulness",))
-    run = runner.evaluate_results([sample], [search_result])
+    run = runner.evaluate_results(samples, search_results)
 
     assert run.aggregate() == {"faithfulness": 0.5}
     assert metric_instances[0].llm == "cpu-llm"
     assert metric_instances[0].embeddings == "cpu-embeddings"
+    assert len(metric_instances) == 1

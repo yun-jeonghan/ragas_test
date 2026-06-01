@@ -27,6 +27,7 @@ GraphRAG로 만든 그래프 기반 검색과 생성 결과를 Ragas로 평가�
 - grev evaluate - 저장된 검색 결과를 Ragas로 평가
 - grev generate-questions - 문서에서 평가 질문 생성
 - grev benchmark-qed autod/autoq/autoe - BenchmarkQED 스타일 흐름
+- grev report smoke - JSON 결과를 HTML 리포트로 렌더링
 
 자세한 실행 예시는 command.md를 보시면 됩니다.
 
@@ -99,7 +100,7 @@ GraphRAG로 만든 그래프 기반 검색과 생성 결과를 Ragas로 평가�
 - Ragas embeddings: `GREV_RAGAS_EMBEDDINGS_PROVIDER`, `GREV_RAGAS_EMBEDDINGS_MODEL`, `GREV_RAGAS_EMBEDDINGS_BASE_URL`, `GREV_RAGAS_EMBEDDINGS_API_KEY`
 - BenchmarkQED LLM: `GREV_BENCHMARKQED_PROVIDER`, `GREV_BENCHMARKQED_MODEL`, `GREV_BENCHMARKQED_BASE_URL`, `GREV_BENCHMARKQED_API_KEY`
 - BenchmarkQED embeddings: `GREV_BENCHMARKQED_EMBEDDINGS_PROVIDER`, `GREV_BENCHMARKQED_EMBEDDINGS_MODEL`, `GREV_BENCHMARKQED_EMBEDDINGS_BASE_URL`, `GREV_BENCHMARKQED_EMBEDDINGS_API_KEY`
-- 공용 vLLM 블록을 쓰면 `GREV_VLLM_*` 만 바꿔서 두 경로에 같이 먹일 수 있습니다.
+- 같은 GPU 서버를 공유하더라도 각 prefix에 값을 복사해서 넣는 방식으로 맞춥니다.
 - Qwen 생각 끄기 같은 추가 옵션은 `GREV_*_EXTRA_BODY` 또는 `GREV_*_EMBEDDINGS_EXTRA_BODY` 로 넣습니다.
 
 CPU 테스트를 할 때는 이렇게 생각하면 됩니다.
@@ -107,6 +108,7 @@ CPU 테스트를 할 때는 이렇게 생각하면 됩니다.
 - LLM: Ollama나 vLLM CPU처럼 OpenAI-compatible 서버가 있으면 `GREV_RAGAS_BASE_URL` 만 로컬 주소로 바꿉니다.
 - embeddings: `GREV_RAGAS_EMBEDDINGS_PROVIDER=local` 로 두고 `GREV_RAGAS_EMBEDDINGS_MODEL=intfloat/multilingual-e5-small`, `GREV_RAGAS_EMBEDDINGS_DEVICE=cpu` 를 넣습니다. BenchmarkQED도 같은 방식으로 `GREV_BENCHMARKQED_EMBEDDINGS_PROVIDER=local` 을 쓰면 됩니다.
 - E5 계열은 기본으로 `query: ` / `passage: ` 접두사를 자동으로 붙입니다. 필요하면 `GREV_*_EMBEDDINGS_QUERY_PREFIX`, `GREV_*_EMBEDDINGS_DOCUMENT_PREFIX` 로 덮어쓸 수 있습니다.
+- 스모크를 안정적으로 돌리려면 `GREV_*_MAX_TOKENS=256`, `GREV_*_EMBEDDINGS_MAX_SEQ_LENGTH=128` 을 권장합니다.
 
 PDF 쪽은 다음만 바꾸면 됩니다.
 
@@ -118,7 +120,7 @@ PDF 쪽은 다음만 바꾸면 됩니다.
 
 ### 최소 `.env` 템플릿
 
-아래 값만 채우면 가장 먼저 돌아가는 구성이 됩니다. 나머지는 `GREV_VLLM_*` 공용 블록이나 `EXTRA_BODY`만 필요할 때 추가하세요.
+아래 값만 채우면 가장 먼저 돌아가는 구성이 됩니다. 나머지는 `EXTRA_BODY`만 필요할 때 추가하세요.
 
 ```env
 # Ragas LLM
@@ -126,24 +128,28 @@ GREV_RAGAS_PROVIDER=vllm
 GREV_RAGAS_MODEL=your-llm-model-name
 GREV_RAGAS_BASE_URL=http://your-host:8000/v1
 GREV_RAGAS_API_KEY=vllm
+GREV_RAGAS_MAX_TOKENS=256
 
 # Ragas embeddings
 GREV_RAGAS_EMBEDDINGS_PROVIDER=vllm
 GREV_RAGAS_EMBEDDINGS_MODEL=your-embedding-model-name
 GREV_RAGAS_EMBEDDINGS_BASE_URL=http://your-host:8001/v1
 GREV_RAGAS_EMBEDDINGS_API_KEY=vllm
+GREV_RAGAS_EMBEDDINGS_MAX_SEQ_LENGTH=128
 
 # BenchmarkQED LLM
 GREV_BENCHMARKQED_PROVIDER=vllm
 GREV_BENCHMARKQED_MODEL=your-llm-model-name
 GREV_BENCHMARKQED_BASE_URL=http://your-host:8000/v1
 GREV_BENCHMARKQED_API_KEY=vllm
+GREV_BENCHMARKQED_MAX_TOKENS=256
 
 # BenchmarkQED embeddings
 GREV_BENCHMARKQED_EMBEDDINGS_PROVIDER=vllm
 GREV_BENCHMARKQED_EMBEDDINGS_MODEL=your-embedding-model-name
 GREV_BENCHMARKQED_EMBEDDINGS_BASE_URL=http://your-host:8001/v1
 GREV_BENCHMARKQED_EMBEDDINGS_API_KEY=vllm
+GREV_BENCHMARKQED_EMBEDDINGS_MAX_SEQ_LENGTH=128
 
 # PDF extraction
 GREV_PDF_EXTRACTOR_MODE=chandra_only

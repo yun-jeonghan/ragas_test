@@ -126,7 +126,7 @@ LLM provider selection and Ragas client construction.
 
 Responsibilities:
 
-- Read GREV_RAGAS_* settings first, with GREV_LLM_* fallback for compatibility.
+- Read GREV_RAGAS_* settings directly.
 - Build an OpenAI-compatible client for Ragas.
 - Keep the provider swap isolated to one file.
 

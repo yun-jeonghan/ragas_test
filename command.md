@@ -13,17 +13,28 @@
 
 - `.env`에서 기본값은 로컬 Ollama 테스트용입니다.
 
-GPU 서버의 vLLM endpoint를 쓸 때는 `.env`에서 공용 블록만 채워도 됩니다.
+GPU 서버의 vLLM endpoint를 쓸 때는 Ragas와 BenchmarkQED 값을 각각 맞춰 넣습니다.
 
-- `GREV_VLLM_PROVIDER=vllm`
-- `GREV_VLLM_MODEL=<vllm-model-name>`
-- `GREV_VLLM_BASE_URL=http://<vllm-host>:8000/v1`
-- `GREV_VLLM_API_KEY=vllm`
-- `GREV_VLLM_EXTRA_BODY={"chat_template_kwargs":{"enable_thinking":false}}`
-- `GREV_VLLM_EMBEDDINGS_PROVIDER=vllm`
-- `GREV_VLLM_EMBEDDINGS_MODEL=<embedding-model-name>`
-- `GREV_VLLM_EMBEDDINGS_BASE_URL=http://<vllm-host>:8000/v1`
-- `GREV_VLLM_EMBEDDINGS_API_KEY=vllm`
+- `GREV_RAGAS_PROVIDER=vllm`
+- `GREV_RAGAS_MODEL=<vllm-model-name>`
+- `GREV_RAGAS_BASE_URL=http://<vllm-host>:8000/v1`
+- `GREV_RAGAS_API_KEY=vllm`
+- `GREV_RAGAS_MAX_TOKENS=256`
+- `GREV_RAGAS_EMBEDDINGS_PROVIDER=vllm`
+- `GREV_RAGAS_EMBEDDINGS_MODEL=<embedding-model-name>`
+- `GREV_RAGAS_EMBEDDINGS_BASE_URL=http://<vllm-host>:8000/v1`
+- `GREV_RAGAS_EMBEDDINGS_API_KEY=vllm`
+- `GREV_RAGAS_EMBEDDINGS_MAX_SEQ_LENGTH=128`
+- `GREV_BENCHMARKQED_PROVIDER=vllm`
+- `GREV_BENCHMARKQED_MODEL=<vllm-model-name>`
+- `GREV_BENCHMARKQED_BASE_URL=http://<vllm-host>:8000/v1`
+- `GREV_BENCHMARKQED_API_KEY=vllm`
+- `GREV_BENCHMARKQED_MAX_TOKENS=256`
+- `GREV_BENCHMARKQED_EMBEDDINGS_PROVIDER=vllm`
+- `GREV_BENCHMARKQED_EMBEDDINGS_MODEL=<embedding-model-name>`
+- `GREV_BENCHMARKQED_EMBEDDINGS_BASE_URL=http://<vllm-host>:8000/v1`
+- `GREV_BENCHMARKQED_EMBEDDINGS_API_KEY=vllm`
+- `GREV_BENCHMARKQED_EMBEDDINGS_MAX_SEQ_LENGTH=128`
 
 PDF 추출 모드도 `.env`에서 바로 고를 수 있습니다.
 
@@ -42,10 +53,12 @@ MinerU 하이브리드로 갈 때는:
 - `GREV_RAGAS_MODEL=<vllm-model-name>`
 - `GREV_RAGAS_BASE_URL=http://<vllm-host>:8000/v1`
 - `GREV_RAGAS_API_KEY=vllm`
+- `GREV_RAGAS_MAX_TOKENS=256`
 - `GREV_BENCHMARKQED_PROVIDER=vllm`
 - `GREV_BENCHMARKQED_MODEL=<vllm-model-name>`
 - `GREV_BENCHMARKQED_BASE_URL=http://<vllm-host>:8000/v1`
 - `GREV_BENCHMARKQED_API_KEY=vllm`
+- `GREV_BENCHMARKQED_MAX_TOKENS=256`
 
 같은 서버에 embeddings 엔드포인트도 같이 열려 있으면 아래도 같은 값으로 맞추면 됩니다.
 
@@ -108,6 +121,13 @@ MinerU 하이브리드 모드로 돌리려면:
     grev graphrag init --source examples/sample_docs --workspace-root workspaces/graphrag --force
     grev graphrag index --source examples/sample_docs --workspace-root workspaces/graphrag
 
+초소형 스모크를 하려면 질문 수와 메트릭 수를 줄입니다.
+
+    grev generate-questions --source examples/sample_docs --output data/benchmarks/generated_questions.json --num-questions 1 --modes local
+    grev benchmark-qed autod --source examples/sample_docs --output data/benchmark-qed/autod-summary.json --target-size 1
+    grev benchmark-qed autoq --source examples/sample_docs --output data/benchmark-qed/autoq-questions.json --num-questions 1 --modes local
+    grev benchmark-qed autoe --benchmark data/benchmarks/sample_benchmark.json --search-results data/results/sample_search_results.json --output data/benchmark-qed/autoe-evaluation.json --metrics context_precision
+
 사용자 온톨로지와 후처리를 함께 쓰려면:
 
     grev graphrag index +      --source examples/sample_docs +      --workspace-root workspaces/graphrag +      --ontology-path workspaces/graphrag/config/user_ontology.json +      --postprocess +      --description-limit 200
@@ -141,30 +161,31 @@ vLLM endpoint를 명시해서 평가:
       --model <vllm-model-name>
 
 `.env`에 이미 위 값들을 넣어두면 `--provider/--base-url/--api-key/--model` 플래그는 생략해도 됩니다.
+스모크에서는 `--metrics context_precision` 같이 1개만 주는 편이 가장 가볍습니다.
 
 ## 4. 질문 생성
 
 문서에서 평가 질문을 만들기:
 
-    grev generate-questions --source examples/sample_docs --output data/benchmarks/generated_questions.json --num-questions 10 --modes local global
+    grev generate-questions --source examples/sample_docs --output data/benchmarks/generated_questions.json --num-questions 1 --modes local
 
 multi-hop, unanswerable도 포함하려면:
 
-    grev generate-questions --source examples/sample_docs --output data/benchmarks/generated_questions.json --num-questions 10 --modes local global multi-hop unanswerable
+    grev generate-questions --source examples/sample_docs --output data/benchmarks/generated_questions.json --num-questions 4 --modes local global multi-hop unanswerable
 
 ## 5. BenchmarkQED 스타일 명령
 
 AutoD 요약:
 
-    grev benchmark-qed autod --source examples/sample_docs --output data/benchmark-qed/autod-summary.json
+    grev benchmark-qed autod --source examples/sample_docs --output data/benchmark-qed/autod-summary.json --target-size 1
 
 AutoQ 질문 생성:
 
-    grev benchmark-qed autoq --source examples/sample_docs --output data/benchmark-qed/autoq-questions.json --num-questions 10 --modes local global
+    grev benchmark-qed autoq --source examples/sample_docs --output data/benchmark-qed/autoq-questions.json --num-questions 1 --modes local
 
 AutoE 평가:
 
-    grev benchmark-qed autoe --benchmark data/benchmarks/sample_benchmark.json --search-results data/results/sample_search_results.json --output data/benchmark-qed/autoe-evaluation.json
+    grev benchmark-qed autoe --benchmark data/benchmarks/sample_benchmark.json --search-results data/results/sample_search_results.json --output data/benchmark-qed/autoe-evaluation.json --metrics context_precision
 
 ## 5. 문법 확인
 

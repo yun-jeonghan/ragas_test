@@ -14,6 +14,7 @@
 - 입력은 문서 파일 또는 문서 디렉터리다.
 - 출력은 JSON 파일이다.
 - local, global, multi-hop, unanswerable 모드를 지원한다.
+- 스모크 테스트는 `--num-questions 1 --modes local` 조합이 가장 빠르다.
 
 ## 모드 설명
 
@@ -48,3 +49,6 @@ questions 배열의 각 항목은 benchmark sample 스키마와 동일한 필드
 2. 생성된 JSON을 benchmark 레포에 커밋한다.
 3. 평가 레포에서 grev evaluate로 측정한다.
 
+빠른 회귀 확인만 필요하면 아래처럼 최소값으로도 충분하다.
+
+- `grev generate-questions --source examples/sample_docs --output data/benchmarks/generated_questions.json --num-questions 1 --modes local`

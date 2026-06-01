@@ -5,7 +5,7 @@ import inspect
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Callable, Iterable, Sequence
+from typing import Any, Callable, Sequence
 
 from ..schemas import BenchmarkSample, EvaluationScore, GraphRAGSearchResult, RetrievedContext
 
@@ -66,12 +66,6 @@ class EvaluationRun:
     def write_json(self, path: Path) -> None:
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps(self.to_dict(), ensure_ascii=False, indent=2), encoding="utf-8")
-
-
-def _to_async(value: Any) -> Any:
-    if inspect.isawaitable(value):
-        return value
-    return value
 
 
 def _context_texts(contexts: Sequence[RetrievedContext]) -> list[str]:
@@ -164,8 +158,12 @@ class RagasRunner:
             metric_objects.append(_try_instantiate_metric(metric_cls, self.llm, self.embeddings))
         return tuple(metric_objects)
 
-    async def aevaluate_sample(self, sample: BenchmarkSample, result: GraphRAGSearchResult) -> list[EvaluationScore]:
-        metric_objects = self.build_metric_objects()
+    async def aevaluate_sample(
+        self,
+        sample: BenchmarkSample,
+        result: GraphRAGSearchResult,
+        metric_objects: Sequence[Any],
+    ) -> list[EvaluationScore]:
         payload = _metric_kwargs(sample, result)
         scores: list[EvaluationScore] = []
         for metric_name, metric in zip(self.metrics, metric_objects, strict=True):
@@ -193,13 +191,14 @@ class RagasRunner:
         by_sample_id = {result.sample_id: result for result in search_results}
         all_scores: list[EvaluationScore] = []
         ordered_results: list[GraphRAGSearchResult] = []
+        metric_objects = self.build_metric_objects()
         for sample in samples:
             try:
                 result = by_sample_id[sample.sample_id]
             except KeyError as exc:
                 raise KeyError(f"Missing search result for sample_id={sample.sample_id}") from exc
             ordered_results.append(result)
-            all_scores.extend(await self.aevaluate_sample(sample, result))
+            all_scores.extend(await self.aevaluate_sample(sample, result, metric_objects))
         return EvaluationRun(scores=tuple(all_scores), results=tuple(ordered_results))
 
     def evaluate_results(

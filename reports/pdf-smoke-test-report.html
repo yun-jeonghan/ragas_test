@@ -3,19 +3,19 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>GraphRAG + Ragas PDF Smoke Test Report</title>
+  <title>GraphRAG + Ragas TXT Smoke Report</title>
   <style>
     :root {
       color-scheme: light;
-      --bg: #f6f7fb;
-      --panel: #ffffff;
+      --bg: #f5f7fb;
+      --panel: rgba(255,255,255,0.95);
       --text: #172033;
       --muted: #5f6b85;
-      --accent: #2357ff;
+      --accent: #2457ff;
       --accent-soft: #e8efff;
       --border: #d9e0ef;
       --good: #0f8a52;
-      --shadow: 0 10px 30px rgba(31, 41, 55, 0.08);
+      --shadow: 0 12px 36px rgba(31, 41, 55, 0.08);
     }
     * { box-sizing: border-box; }
     body {
@@ -26,23 +26,18 @@
       line-height: 1.55;
     }
     .wrap {
-      max-width: 1100px;
+      max-width: 1180px;
       margin: 0 auto;
       padding: 40px 20px 64px;
     }
-    header {
-      background: rgba(255,255,255,0.92);
+    header.hero {
+      background: var(--panel);
       border: 1px solid var(--border);
       border-radius: 24px;
       padding: 28px;
       box-shadow: var(--shadow);
-      backdrop-filter: blur(8px);
     }
-    h1 {
-      margin: 0 0 8px;
-      font-size: 2rem;
-      line-height: 1.15;
-    }
+    h1 { margin: 0 0 8px; font-size: clamp(2rem, 4vw, 3rem); line-height: 1.1; }
     .subtitle { color: var(--muted); margin: 0; }
     .chips { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
     .chip {
@@ -54,26 +49,19 @@
       background: var(--accent-soft);
       color: var(--accent);
       font-size: 0.92rem;
-      font-weight: 600;
+      font-weight: 700;
     }
     main { margin-top: 22px; display: grid; gap: 18px; }
-    section, article {
-      background: rgba(255,255,255,0.94);
+    section, article.panel {
+      background: var(--panel);
       border: 1px solid var(--border);
       border-radius: 20px;
       padding: 22px;
       box-shadow: var(--shadow);
     }
-    h2 {
-      margin: 0 0 14px;
-      font-size: 1.25rem;
-    }
-    h3 {
-      margin: 20px 0 10px;
-      font-size: 1.02rem;
-    }
-    ul { margin: 0; padding-left: 20px; }
-    li { margin: 6px 0; }
+    h2 { margin: 0 0 14px; font-size: 1.25rem; }
+    h3 { margin: 0 0 10px; font-size: 1.02rem; }
+    h4 { margin: 0 0 8px; font-size: 0.98rem; }
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -85,9 +73,15 @@
       border-radius: 16px;
       padding: 16px;
     }
-    .metric .label { color: var(--muted); font-size: 0.92rem; }
-    .metric .value { font-size: 1.7rem; font-weight: 800; margin-top: 4px; }
-    .metric .hint { color: var(--good); font-size: 0.9rem; margin-top: 6px; }
+    .metric .label { color: var(--muted); font-size: 0.9rem; }
+    .metric .value { font-size: 1.7rem; font-weight: 900; margin-top: 4px; }
+    .note {
+      border-left: 4px solid var(--accent);
+      background: #f5f8ff;
+      padding: 14px 16px;
+      border-radius: 12px;
+      color: #2b3550;
+    }
     .table {
       width: 100%;
       border-collapse: collapse;
@@ -123,158 +117,230 @@
       padding: 0.15em 0.35em;
       border-radius: 6px;
     }
-    .note {
-      border-left: 4px solid var(--accent);
-      background: #f5f8ff;
-      padding: 14px 16px;
-      border-radius: 12px;
-      color: #2b3550;
-    }
     .small { color: var(--muted); font-size: 0.92rem; }
-    .artifacts a { color: var(--accent); text-decoration: none; }
-    .artifacts a:hover { text-decoration: underline; }
+    .result-card {
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 18px;
+      background: #fff;
+      box-shadow: 0 8px 24px rgba(31, 41, 55, 0.04);
+    }
+    .result-card + .result-card { margin-top: 14px; }
+    .qa {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 10px;
+      margin: 14px 0;
+    }
+    .qa div {
+      background: #f8faff;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px;
+    }
+    .qa span { display: block; color: var(--muted); font-size: 0.84rem; }
+    .qa strong { display: block; margin-top: 4px; }
+    footer { color: var(--muted); font-size: 0.9rem; text-align: center; margin-top: 24px; }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <header>
-      <h1>GraphRAG + Ragas PDF Smoke Test Report</h1>
-      <p class="subtitle">GraphRAG로 인덱싱한 PDF 결과를 Ragas로 평가한 소규모 smoke test 보고서</p>
+    <header class="hero">
+      <h1>GraphRAG + Ragas TXT Smoke Report</h1>
+      <p class="subtitle">TXT-only smoke, question generation, AutoD/AutoQ, and Ragas AutoE results in one page.</p>
       <div class="chips">
-        <span class="chip">date: 2026-05-29</span>
-        <span class="chip">scope: 1 PDF</span>
-        <span class="chip">queries: local + global</span>
-        <span class="chip">metrics: context_precision, faithfulness</span>
+        <span class="chip">generated: 2026-06-01 16:58 UTC</span>
+        <span class="chip">scores: 1</span>
+        <span class="chip">results: 1</span>
+        <span class="chip">aggregate metrics: 1</span>
       </div>
     </header>
 
     <main>
       <section>
-        <h2>요약</h2>
+        <h2>Summary</h2>
         <p>
-          이 보고서는 <code>sample.pdf</code>를 GraphRAG에 인덱싱한 뒤, local/global 질의를 실행하고
-          그 <strong>GraphRAG 검색 결과</strong>를 Ragas로 평가한 smoke test 결과를 정리한 것이다.
+          This report captures the smoke path that succeeded with
+          <code>examples/sample_docs/scrooge.txt</code>, then evaluates the saved search result JSON with Ragas.
         </p>
         <div class="note">
-          결론적으로, 평가 대상은 일반 텍스트가 아니라 <strong>GraphRAG가 반환한 검색 결과와 답변</strong>이었다.
+          The AutoE run completed with <strong>context_precision = 1</strong>.
         </div>
       </section>
 
       <section>
-        <h2>실행 범위</h2>
-        <ul>
-          <li>입력 문서: <code>/tmp/graphrag-smoke/input/sample.pdf</code></li>
-          <li>GraphRAG workspace: <code>/tmp/graphrag-smoke/workspace</code></li>
-          <li>local query: <code>Where does Bob work?</code></li>
-          <li>global query: <code>Summarize the workplace relationships described in the document.</code></li>
-          <li>평가 파일: <code>/tmp/graphrag-smoke/eval_quick.json</code></li>
-        </ul>
-      </section>
-
-      <section>
-        <h2>핵심 결과</h2>
+        <h2>Aggregate Metrics</h2>
         <div class="grid">
-          <div class="metric">
-            <div class="label">aggregate context_precision</div>
-            <div class="value">0.999999999925</div>
-            <div class="hint">거의 완전한 컨텍스트 정밀도</div>
-          </div>
-          <div class="metric">
-            <div class="label">aggregate faithfulness</div>
-            <div class="value">1.0</div>
-            <div class="hint">답변이 컨텍스트에 충실함</div>
-          </div>
+          
+            <article class="metric">
+              <div class="label">context_precision</div>
+              <div class="value">1</div>
+            </article>
+            
         </div>
+      </section>
 
-        <h3>샘플별 점수</h3>
+      <section>
+        <h2>Scores</h2>
         <table class="table">
           <thead>
             <tr>
               <th>sample_id</th>
-              <th>query</th>
               <th>metric</th>
               <th>value</th>
+              <th>question</th>
+              <th>search mode</th>
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>local-1</td>
-              <td>Where does Bob work?</td>
-              <td>context_precision</td>
-              <td>0.99999999995</td>
-            </tr>
-            <tr>
-              <td>local-1</td>
-              <td>Where does Bob work?</td>
-              <td>faithfulness</td>
-              <td>1.0</td>
-            </tr>
-            <tr>
-              <td>global-1</td>
-              <td>Summarize the workplace relationships described in the document.</td>
-              <td>context_precision</td>
-              <td>0.9999999999</td>
-            </tr>
-            <tr>
-              <td>global-1</td>
-              <td>Summarize the workplace relationships described in the document.</td>
-              <td>faithfulness</td>
-              <td>1.0</td>
-            </tr>
+            
+      <tr>
+        <td>scrooge-1</td>
+        <td>context_precision</td>
+        <td>1</td>
+        <td>Who is Scrooge?</td>
+        <td>local</td>
+      </tr>
+    
           </tbody>
         </table>
       </section>
 
       <section>
-        <h2>GraphRAG 검색 결과가 어떻게 평가됐는가</h2>
-        <p class="small">
-          아래 retrieved contexts는 GraphRAG가 실제로 반환한 컨텍스트다. Ragas는 이 검색 결과를 기반으로 점수를 계산했다.
-        </p>
-
-        <article>
-          <h3>local-1</h3>
-          <p><strong>Q.</strong> Where does Bob work?</p>
-          <p><strong>A.</strong> Bob is employed by Fabrikam, and the location of his work is Busan.</p>
-          <p><strong>retrieved_contexts</strong></p>
-          <pre>[
-  {"text":"Sample PDF for GraphRAG smoke test. Alice works at Contoso in Seoul. Bob works at Fabrikam in Busan. Alice and Bob collaborate on knowledge graph evaluation.","source":"sample.pdf","score":1.0},
-  {"text":"Bob works at Fabrikam as an employee","source":"entity:BOB","score":0.95},
-  {"text":"Bob works in the city of Busan","source":"relationship:BOB-&gt;BUSAN","score":0.93}
+        <h2>Retrieved Contexts</h2>
+        
+            <article class="result-card">
+              <header>
+                <h3>scrooge-1</h3>
+                <p>Who is Scrooge?</p>
+              </header>
+              <div class="qa">
+                <div><span>Answer</span><strong>Scrooge is a miser who loves money more than people.</strong></div>
+                <div><span>Search mode</span><strong>local</strong></div>
+              </div>
+              <div class="contexts">
+                <h4>Retrieved contexts</h4>
+                <pre>[
+  {
+    &quot;text&quot;: &quot;Scrooge is a miser who loves money more than people.&quot;,
+    &quot;source&quot;: &quot;scrooge.txt&quot;,
+    &quot;score&quot;: 1.0,
+    &quot;metadata&quot;: {}
+  }
 ]</pre>
-        </article>
-
-        <article style="margin-top: 16px;">
-          <h3>global-1</h3>
-          <p><strong>Q.</strong> Summarize the workplace relationships described in the document.</p>
-          <p><strong>A.</strong> Bob works at Fabrikam in Busan. The broader community ties Bob and Alice to the GraphRAG smoke test and knowledge graph evaluation work.</p>
-          <p><strong>retrieved_contexts</strong></p>
-          <pre>[
-  {"text":"Sample PDF for GraphRAG smoke test. Alice works at Contoso in Seoul. Bob works at Fabrikam in Busan. Alice and Bob collaborate on knowledge graph evaluation.","source":"sample.pdf","score":1.0},
-  {"text":"Bob works at Fabrikam as an employee","source":"relationship:BOB-&gt;FABRIKAM","score":0.95},
-  {"text":"Fabrikam is located in Busan","source":"relationship:FABRIKAM-&gt;BUSAN","score":0.92},
-  {"text":"Alice works at Contoso in Seoul","source":"entity:ALICE","score":0.88}
-]</pre>
-        </article>
+              </div>
+            </article>
+            
       </section>
 
       <section>
-        <h2>해석</h2>
-        <ul>
-          <li>이 smoke test는 GraphRAG 인덱스가 제대로 생성되고, local/global 검색이 문서 사실을 회수하는지 검증했다.</li>
-          <li>평가는 해당 GraphRAG 검색 결과를 사용했기 때문에, 단순 LLM 답변이 아니라 검색 품질까지 포함한 결과다.</li>
-          <li>점수는 매우 높았지만, 샘플이 1개 PDF / 2개 질의뿐이라 통계적 의미는 제한적이다.</li>
-          <li>global query는 thinking 출력 때문에 JSON 파싱 문제가 있었고, <code>enable_thinking=false</code> 프록시로 우회한 뒤 정상 평가했다.</li>
-        </ul>
-      </section>
-
-      <section class="artifacts">
-        <h2>아티팩트</h2>
-        <ul>
-          <li><a href="file:///tmp/graphrag-smoke/eval_quick.json">/tmp/graphrag-smoke/eval_quick.json</a></li>
-          <li><a href="file:///tmp/graphrag-smoke/workspace">/tmp/graphrag-smoke/workspace</a></li>
-        </ul>
+        <h2>Supporting Artifacts</h2>
+        <div class="grid">
+          
+          <article class="summary-card">
+            <h3>Generated Questions</h3>
+            <pre>{
+  &quot;metadata&quot;: {
+    &quot;subrepo_name&quot;: &quot;benchmark&quot;,
+    &quot;num_questions&quot;: 1,
+    &quot;modes&quot;: [
+      &quot;local&quot;
+    ]
+  },
+  &quot;questions&quot;: [
+    {
+      &quot;sample_id&quot;: &quot;local-1&quot;,
+      &quot;question&quot;: &quot;What does the document say about scrooge?&quot;,
+      &quot;query_type&quot;: &quot;local&quot;,
+      &quot;search_mode&quot;: &quot;local&quot;,
+      &quot;reference_answer&quot;: &quot;Scrooge is a miser who loves money more than people&quot;,
+      &quot;reference_contexts&quot;: [
+        &quot;Scrooge is a miser who loves money more than people.\nHe is visited by three spirits and learns to change his ways.&quot;
+      ],
+      &quot;expected_entities&quot;: [],
+      &quot;expected_relationships&quot;: [],
+      &quot;expected_community_ids&quot;: [],
+      &quot;source_doc_ids&quot;: [
+        &quot;scrooge.txt&quot;
+      ],
+      &quot;difficulty&quot;: &quot;easy&quot;,
+      &quot;metadata&quot;: {
+        &quot;generator&quot;: &quot;fallback&quot;,
+        &quot;mode&quot;: &quot;local&quot;
+      }
+    }
+  ]
+}</pre>
+          </article>
+        
+          
+          <article class="summary-card">
+            <h3>AutoD Summary</h3>
+            <pre>{
+  &quot;metadata&quot;: {
+    &quot;component&quot;: &quot;AutoD&quot;,
+    &quot;target_size&quot;: 1
+  },
+  &quot;documents&quot;: [
+    {
+      &quot;id&quot;: &quot;scrooge.txt&quot;,
+      &quot;title&quot;: &quot;scrooge&quot;,
+      &quot;summary&quot;: &quot;Scrooge is a miser who loves money more than people. He is visited by three spirits and learns to change his ways.&quot;,
+      &quot;source_path&quot;: &quot;examples/sample_docs/scrooge.txt&quot;
+    }
+  ],
+  &quot;corpus_summary&quot;: &quot;Scrooge is a miser who loves money more than people. He is visited by three spirits and learns to change his ways.&quot;,
+  &quot;themes&quot;: [
+    &quot;Scrooge is a miser who loves money more than people&quot;,
+    &quot;He is visited by three spirits and learns to change his ways&quot;
+  ]
+}</pre>
+          </article>
+        
+          
+          <article class="summary-card">
+            <h3>AutoQ Questions</h3>
+            <pre>{
+  &quot;metadata&quot;: {
+    &quot;subrepo_name&quot;: &quot;benchmark-qed&quot;,
+    &quot;num_questions&quot;: 1,
+    &quot;modes&quot;: [
+      &quot;local&quot;
+    ]
+  },
+  &quot;questions&quot;: [
+    {
+      &quot;sample_id&quot;: &quot;local-1&quot;,
+      &quot;question&quot;: &quot;What does the document say about scrooge?&quot;,
+      &quot;query_type&quot;: &quot;local&quot;,
+      &quot;search_mode&quot;: &quot;local&quot;,
+      &quot;reference_answer&quot;: &quot;Scrooge is a miser who loves money more than people&quot;,
+      &quot;reference_contexts&quot;: [
+        &quot;Scrooge is a miser who loves money more than people.\nHe is visited by three spirits and learns to change his ways.&quot;
+      ],
+      &quot;expected_entities&quot;: [],
+      &quot;expected_relationships&quot;: [],
+      &quot;expected_community_ids&quot;: [],
+      &quot;source_doc_ids&quot;: [
+        &quot;scrooge.txt&quot;
+      ],
+      &quot;difficulty&quot;: &quot;easy&quot;,
+      &quot;metadata&quot;: {
+        &quot;generator&quot;: &quot;fallback&quot;,
+        &quot;mode&quot;: &quot;local&quot;
+      }
+    }
+  ]
+}</pre>
+          </article>
+        
+        </div>
       </section>
     </main>
+
+    <footer>
+      Rendered by <code>graphrag_ragas_eval.reporting.render_smoke_report</code>.
+    </footer>
   </div>
 </body>
 </html>
