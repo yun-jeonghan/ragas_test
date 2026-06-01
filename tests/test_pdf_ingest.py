@@ -49,7 +49,7 @@ def test_extract_pdf_text_uses_page_level_ocr(monkeypatch, tmp_path: Path) -> No
     pdf_path = tmp_path / "sample.pdf"
     pdf_path.write_bytes(b"%PDF-1.4 fake")
 
-    result = extract_pdf_text(
+    result = extract_pdf_document(
         pdf_path,
         PdfExtractionPolicy(min_text_chars=5, ocr_backend=_FakeOcrBackend()),
     )

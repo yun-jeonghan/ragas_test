@@ -16,5 +16,4 @@ def test_stage_documents_flatten(tmp_path: Path) -> None:
 
     assert len(staged) == 2
     assert (workspace.input_dir / "a.txt").exists()
-    assert (workspace.input_dir / "nested__b.md").exists()
-
+    assert (workspace.input_dir / "nested__b.txt").exists()

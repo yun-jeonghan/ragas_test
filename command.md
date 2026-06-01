@@ -11,7 +11,7 @@
     pip install graphrag
     cp .env.example .env
 
-- `.env`에서 기본값은 OpenAI 테스트용입니다.
+- `.env`에서 기본값은 로컬 Ollama 테스트용입니다.
 
 GPU 서버의 vLLM endpoint를 쓸 때는 `.env`에서 공용 블록만 채워도 됩니다.
 
@@ -58,9 +58,10 @@ MinerU 하이브리드로 갈 때는:
 - `GREV_BENCHMARKQED_EMBEDDINGS_BASE_URL=http://<vllm-host>:8000/v1`
 - `GREV_BENCHMARKQED_EMBEDDINGS_API_KEY=vllm`
 
-- `GREV_RAGAS_PROVIDER=openai`
-- `GREV_RAGAS_MODEL=gpt-4o-mini`
-- `GREV_RAGAS_API_KEY=<your-openai-key>`
+- `GREV_RAGAS_PROVIDER=ollama`
+- `GREV_RAGAS_MODEL=qwen2.5:0.5b`
+- `GREV_RAGAS_BASE_URL=http://127.0.0.1:11434/v1`
+- `GREV_RAGAS_API_KEY=ollama`
 
 vLLM로 바꿀 때는 아래처럼 바꿉니다.
 
@@ -72,9 +73,10 @@ vLLM로 바꿀 때는 아래처럼 바꿉니다.
 
 BenchmarkQED 스타일 AutoE도 같은 방식으로 별도 설정을 씁니다.
 
-- `GREV_BENCHMARKQED_PROVIDER=openai`
-- `GREV_BENCHMARKQED_MODEL=gpt-4o-mini`
-- `GREV_BENCHMARKQED_API_KEY=<your-openai-key>`
+- `GREV_BENCHMARKQED_PROVIDER=ollama`
+- `GREV_BENCHMARKQED_MODEL=qwen2.5:0.5b`
+- `GREV_BENCHMARKQED_BASE_URL=http://127.0.0.1:11434/v1`
+- `GREV_BENCHMARKQED_API_KEY=ollama`
 
 vLLM로 바꿀 때는 아래처럼 바꿉니다.
 

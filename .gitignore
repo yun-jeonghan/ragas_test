@@ -11,3 +11,4 @@ reports/
 !data/results/
 data/results/*
 !data/results/sample_search_results.json
+!data/results/sample_evaluation.json

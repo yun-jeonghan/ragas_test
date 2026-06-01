@@ -8,7 +8,7 @@ import typer
 from .benchmark_qed.autod import AutoDPlan, summarize_dataset
 from .benchmark_qed.autoe import AutoEPlan, evaluate_answers
 from .benchmark_qed.autoq import AutoQPlan, generate_queries
-from .config import ProjectPaths
+from .config import DEFAULT_CHAT_MODEL, DEFAULT_EMBEDDING_MODEL, ProjectPaths
 from .ingest import PdfExtractionPolicy, load_pdf_extraction_policy, normalize_source_tree
 from .eval import DEFAULT_RAGAS_METRICS, RagasRunner, load_benchmark_samples, load_search_results
 from .generation.builder import GenerationMode, QuestionGenerationPlan, generate_questions
@@ -80,8 +80,8 @@ def init_graphrag(
         help="PDF 추출 모드: chandra_only 또는 mineru_hybrid",
     ),
     force: bool = typer.Option(True),
-    model: str = typer.Option("gpt-4.1"),
-    embedding: str = typer.Option("text-embedding-3-large"),
+    model: str = typer.Option(DEFAULT_CHAT_MODEL),
+    embedding: str = typer.Option(DEFAULT_EMBEDDING_MODEL),
 ) -> None:
     workspace = GraphRAGWorkspace(root=workspace_root)
     staged = stage_documents(source, workspace, clean=clean, pdf_policy=_build_pdf_policy(pdf_mode))
@@ -100,8 +100,8 @@ def index_graphrag(
         help="PDF 추출 모드: chandra_only 또는 mineru_hybrid",
     ),
     force: bool = typer.Option(True),
-    model: str = typer.Option("gpt-4.1"),
-    embedding: str = typer.Option("text-embedding-3-large"),
+    model: str = typer.Option(DEFAULT_CHAT_MODEL),
+    embedding: str = typer.Option(DEFAULT_EMBEDDING_MODEL),
     method: str = typer.Option("standard"),
     skip_validation: bool = typer.Option(False),
     ontology_path: Path | None = typer.Option(

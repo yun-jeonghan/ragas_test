@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 
+from .config import DEFAULT_CHAT_MODEL, DEFAULT_EMBEDDING_MODEL
 from .ingest import PdfExtractionPolicy, load_pdf_extraction_policy
 from .ontology_handler import materialize_graph_rag_prompts
 from .post_processor import split_long_nodes_and_append_edges
@@ -21,8 +22,8 @@ def ingest_and_index_documents(
     *,
     clean: bool = False,
     force_init: bool = False,
-    model: str = "gpt-4.1",
-    embedding: str = "text-embedding-3-large",
+    model: str = DEFAULT_CHAT_MODEL,
+    embedding: str = DEFAULT_EMBEDDING_MODEL,
     method: str = "standard",
     skip_validation: bool = False,
     ontology_path: Path | None = None,

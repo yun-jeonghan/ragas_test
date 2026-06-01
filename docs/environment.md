@@ -15,7 +15,9 @@
 - GREV_RAGAS_EMBEDDINGS_API_KEY
 - GREV_RAGAS_EMBEDDINGS_EXTRA_BODY
 
-기본은 OpenAI API이고, vLLM로 바꿀 때는 `GREV_RAGAS_PROVIDER=vllm` 과 OpenAI-compatible `BASE_URL`만 바꾸면 됩니다.
+기본은 로컬 Ollama입니다. RAM을 아끼는 기본 조합은 `qwen2.5:0.5b` + `nomic-embed-text` 입니다.
+더 가벼운 chat 모델이 필요하면 `qwen2.5:0.5b` 대신 `smollm2:135m` 로 바꾸면 됩니다.
+vLLM로 바꿀 때는 `GREV_RAGAS_PROVIDER=vllm` 과 OpenAI-compatible `BASE_URL`만 바꾸면 됩니다.
 `BASE_URL`은 보통 `http://<vllm-host>:8000/v1` 같은 형태로 넣습니다. `/v1/chat/completions` 와 `/v1/embeddings` 를 기준으로 호출하므로, `/v1` 까지 포함한 루트 주소를 넣어야 합니다.
 `MODEL` 값은 Hugging Face repo id가 아니라, 서버가 실제로 서빙하는 모델 이름이어야 합니다. vLLM에서 `--served-model-name` 을 따로 줬다면 그 값을 넣으세요.
 chat/completions와 embeddings를 같은 서버에 띄우면 둘 다 같은 BASE_URL을 써도 됩니다.

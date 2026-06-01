@@ -62,10 +62,11 @@ GraphRAG로 만든 그래프 기반 검색과 생성 결과를 Ragas로 평가�
 
 ## LLM 전환
 
-현재는 OpenAI API를 기본으로 씁니다.
+현재는 로컬 Ollama를 기본으로 씁니다.
 
-- 테스트와 검증은 OpenAI
-- 나중에 실서빙이나 로컬 추론은 vLLM OpenAI-compatible endpoint
+- 테스트와 검증은 로컬 Ollama
+- 더 가벼운 chat 모델이 필요하면 `smollm2:135m`
+- 나중에 실서빙이나 다른 로컬 추론 엔진으로 옮길 때는 vLLM OpenAI-compatible endpoint
 
 전환할 때는 .env.example 기준으로 아래만 바꾸면 됩니다.
 

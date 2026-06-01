@@ -6,6 +6,7 @@ import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 
+from ..config import DEFAULT_CHAT_MODEL, DEFAULT_EMBEDDING_MODEL
 from ..ingest import PdfExtractionPolicy, load_pdf_extraction_policy, normalize_source_tree
 
 
@@ -92,8 +93,8 @@ def stage_documents(
 def ensure_graph_rag_project(
     workspace: GraphRAGWorkspace,
     *,
-    model: str = "gpt-4.1",
-    embedding: str = "text-embedding-3-large",
+    model: str = DEFAULT_CHAT_MODEL,
+    embedding: str = DEFAULT_EMBEDDING_MODEL,
     force: bool = False,
 ) -> None:
     workspace.root.mkdir(parents=True, exist_ok=True)
