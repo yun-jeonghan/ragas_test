@@ -10,7 +10,8 @@ from typing import Any, Sequence
 
 from openai import AsyncOpenAI
 
-from ..eval import EvaluationRun, load_benchmark_samples, load_search_results
+from ..adapters import load_benchmark_samples, load_search_results
+from ..eval import EvaluationRun
 from ..llm import load_llm_runtime_config
 from ..schemas import BenchmarkSample, EvaluationScore, GraphRAGSearchResult
 

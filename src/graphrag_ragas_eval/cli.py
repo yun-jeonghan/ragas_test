@@ -9,14 +9,13 @@ from .benchmark_qed.autod import AutoDPlan, summarize_dataset
 from .benchmark_qed.autoe import AutoEPlan, evaluate_answers
 from .benchmark_qed.autoq import AutoQPlan, generate_queries
 from .config import DEFAULT_CHAT_MODEL, DEFAULT_EMBEDDING_MODEL, ProjectPaths
-from .kg_correctness import KGCorrectnessPlan, evaluate_correctness
+from .integrations import evaluate_kg_correctness, evaluate_ragas
 from .ingest import PdfExtractionPolicy, load_pdf_extraction_policy, normalize_source_tree
-from .eval import DEFAULT_RAGAS_METRICS, RagasRunner, load_benchmark_samples, load_search_results
+from .eval import DEFAULT_RAGAS_METRICS
 from .generation.builder import GenerationMode, QuestionGenerationPlan, generate_questions
 from .graphrag.loaders import load_graphrag_tables
 from .graphrag.workspace import GraphRAGWorkspace, ensure_graph_rag_project, run_graph_rag_index, stage_documents
 from .graphrag_runner import ingest_and_index_documents
-from .llm import build_ragas_embeddings, build_ragas_llm, load_llm_runtime_config
 from .ontology_handler import materialize_graph_rag_prompts
 from .post_processor import split_long_nodes_and_append_edges
 from .reporting import render_smoke_report
@@ -176,22 +175,16 @@ def evaluate(
     api_key: str | None = typer.Option(None, help="OpenAI 또는 vLLM API key"),
     metrics: list[str] = typer.Option(list(DEFAULT_RAGAS_METRICS), help="평가할 metric 이름"),
 ) -> None:
-    samples = load_benchmark_samples(benchmark)
-    results = load_search_results(search_results)
-    runtime_env = dict(os.environ)
-    if provider is not None:
-        runtime_env["GREV_RAGAS_PROVIDER"] = provider
-    if model is not None:
-        runtime_env["GREV_RAGAS_MODEL"] = model
-    if base_url is not None:
-        runtime_env["GREV_RAGAS_BASE_URL"] = base_url
-    if api_key is not None:
-        runtime_env["GREV_RAGAS_API_KEY"] = api_key
-    runtime = load_llm_runtime_config(runtime_env, prefix="GREV_RAGAS")
-    llm = build_ragas_llm(runtime)
-    embeddings = build_ragas_embeddings(runtime)
-    runner = RagasRunner(llm=llm, embeddings=embeddings, metrics=tuple(metrics))
-    run = runner.evaluate_results(samples, results)
+    run = evaluate_ragas(
+        benchmark=benchmark,
+        search_results=search_results,
+        provider=provider,
+        model=model,
+        base_url=base_url,
+        api_key=api_key,
+        metrics=tuple(metrics),
+        prefix="GREV_RAGAS",
+    )
     run.write_json(output)
     typer.echo(f"wrote evaluation results to {output}")
     typer.echo(f"aggregate: {run.aggregate()}")
@@ -265,17 +258,15 @@ def kg_correctness_evaluate(
     api_key: str | None = typer.Option(None, help="OpenAI 또는 vLLM API key"),
     max_tokens: int | None = typer.Option(None, min=1, help="판정용 최대 토큰 수"),
 ) -> None:
-    run = evaluate_correctness(
-        KGCorrectnessPlan(
-            benchmark=benchmark,
-            search_results=search_results,
-            output=output,
-            provider=provider,
-            model=model,
-            base_url=base_url,
-            api_key=api_key,
-            max_tokens=max_tokens,
-        )
+    run = evaluate_kg_correctness(
+        benchmark=benchmark,
+        search_results=search_results,
+        output=output,
+        provider=provider,
+        model=model,
+        base_url=base_url,
+        api_key=api_key,
+        max_tokens=max_tokens,
     )
     typer.echo(f"wrote correctness evaluation to {output}")
     typer.echo(f"aggregate: {run.aggregate()}")
