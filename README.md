@@ -9,6 +9,14 @@ GraphRAG로 만든 그래프 기반 검색과 생성 결과를 Ragas로 평가�
 - Ragas 지표로 검색 품질과 답변 품질을 측정합니다.
 - 그래프 특유의 품질은 별도 지표로 보강합니다.
 
+## upstream 기준
+
+- `vendor/ragas` - <https://github.com/explodinggradients/ragas.git>
+- `vendor/benchmark-qed` - <https://github.com/microsoft/benchmark-qed.git>
+- `vendor/kg-gen` - <https://github.com/stair-lab/kg-gen>
+
+각 구현은 위 upstream을 기준으로 입력/출력 포맷만 감싸는 구조입니다.
+
 ## 기본 구조
 
 - data/raw/graphrag/ - GraphRAG 인덱싱 출력물
@@ -26,7 +34,7 @@ GraphRAG로 만든 그래프 기반 검색과 생성 결과를 Ragas로 평가�
 - grev graphrag index - 문서 반영 후 인덱싱 실행
 - grev evaluate - 저장된 검색 결과를 Ragas로 평가
 - grev generate-questions - 문서에서 평가 질문 생성
-- grev benchmark-qed autod/autoq/autoe - BenchmarkQED 스타일 흐름
+- grev benchmark-qed autod/autoq/autoe - upstream `benchmark-qed` 흐름
 - grev kg-gen mine evaluate - kg-gen MINE 스타일 binary correctness 평가
 - grev kg-correctness evaluate - 위 명령의 호환 별칭
 - grev report smoke - JSON 결과를 HTML 리포트로 렌더링

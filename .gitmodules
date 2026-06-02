@@ -1,3 +1,9 @@
 [submodule "vendor/kg-gen"]
 	path = vendor/kg-gen
 	url = https://github.com/stair-lab/kg-gen
+[submodule "vendor/ragas"]
+	path = vendor/ragas
+	url = https://github.com/explodinggradients/ragas.git
+[submodule "vendor/benchmark-qed"]
+	path = vendor/benchmark-qed
+	url = https://github.com/microsoft/benchmark-qed.git
