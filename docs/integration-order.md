@@ -6,7 +6,7 @@
 ## 1. 라이브러리 경계 확정
 
 - `ragas`: 실제 `ragas` 패키지 API를 직접 호출하는 integration으로 유지
-- `kg-gen`: `vendor/kg-gen`의 MINE 평가 로직을 직접 참조해서 호출부를 맞춤
+- `kg-gen`: `vendor/kg-gen`의 `experiments/MINE` 평가 로직을 직접 참조해서 호출부를 맞춤
 - `benchmarkqed`: upstream 실체가 없으면 더 이상 같은 이름으로 흉내 내지 말고 별도 이름으로 분리
 
 ## 2. 데이터 어댑터 만들기
@@ -21,7 +21,7 @@
   - Ragas metric 생성
   - LLM / embeddings 주입
   - sample 단위 score 계산
-- `integrations/kggen_mine.py`
+- `integrations/kggen.py`
   - MINE judge 호출
   - binary correctness 계산
 - `integrations/<benchmarkqed>.py`
@@ -34,8 +34,10 @@
   - Ragas 평가만 담당
 - `grev benchmark-qed ...`
   - benchmark-qed가 실제로 존재하는 경우에만 유지
-- `grev kg-correctness evaluate`
+- `grev kg-gen mine evaluate`
   - MINE correctness 판단만 담당
+- `grev kg-correctness evaluate`
+  - 위 명령의 호환 별칭
 
 ## 5. 결과 포맷 통일
 

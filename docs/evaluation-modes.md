@@ -83,7 +83,7 @@
 - MINE 스타일의 binary judge다
 - 문장 품질보다 정답 근거 포함 여부를 더 직접적으로 본다
 
-이 프레임워크는 `grev kg-correctness evaluate` 로 실행한다.
+이 프레임워크는 `grev kg-gen mine evaluate` 로 실행한다.
 결과는 sample별 0/1 판정과 aggregate accuracy로 요약된다.
 
 ## 질문 자동 생성

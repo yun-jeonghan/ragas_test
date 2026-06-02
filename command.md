@@ -99,21 +99,21 @@ vLLM로 바꿀 때는 아래처럼 바꿉니다.
 - `GREV_BENCHMARKQED_API_KEY=vllm`
 - `GREV_BENCHMARKQED_EXTRA_BODY={"chat_template_kwargs":{"enable_thinking":false}}`
 
-KG correctness / MINE 스타일 판정도 같은 방식으로 별도 설정을 씁니다.
+kg-gen MINE 스타일 판정도 같은 방식으로 별도 설정을 씁니다.
 
-- `GREV_KGCORRECTNESS_PROVIDER=ollama`
-- `GREV_KGCORRECTNESS_MODEL=qwen2.5:0.5b`
-- `GREV_KGCORRECTNESS_BASE_URL=http://127.0.0.1:11434/v1`
-- `GREV_KGCORRECTNESS_API_KEY=ollama`
-- `GREV_KGCORRECTNESS_MAX_TOKENS=256`
+- `GREV_KGGEN_MINE_PROVIDER=ollama`
+- `GREV_KGGEN_MINE_MODEL=qwen2.5:0.5b`
+- `GREV_KGGEN_MINE_BASE_URL=http://127.0.0.1:11434/v1`
+- `GREV_KGGEN_MINE_API_KEY=ollama`
+- `GREV_KGGEN_MINE_MAX_TOKENS=256`
 
 vLLM로 바꿀 때는 아래처럼 바꿉니다.
 
-- `GREV_KGCORRECTNESS_PROVIDER=vllm`
-- `GREV_KGCORRECTNESS_MODEL=<vllm-model-name>`
-- `GREV_KGCORRECTNESS_BASE_URL=http://<vllm-host>:8000/v1`
-- `GREV_KGCORRECTNESS_API_KEY=vllm`
-- `GREV_KGCORRECTNESS_EXTRA_BODY={"chat_template_kwargs":{"enable_thinking":false}}`
+- `GREV_KGGEN_MINE_PROVIDER=vllm`
+- `GREV_KGGEN_MINE_MODEL=<vllm-model-name>`
+- `GREV_KGGEN_MINE_BASE_URL=http://<vllm-host>:8000/v1`
+- `GREV_KGGEN_MINE_API_KEY=vllm`
+- `GREV_KGGEN_MINE_EXTRA_BODY={"chat_template_kwargs":{"enable_thinking":false}}`
 
 ## 1. 문서 넣고 GraphRAG 인덱싱
 
@@ -143,7 +143,7 @@ MinerU 하이브리드 모드로 돌리려면:
     grev benchmark-qed autod --source examples/sample_docs --output data/benchmark-qed/autod-summary.json --target-size 1
     grev benchmark-qed autoq --source examples/sample_docs --output data/benchmark-qed/autoq-questions.json --num-questions 1 --modes local
     grev benchmark-qed autoe --benchmark data/benchmarks/sample_benchmark.json --search-results data/results/sample_search_results.json --output data/benchmark-qed/autoe-evaluation.json --metrics context_precision
-    grev kg-correctness evaluate --benchmark data/benchmarks/sample_benchmark.json --search-results data/results/sample_search_results.json --output data/kg-correctness/evaluation.json
+    grev kg-gen mine evaluate --benchmark data/benchmarks/sample_benchmark.json --search-results data/results/sample_search_results.json --output data/kggen-mine/evaluation.json
 
 사용자 온톨로지와 후처리를 함께 쓰려면:
 
@@ -204,9 +204,9 @@ AutoE 평가:
 
     grev benchmark-qed autoe --benchmark data/benchmarks/sample_benchmark.json --search-results data/results/sample_search_results.json --output data/benchmark-qed/autoe-evaluation.json --metrics context_precision
 
-KG correctness / MINE 스타일 평가:
+kg-gen MINE 스타일 평가:
 
-    grev kg-correctness evaluate --benchmark data/benchmarks/sample_benchmark.json --search-results data/results/sample_search_results.json --output data/kg-correctness/evaluation.json
+    grev kg-gen mine evaluate --benchmark data/benchmarks/sample_benchmark.json --search-results data/results/sample_search_results.json --output data/kggen-mine/evaluation.json
 
 ## 5. 문법 확인
 

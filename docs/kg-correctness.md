@@ -1,6 +1,8 @@
 # KG Correctness / MINE 스타일 평가
 
 이 문서는 `stair-lab/kg-gen` 레포의 `experiments/MINE` 평가 흐름을 조사한 메모입니다.
+현재 구현은 업스트림 명칭에 맞춰 `grev kg-gen mine evaluate` 를 기본 경로로 두고,
+`grev kg-correctness evaluate` 는 호환용 별칭으로 남겨두었습니다.
 
 ## 어디에 있나
 
@@ -63,7 +65,8 @@ MINE 쪽 correctness 검증은 복잡한 다중 지표가 아니라 아주 단�
 - 판정: LLM judge가 retrieved context가 reference answer를 지지하는지 0/1로 판단
 - 출력: per-sample correctness score + aggregate accuracy
 
-실행 명령은 `grev kg-correctness evaluate` 입니다.
+실행 명령은 기본적으로 `grev kg-gen mine evaluate` 입니다.
+옛 이름인 `grev kg-correctness evaluate` 도 같은 구현을 호출합니다.
 
 ## 해석 주의
 

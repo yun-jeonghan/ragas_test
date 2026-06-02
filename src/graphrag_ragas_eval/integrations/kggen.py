@@ -3,10 +3,10 @@ from __future__ import annotations
 from pathlib import Path
 
 from ..eval import EvaluationRun
-from .kggen import evaluate_kggen_mine
+from ..kggen import KGGenMinePlan, evaluate_mine
 
 
-def evaluate_kg_correctness(
+def evaluate_kggen_mine(
     *,
     benchmark: Path,
     search_results: Path,
@@ -17,7 +17,7 @@ def evaluate_kg_correctness(
     api_key: str | None = None,
     max_tokens: int | None = None,
 ) -> EvaluationRun:
-    return evaluate_kggen_mine(
+    plan = KGGenMinePlan(
         benchmark=benchmark,
         search_results=search_results,
         output=output,
@@ -27,3 +27,4 @@ def evaluate_kg_correctness(
         api_key=api_key,
         max_tokens=max_tokens,
     )
+    return evaluate_mine(plan)

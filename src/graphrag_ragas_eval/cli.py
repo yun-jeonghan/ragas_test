@@ -9,7 +9,7 @@ from .benchmark_qed.autod import AutoDPlan, summarize_dataset
 from .benchmark_qed.autoe import AutoEPlan, evaluate_answers
 from .benchmark_qed.autoq import AutoQPlan, generate_queries
 from .config import DEFAULT_CHAT_MODEL, DEFAULT_EMBEDDING_MODEL, ProjectPaths
-from .integrations import evaluate_kg_correctness, evaluate_ragas
+from .integrations import evaluate_kg_correctness, evaluate_kggen_mine, evaluate_ragas
 from .ingest import PdfExtractionPolicy, load_pdf_extraction_policy, normalize_source_tree
 from .eval import DEFAULT_RAGAS_METRICS
 from .generation.builder import GenerationMode, QuestionGenerationPlan, generate_questions
@@ -24,6 +24,8 @@ from .schemas import GraphRAGTableSet
 app = typer.Typer(no_args_is_help=True, add_completion=False)
 graphrag_app = typer.Typer(no_args_is_help=True, add_completion=False)
 benchmark_qed_app = typer.Typer(no_args_is_help=True, add_completion=False)
+kg_gen_app = typer.Typer(no_args_is_help=True, add_completion=False)
+kg_gen_mine_app = typer.Typer(no_args_is_help=True, add_completion=False)
 kg_correctness_app = typer.Typer(no_args_is_help=True, add_completion=False)
 report_app = typer.Typer(no_args_is_help=True, add_completion=False)
 
@@ -247,6 +249,31 @@ def benchmark_qed_autoe(
     typer.echo(f"aggregate: {run.aggregate()}")
 
 
+@kg_gen_mine_app.command("evaluate")
+def kg_gen_mine_evaluate(
+    benchmark: Path = typer.Option(..., exists=True, file_okay=True, dir_okay=False, help="질문셋 JSON 또는 JSONL"),
+    search_results: Path = typer.Option(..., exists=True, file_okay=True, dir_okay=False, help="GraphRAG 검색 결과 JSON"),
+    output: Path = typer.Option(Path("data/kggen-mine/evaluation.json"), file_okay=True, dir_okay=False, help="평가 결과 저장 경로"),
+    provider: str | None = typer.Option(None, help="openai 또는 vllm"),
+    model: str | None = typer.Option(None, help="정답 판정용 LLM 모델"),
+    base_url: str | None = typer.Option(None, help="OpenAI-compatible endpoint, vLLM용"),
+    api_key: str | None = typer.Option(None, help="OpenAI 또는 vLLM API key"),
+    max_tokens: int | None = typer.Option(None, min=1, help="판정용 최대 토큰 수"),
+) -> None:
+    run = evaluate_kggen_mine(
+        benchmark=benchmark,
+        search_results=search_results,
+        output=output,
+        provider=provider,
+        model=model,
+        base_url=base_url,
+        api_key=api_key,
+        max_tokens=max_tokens,
+    )
+    typer.echo(f"wrote correctness evaluation to {output}")
+    typer.echo(f"aggregate: {run.aggregate()}")
+
+
 @kg_correctness_app.command("evaluate")
 def kg_correctness_evaluate(
     benchmark: Path = typer.Option(..., exists=True, file_okay=True, dir_okay=False, help="질문셋 JSON 또는 JSONL"),
@@ -372,5 +399,7 @@ def _main() -> None:
 
 app.add_typer(graphrag_app, name="graphrag")
 app.add_typer(benchmark_qed_app, name="benchmark-qed")
+app.add_typer(kg_gen_app, name="kg-gen")
+kg_gen_app.add_typer(kg_gen_mine_app, name="mine")
 app.add_typer(kg_correctness_app, name="kg-correctness")
 app.add_typer(report_app, name="report")

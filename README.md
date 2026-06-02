@@ -27,7 +27,8 @@ GraphRAG로 만든 그래프 기반 검색과 생성 결과를 Ragas로 평가�
 - grev evaluate - 저장된 검색 결과를 Ragas로 평가
 - grev generate-questions - 문서에서 평가 질문 생성
 - grev benchmark-qed autod/autoq/autoe - BenchmarkQED 스타일 흐름
-- grev kg-correctness evaluate - MINE 스타일 binary correctness 평가
+- grev kg-gen mine evaluate - kg-gen MINE 스타일 binary correctness 평가
+- grev kg-correctness evaluate - 위 명령의 호환 별칭
 - grev report smoke - JSON 결과를 HTML 리포트로 렌더링
 
 자세한 실행 예시는 command.md를 보시면 됩니다.
@@ -76,7 +77,7 @@ GraphRAG로 만든 그래프 기반 검색과 생성 결과를 Ragas로 평가�
 - Ragas embeddings: `GREV_RAGAS_EMBEDDINGS_PROVIDER`, `GREV_RAGAS_EMBEDDINGS_MODEL`, `GREV_RAGAS_EMBEDDINGS_BASE_URL`, `GREV_RAGAS_EMBEDDINGS_API_KEY`
 - BenchmarkQED용: `GREV_BENCHMARKQED_PROVIDER`, `GREV_BENCHMARKQED_MODEL`, `GREV_BENCHMARKQED_BASE_URL`, `GREV_BENCHMARKQED_API_KEY`
 - BenchmarkQED embeddings: `GREV_BENCHMARKQED_EMBEDDINGS_PROVIDER`, `GREV_BENCHMARKQED_EMBEDDINGS_MODEL`, `GREV_BENCHMARKQED_EMBEDDINGS_BASE_URL`, `GREV_BENCHMARKQED_EMBEDDINGS_API_KEY`
-- KG correctness / MINE 스타일 판정용: `GREV_KGCORRECTNESS_PROVIDER`, `GREV_KGCORRECTNESS_MODEL`, `GREV_KGCORRECTNESS_BASE_URL`, `GREV_KGCORRECTNESS_API_KEY`
+- kg-gen MINE 스타일 판정용: `GREV_KGGEN_MINE_PROVIDER`, `GREV_KGGEN_MINE_MODEL`, `GREV_KGGEN_MINE_BASE_URL`, `GREV_KGGEN_MINE_API_KEY`
 
 엔드포인트를 다른 서버로 옮길 때는 아래를 같이 맞추는 게 핵심입니다.
 
@@ -102,7 +103,7 @@ GraphRAG로 만든 그래프 기반 검색과 생성 결과를 Ragas로 평가�
 - Ragas embeddings: `GREV_RAGAS_EMBEDDINGS_PROVIDER`, `GREV_RAGAS_EMBEDDINGS_MODEL`, `GREV_RAGAS_EMBEDDINGS_BASE_URL`, `GREV_RAGAS_EMBEDDINGS_API_KEY`
 - BenchmarkQED LLM: `GREV_BENCHMARKQED_PROVIDER`, `GREV_BENCHMARKQED_MODEL`, `GREV_BENCHMARKQED_BASE_URL`, `GREV_BENCHMARKQED_API_KEY`
 - BenchmarkQED embeddings: `GREV_BENCHMARKQED_EMBEDDINGS_PROVIDER`, `GREV_BENCHMARKQED_EMBEDDINGS_MODEL`, `GREV_BENCHMARKQED_EMBEDDINGS_BASE_URL`, `GREV_BENCHMARKQED_EMBEDDINGS_API_KEY`
-- KG correctness / MINE 스타일 판정용: `GREV_KGCORRECTNESS_PROVIDER`, `GREV_KGCORRECTNESS_MODEL`, `GREV_KGCORRECTNESS_BASE_URL`, `GREV_KGCORRECTNESS_API_KEY`
+- kg-gen MINE 스타일 판정용: `GREV_KGGEN_MINE_PROVIDER`, `GREV_KGGEN_MINE_MODEL`, `GREV_KGGEN_MINE_BASE_URL`, `GREV_KGGEN_MINE_API_KEY`
 - 같은 GPU 서버를 공유하더라도 각 prefix에 값을 복사해서 넣는 방식으로 맞춥니다.
 - Qwen 생각 끄기 같은 추가 옵션은 `GREV_*_EXTRA_BODY` 또는 `GREV_*_EMBEDDINGS_EXTRA_BODY` 로 넣습니다.
 
