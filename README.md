@@ -83,7 +83,7 @@ GraphRAG로 만든 그래프 기반 검색과 생성 결과를 Ragas로 평가�
 
 - Ragas 평가용: `GREV_RAGAS_PROVIDER`, `GREV_RAGAS_MODEL`, `GREV_RAGAS_BASE_URL`, `GREV_RAGAS_API_KEY`
 - Ragas embeddings: `GREV_RAGAS_EMBEDDINGS_PROVIDER`, `GREV_RAGAS_EMBEDDINGS_MODEL`, `GREV_RAGAS_EMBEDDINGS_BASE_URL`, `GREV_RAGAS_EMBEDDINGS_API_KEY`
-- BenchmarkQED용: `GREV_BENCHMARKQED_PROVIDER`, `GREV_BENCHMARKQED_MODEL`, `GREV_BENCHMARKQED_BASE_URL`, `GREV_BENCHMARKQED_API_KEY`
+- upstream benchmark-qed용: `GREV_BENCHMARKQED_PROVIDER`, `GREV_BENCHMARKQED_MODEL`, `GREV_BENCHMARKQED_BASE_URL`, `GREV_BENCHMARKQED_API_KEY`
 - BenchmarkQED embeddings: `GREV_BENCHMARKQED_EMBEDDINGS_PROVIDER`, `GREV_BENCHMARKQED_EMBEDDINGS_MODEL`, `GREV_BENCHMARKQED_EMBEDDINGS_BASE_URL`, `GREV_BENCHMARKQED_EMBEDDINGS_API_KEY`
 - kg-gen MINE 스타일 판정용: `GREV_KGGEN_MINE_PROVIDER`, `GREV_KGGEN_MINE_MODEL`, `GREV_KGGEN_MINE_BASE_URL`, `GREV_KGGEN_MINE_API_KEY`
 
@@ -191,7 +191,7 @@ TXT 추출과 PDF OCR 흐름은 docs/txt-extraction.md를 보면 됩니다.
 
 GitHub SSH push 절차는 docs/github-push-ssh.md를 보면 됩니다.
 
-BenchmarkQED 스타일 구조는 docs/benchmark-qed.md를 보면 됩니다.
+upstream benchmark-qed 구조는 docs/benchmark-qed.md를 보면 됩니다.
 
 자세한 설계는 docs/architecture.md, docs/benchmark-schema.md, docs/search-design.md, docs/graphrag-workspace.md, docs/environment.md를 보시면 됩니다.
 

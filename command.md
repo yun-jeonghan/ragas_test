@@ -84,7 +84,7 @@ vLLM로 바꿀 때는 아래처럼 바꿉니다.
 - `GREV_RAGAS_API_KEY=vllm`
 - `GREV_RAGAS_EXTRA_BODY={"chat_template_kwargs":{"enable_thinking":false}}`
 
-BenchmarkQED 스타일 AutoE도 같은 방식으로 별도 설정을 씁니다.
+upstream benchmark-qed AutoE도 같은 방식으로 별도 설정을 씁니다.
 
 - `GREV_BENCHMARKQED_PROVIDER=ollama`
 - `GREV_BENCHMARKQED_MODEL=qwen2.5:0.5b`
@@ -190,7 +190,7 @@ multi-hop, unanswerable도 포함하려면:
 
     grev generate-questions --source examples/sample_docs --output data/benchmarks/generated_questions.json --num-questions 4 --modes local global multi-hop unanswerable
 
-## 5. BenchmarkQED 스타일 명령
+## 5. upstream benchmark-qed 명령
 
 AutoD 요약:
 

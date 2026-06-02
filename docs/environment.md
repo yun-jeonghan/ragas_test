@@ -23,7 +23,7 @@ vLLM로 바꿀 때는 `GREV_RAGAS_PROVIDER=vllm` 과 OpenAI-compatible `BASE_URL
 `BASE_URL`은 보통 `http://<vllm-host>:8000/v1` 같은 형태로 넣습니다. `/v1/chat/completions` 와 `/v1/embeddings` 를 기준으로 호출하므로, `/v1` 까지 포함한 루트 주소를 넣어야 합니다.
 `MODEL` 값은 Hugging Face repo id가 아니라, 서버가 실제로 서빙하는 모델 이름이어야 합니다. vLLM에서 `--served-model-name` 을 따로 줬다면 그 값을 넣으세요.
 chat/completions와 embeddings를 같은 서버에 띄우면 둘 다 같은 BASE_URL을 써도 됩니다.
-이 저장소는 예전 `GREV_LLM_*` 나 `GREV_VLLM_*` 에 자동으로 fallback 하지 않습니다. Ragas용과 BenchmarkQED용 값을 각각 직접 넣는 쪽이 안전합니다.
+이 저장소는 예전 `GREV_LLM_*` 나 `GREV_VLLM_*` 에 자동으로 fallback 하지 않습니다. Ragas용과 upstream benchmark-qed용 값을 각각 직접 넣는 쪽이 안전합니다.
 `GREV_*_EXTRA_BODY` 는 chat/completions 요청에만 병합됩니다. `GREV_*_EMBEDDINGS_EXTRA_BODY` 는 embeddings 요청에만 병합됩니다.
 Qwen 계열에서 생각 과정을 끄고 싶으면 `GREV_RAGAS_EXTRA_BODY={"chat_template_kwargs":{"enable_thinking":false}}` 형태로 넣으면 됩니다.
 answer_relevancy 같은 metric은 embeddings 설정도 필요합니다.

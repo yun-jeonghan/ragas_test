@@ -1,7 +1,7 @@
-# BenchmarkQED 스타일 구조
+# upstream benchmark-qed 구조
 
 BenchmarkQED는 RAG 벤치마크를 자동화하는 도구 묶음이다.
-이 저장소에서는 그 구조를 상위 오케스트레이터/하위 benchmark 레포 구조로 단순화해서 구현한다.
+이 저장소에서는 vendor/benchmark-qed 서브모듈의 실제 코드를 직접 호출하는 얇은 어댑터만 둔다.
 
 ## 구성
 
@@ -21,7 +21,7 @@ BenchmarkQED는 RAG 벤치마크를 자동화하는 도구 묶음이다.
 ### AutoE
 
 - 질문과 답변을 비교해서 점수를 매긴다.
-- 현재 구현은 reference-based Ragas 평가를 AutoE 스타일로 제공한다.
+- 현재 구현은 vendor/benchmark-qed의 reference scoring 경로를 직접 호출한다.
 - answers JSON과 benchmark JSON을 파일 경계로 연결한다.
 - 이 저장소는 metric 객체를 샘플마다 새로 만들지 않고 한 번만 구성한다.
 - CLI에서 `--metrics context_precision` 처럼 줄일 수 있다.
