@@ -3,7 +3,11 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from graphrag_ragas_eval.reporting import render_retrieval_smoke_report, render_smoke_report
+from graphrag_ragas_eval.reporting import (
+    render_assertion_report,
+    render_retrieval_smoke_report,
+    render_smoke_report,
+)
 
 
 def test_render_smoke_report(tmp_path: Path) -> None:
@@ -12,6 +16,7 @@ def test_render_smoke_report(tmp_path: Path) -> None:
     autod_summary = tmp_path / "autod.json"
     autoq_questions = tmp_path / "autoq.json"
     assertion_prep = tmp_path / "assertions.json"
+    assertion_scores = tmp_path / "assertion-scores.json"
     output = tmp_path / "report.html"
 
     evaluation.write_text(
@@ -60,6 +65,26 @@ def test_render_smoke_report(tmp_path: Path) -> None:
         ),
         encoding="utf-8",
     )
+    assertion_scores.write_text(
+        json.dumps(
+            {
+                "metadata": {"component": "AssertionEvaluation", "backend": "benchmark-qed"},
+                "scores": [
+                    {
+                        "question_id": "q1",
+                        "question": "Who is Scrooge?",
+                        "assertion": "The answer should mention Scrooge.",
+                        "score": 1.0,
+                        "reason": "Pass",
+                    }
+                ],
+                "summary_by_assertion": [{"assertion": "The answer should mention Scrooge."}],
+                "summary_by_question": [{"question_id": "q1"}],
+                "aggregate": {"overall_accuracy": 1.0},
+            }
+        ),
+        encoding="utf-8",
+    )
 
     html = render_smoke_report(
         evaluation=evaluation,
@@ -68,6 +93,7 @@ def test_render_smoke_report(tmp_path: Path) -> None:
         autod_summary=autod_summary,
         autoq_questions=autoq_questions,
         assertion_prep=assertion_prep,
+        assertion_scores=assertion_scores,
         title="Smoke",
     )
 
@@ -79,6 +105,7 @@ def test_render_smoke_report(tmp_path: Path) -> None:
     assert "<details" in html
     assert "Interpretation" in html
     assert "Assertion Prep" in html
+    assert "Assertion Scores" in html
     assert "Retrieval Prep" in html
     assert "context_precision" in html
     assert "검색된 컨텍스트 중 답변에 실제로 도움이 되는 비율" in html
@@ -202,3 +229,43 @@ def test_render_retrieval_smoke_report(tmp_path: Path) -> None:
     assert "Retrieval Evaluation" in html
     assert "context_precision" in html
     assert "BenchmarkQED-only retrieval report" in html
+
+
+def test_render_assertion_report(tmp_path: Path) -> None:
+    assertion_scores = tmp_path / "assertion-scores.json"
+    output = tmp_path / "assertion-report.html"
+
+    assertion_scores.write_text(
+        json.dumps(
+            {
+                "metadata": {"component": "AssertionEvaluation", "backend": "benchmark-qed"},
+                "scores": [
+                    {
+                        "question_id": "q1",
+                        "question": "Who is Scrooge?",
+                        "assertion": "The answer should mention Scrooge.",
+                        "score": 1.0,
+                        "reason": "Pass",
+                    }
+                ],
+                "summary_by_assertion": [{"assertion": "The answer should mention Scrooge."}],
+                "summary_by_question": [{"question_id": "q1"}],
+                "aggregate": {"overall_accuracy": 1.0},
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    html = render_assertion_report(
+        assertion_scores=assertion_scores,
+        output=output,
+        title="Assertion Report",
+    )
+
+    assert output.exists()
+    assert "Assertion Report" in html
+    assert "BenchmarkQED Assertion" in html
+    assert "Assertion Scores" in html
+    assert "overall_accuracy" in html
+    assert "Who is Scrooge?" in html
+    assert "The answer should mention Scrooge." in html

@@ -29,6 +29,7 @@ class BenchmarkQEDSmokePlan:
     source: Path = Path("examples/sample_docs")
     benchmark: Path = Path("data/benchmarks/sample_benchmark.json")
     search_results: Path = Path("data/results/sample_search_results.json")
+    assertion_scores: Path | None = None
     output_dir: Path = Path("/tmp/grev-benchmark-qed-smoke")
     report_output: Path = _repo_root() / "reports" / "benchmark-qed-smoke.html"
     target_size: int = 1
@@ -179,11 +180,21 @@ def _generate_assertion_prep(
     )
 
 
-def _build_interpretation(runtime: Any, autod_summary: Path, autoq_questions: Path, assertion_prep: Path, autoe_evaluation: Path) -> str:
+def _build_interpretation(
+    runtime: Any,
+    autod_summary: Path,
+    autoq_questions: Path,
+    assertion_prep: Path,
+    autoe_evaluation: Path,
+    assertion_scores: Path | None = None,
+) -> str:
     autod_data = json.loads(autod_summary.read_text(encoding="utf-8"))
     autoq_data = json.loads(autoq_questions.read_text(encoding="utf-8"))
     assertion_data = json.loads(assertion_prep.read_text(encoding="utf-8"))
     evaluation_data = json.loads(autoe_evaluation.read_text(encoding="utf-8"))
+    assertion_scores_data = (
+        json.loads(assertion_scores.read_text(encoding="utf-8")) if assertion_scores else None
+    )
 
     prompt_payload = {
         "runtime": {
@@ -215,6 +226,12 @@ def _build_interpretation(runtime: Any, autod_summary: Path, autoq_questions: Pa
             "stats": assertion_data.get("stats", {}),
             "validation_enabled": assertion_data.get("metadata", {}).get("validation_enabled"),
             "min_validation_score": assertion_data.get("metadata", {}).get("min_validation_score"),
+        },
+        "assertion_scores": {
+            "score_rows": len((assertion_scores_data or {}).get("scores", [])),
+            "summary_by_assertion": len((assertion_scores_data or {}).get("summary_by_assertion", [])),
+            "summary_by_question": len((assertion_scores_data or {}).get("summary_by_question", [])),
+            "aggregate": (assertion_scores_data or {}).get("aggregate", {}),
         },
     }
 
@@ -250,6 +267,10 @@ def _build_interpretation(runtime: Any, autod_summary: Path, autoq_questions: Pa
             lines.append(f"{metric_name} = {value}.")
     if not autoq_data.get("questions"):
         lines.append("AutoQ returned no selected questions in this run, so generation coverage is the main thing to inspect.")
+    if assertion_scores_data is not None:
+        lines.append(
+            f"Assertion scoring produced {len(assertion_scores_data.get('scores', []))} score row(s) and {len(assertion_scores_data.get('aggregate', {}))} aggregate metric(s)."
+        )
     return "\n".join(lines)
 
 
@@ -264,6 +285,7 @@ def run_benchmark_qed_smoke(plan: BenchmarkQEDSmokePlan) -> BenchmarkQEDSmokeRes
     autod_summary = plan.output_dir / "autod-summary.json"
     autoq_questions = plan.output_dir / "autoq-questions.json"
     assertion_prep = plan.output_dir / "assertion-prep.json"
+    assertion_scores = plan.assertion_scores
     autoe_evaluation = plan.output_dir / "autoe-evaluation.json"
     retrieval_results = plan.output_dir / "retrieval-results.json"
 
@@ -309,7 +331,14 @@ def run_benchmark_qed_smoke(plan: BenchmarkQEDSmokePlan) -> BenchmarkQEDSmokeRes
         )
     )
 
-    interpretation = _build_interpretation(runtime, autod_summary, autoq_questions, assertion_prep, autoe_evaluation)
+    interpretation = _build_interpretation(
+        runtime,
+        autod_summary,
+        autoq_questions,
+        assertion_prep,
+        autoe_evaluation,
+        assertion_scores=assertion_scores,
+    )
 
     render_smoke_report(
         evaluation=autoe_evaluation,
@@ -318,6 +347,7 @@ def run_benchmark_qed_smoke(plan: BenchmarkQEDSmokePlan) -> BenchmarkQEDSmokeRes
         autod_summary=autod_summary,
         autoq_questions=autoq_questions,
         assertion_prep=assertion_prep,
+        assertion_scores=assertion_scores,
         title=plan.report_title,
         retrieval_results=retrieval_results,
         report_metadata={

@@ -1,3 +1,4 @@
+from .assertion import AssertionEvaluationPlan, evaluate_assertion_scores
 from .autod import AutoDPlan, summarize_dataset
 from .autoe import AutoEPlan, evaluate_answers
 from .autoq import AutoQPlan, generate_queries
@@ -18,6 +19,7 @@ __all__ = [
     "AutoDPlan",
     "AutoEPlan",
     "AutoQPlan",
+    "AssertionEvaluationPlan",
     "BenchmarkQEDSmokePlan",
     "BenchmarkQEDSmokeResult",
     "RetrievalEvaluationPlan",
@@ -25,6 +27,7 @@ __all__ = [
     "RetrievalReferencePlan",
     "RetrievalSmokePlan",
     "RetrievalSmokeResult",
+    "evaluate_assertion_scores",
     "evaluate_retrieval_results",
     "evaluate_answers",
     "generate_retrieval_reference",

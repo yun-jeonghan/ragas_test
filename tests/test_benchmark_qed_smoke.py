@@ -46,6 +46,27 @@ def test_run_benchmark_qed_smoke_orchestrates_all_steps(monkeypatch, tmp_path: P
         ),
         encoding="utf-8",
     )
+    assertion_scores = tmp_path / "assertion_scores.json"
+    assertion_scores.write_text(
+        json.dumps(
+            {
+                "metadata": {"component": "AssertionEvaluation", "backend": "benchmark-qed"},
+                "scores": [
+                    {
+                        "question_id": "q1",
+                        "question": "Who is Scrooge?",
+                        "assertion": "The answer should mention Scrooge.",
+                        "score": 1.0,
+                        "reason": "Pass",
+                    }
+                ],
+                "summary_by_assertion": [{"assertion": "The answer should mention Scrooge."}],
+                "summary_by_question": [{"question_id": "q1"}],
+                "aggregate": {"overall_accuracy": 1.0},
+            }
+        ),
+        encoding="utf-8",
+    )
     output_dir = tmp_path / "output"
     report_output = tmp_path / "report.html"
     calls: list[tuple[str, dict[str, object]]] = []
@@ -104,6 +125,7 @@ def test_run_benchmark_qed_smoke_orchestrates_all_steps(monkeypatch, tmp_path: P
             source=source,
             benchmark=benchmark,
             search_results=search_results,
+            assertion_scores=assertion_scores,
             output_dir=output_dir,
             report_output=report_output,
             target_size=1,
@@ -140,12 +162,14 @@ def test_run_benchmark_qed_smoke_orchestrates_all_steps(monkeypatch, tmp_path: P
     assert calls[2][1]["kwargs"]["output_dir"] == output_dir
     assert calls[3][1]["args"][0].metadata == {"smoke": True, "suite": "benchmark-qed"}
     assert calls[4][1]["args"][0].metadata == {"smoke": True, "suite": "benchmark-qed"}
+    assert calls[5][1]["kwargs"]["assertion_scores"] == assertion_scores
 
 
 def test_benchmark_qed_smoke_cli_dispatch(monkeypatch, tmp_path: Path) -> None:
     captured: dict[str, object] = {}
     (tmp_path / "benchmark.json").write_text("[]", encoding="utf-8")
     (tmp_path / "search_results.json").write_text("[]", encoding="utf-8")
+    (tmp_path / "assertion_scores.json").write_text("{}", encoding="utf-8")
 
     def _fake_run(plan):
         captured["plan"] = plan
@@ -186,6 +210,8 @@ def test_benchmark_qed_smoke_cli_dispatch(monkeypatch, tmp_path: Path) -> None:
             str(tmp_path / "benchmark.json"),
             "--search-results",
             str(tmp_path / "search_results.json"),
+            "--assertion-scores",
+            str(tmp_path / "assertion_scores.json"),
             "--output-dir",
             str(tmp_path / "out"),
             "--report-output",
@@ -197,6 +223,7 @@ def test_benchmark_qed_smoke_cli_dispatch(monkeypatch, tmp_path: Path) -> None:
     assert "wrote smoke report" in result.output
     assert "wrote assertion prep" in result.output
     assert captured["plan"].source == tmp_path
+    assert captured["plan"].assertion_scores == tmp_path / "assertion_scores.json"
 
 
 def test_autoq_uses_tiktoken_encoding_name(monkeypatch, tmp_path: Path) -> None:

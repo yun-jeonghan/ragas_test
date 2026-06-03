@@ -5,6 +5,7 @@ from pathlib import Path
 
 import typer
 
+from .benchmark_qed import AssertionEvaluationPlan, evaluate_assertion_scores
 from .benchmark_qed.autod import AutoDPlan, summarize_dataset
 from .benchmark_qed.autoe import AutoEPlan, evaluate_answers
 from .benchmark_qed.autoq import AutoQPlan, generate_queries
@@ -27,7 +28,7 @@ from .graphrag.workspace import GraphRAGWorkspace, ensure_graph_rag_project, run
 from .graphrag_runner import ingest_and_index_documents
 from .ontology_handler import materialize_graph_rag_prompts
 from .post_processor import split_long_nodes_and_append_edges
-from .reporting import render_smoke_report
+from .reporting import render_assertion_report, render_smoke_report
 from .schemas import GraphRAGTableSet
 
 app = typer.Typer(no_args_is_help=True, add_completion=False)
@@ -394,11 +395,55 @@ def benchmark_qed_retrieval_smoke(
     typer.echo(f"wrote retrieval report to {payload.report}")
 
 
+@benchmark_qed_app.command("assertion-score")
+def benchmark_qed_assertion_score(
+    assertion_prep: Path = typer.Option(..., exists=True, file_okay=True, dir_okay=False, help="Assertion prep JSON"),
+    answers: Path = typer.Option(..., exists=True, file_okay=True, dir_okay=False, help="Answers JSON"),
+    output: Path = typer.Option(Path("data/benchmark-qed/assertion-scores.json"), file_okay=True, dir_okay=False, help="Assertion score JSON 저장 경로"),
+    trials: int = typer.Option(1, min=1, help="Assertion scoring trials"),
+    top_k_assertions: int | None = typer.Option(None, min=1, help="question당 평가할 assertion 수 상한"),
+    include_score_id_in_prompt: bool = typer.Option(True, help="LLM prompt에 score id 포함 여부"),
+    question_id_key: str = typer.Option("question_id", help="question ID key"),
+    question_text_key: str = typer.Option("question_text", help="question text key"),
+    answer_text_key: str = typer.Option("answer", help="answer text key"),
+) -> None:
+    payload = evaluate_assertion_scores(
+        AssertionEvaluationPlan(
+            assertion_prep=assertion_prep,
+            answers=answers,
+            output=output,
+            trials=trials,
+            top_k_assertions=top_k_assertions,
+            include_score_id_in_prompt=include_score_id_in_prompt,
+            question_id_key=question_id_key,
+            question_text_key=question_text_key,
+            answer_text_key=answer_text_key,
+        )
+    )
+    typer.echo(f"wrote assertion scores to {output}")
+    typer.echo(f"assertions: {len(payload['scores'])}")
+
+
+@benchmark_qed_app.command("assertion-report")
+def benchmark_qed_assertion_report(
+    assertion_scores: Path = typer.Option(..., exists=True, file_okay=True, dir_okay=False, help="Assertion score JSON"),
+    output: Path = typer.Option(Path("reports/benchmark-qed-assertion-report.html"), file_okay=True, dir_okay=False, help="HTML report output path"),
+    title: str = typer.Option("BenchmarkQED Assertion Report", help="Report title"),
+) -> None:
+    render_assertion_report(
+        assertion_scores=assertion_scores,
+        output=output,
+        title=title,
+    )
+    typer.echo(f"wrote assertion report to {output}")
+
+
 @benchmark_qed_app.command("smoke")
 def benchmark_qed_smoke(
     source: Path = typer.Option(Path("examples/sample_docs"), exists=True, file_okay=True, dir_okay=True, help="스모크 입력 문서 또는 디렉터리"),
     benchmark: Path = typer.Option(Path("data/benchmarks/sample_benchmark.json"), exists=True, file_okay=True, dir_okay=False, help="AutoE용 benchmark JSON 또는 JSONL"),
     search_results: Path = typer.Option(Path("data/results/sample_search_results.json"), exists=True, file_okay=True, dir_okay=False, help="AutoE용 search results JSON"),
+    assertion_scores: Path | None = typer.Option(None, exists=True, file_okay=True, dir_okay=False, help="Assertion score JSON"),
     output_dir: Path = typer.Option(Path("/tmp/grev-benchmark-qed-smoke"), file_okay=False, dir_okay=True, help="스모크 산출물 디렉터리"),
     report_output: Path = typer.Option(_repo_root() / "reports" / "benchmark-qed-smoke.html", file_okay=True, dir_okay=False, help="스모크 리포트 HTML 경로"),
     target_size: int = typer.Option(1, min=1, help="AutoD에 사용할 문서 수"),
@@ -414,6 +459,7 @@ def benchmark_qed_smoke(
             source=source,
             benchmark=benchmark,
             search_results=search_results,
+            assertion_scores=assertion_scores,
             output_dir=output_dir,
             report_output=report_output,
             target_size=target_size,

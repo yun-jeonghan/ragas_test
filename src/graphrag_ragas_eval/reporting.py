@@ -220,6 +220,23 @@ def _score_detail(score: dict[str, Any]) -> str:
     )
 
 
+def _assertion_score_row(score: dict[str, Any]) -> str:
+    metadata = _safe_dict(score.get("metadata"))
+    question_id = score.get("question_id") or metadata.get("question_id") or ""
+    question = score.get("question") or metadata.get("question") or score.get("question_text") or ""
+    assertion = score.get("assertion") or score.get("statement") or ""
+    reason = score.get("reason") or score.get("reasoning") or score.get("explanation") or ""
+    return f"""
+      <tr>
+        <td>{html.escape(str(question_id))}</td>
+        <td>{html.escape(str(question))}</td>
+        <td>{html.escape(str(assertion))}</td>
+        <td>{_format_metric_value(score.get("score") or score.get("value"))}</td>
+        <td title="{html.escape(str(reason or ''))}">{_truncate_text(reason or 'No reason provided.', 120)}</td>
+      </tr>
+    """
+
+
 def _context_preview(contexts: list[dict[str, Any]]) -> str:
     if not contexts:
         return '<p class="small">No retrieved contexts were saved for this sample.</p>'
@@ -360,6 +377,38 @@ def _retrieval_interpretation(
     return "\n".join(lines)
 
 
+def _assertion_interpretation(
+    *,
+    assertion_data: dict[str, Any] | None,
+    report_metadata: dict[str, Any] | None,
+) -> str:
+    metadata = report_metadata or {}
+    model = metadata.get("chat_model") or metadata.get("model") or "qwen2.5:0.5b"
+    provider = metadata.get("provider") or "ollama"
+    base_url = metadata.get("base_url") or "http://127.0.0.1:11434/v1"
+    scores = _safe_list((assertion_data or {}).get("scores"))
+    summary_by_assertion = _safe_list((assertion_data or {}).get("summary_by_assertion"))
+    summary_by_question = _safe_list((assertion_data or {}).get("summary_by_question"))
+    aggregate = _safe_dict((assertion_data or {}).get("aggregate"))
+    lines = [
+        f"Model lens: {model} via {provider} ({base_url}).",
+        "Assertion smoke is wired if score rows, assertion summaries, and per-question summaries all appear together.",
+    ]
+    lines.append(f"Score rows: {len(scores)}.")
+    lines.append(f"Assertion summary rows: {len(summary_by_assertion)}.")
+    lines.append(f"Question summary rows: {len(summary_by_question)}.")
+    if aggregate:
+        for metric_name, value in aggregate.items():
+            lines.append(f"{metric_name} = {_format_metric_value(value)}.")
+    if not scores:
+        lines.append("No assertion score rows were found.")
+    if not summary_by_assertion:
+        lines.append("No assertion summary rows were found.")
+    if not summary_by_question:
+        lines.append("No per-question assertion summary rows were found.")
+    return "\n".join(lines)
+
+
 def render_smoke_report(
     evaluation: Path,
     output: Path,
@@ -369,6 +418,7 @@ def render_smoke_report(
     autod_summary: Path | None = None,
     autoq_questions: Path | None = None,
     assertion_prep: Path | None = None,
+    assertion_scores: Path | None = None,
     retrieval_results: Path | None = None,
     report_metadata: dict[str, Any] | None = None,
     interpretation: str | None = None,
@@ -378,6 +428,7 @@ def render_smoke_report(
     autod_data = _load_json(autod_summary) if autod_summary else None
     autoq_data = _load_json(autoq_questions) if autoq_questions else None
     assertion_data = _load_json(assertion_prep) if assertion_prep else None
+    assertion_scores_data = _load_json(assertion_scores) if assertion_scores else None
     retrieval_data = _load_json(retrieval_results) if retrieval_results else None
 
     scores = _safe_list(evaluation_data.get("scores"))
@@ -423,6 +474,8 @@ def render_smoke_report(
         overview_cards.append(_metric_card("questions", len(_safe_list(autoq_data.get("questions")))))
     if assertion_data:
         overview_cards.append(_metric_card("assertions", len(_safe_list(assertion_data.get("questions")))))
+    if assertion_scores_data:
+        overview_cards.append(_metric_card("assertion scores", len(_safe_list(assertion_scores_data.get("scores")))))
 
     aggregate_cards = [_metric_card(metric_name, value) for metric_name, value in aggregate.items()]
     score_rows = "\n".join(_score_row(score) for score in scores if isinstance(score, dict))
@@ -488,6 +541,13 @@ def render_smoke_report(
                 " Check the assertion scoring and filtering path."
                 "</div>"
             )
+    assertion_scores_alert = ""
+    if assertion_scores_data and len(_safe_list(assertion_scores_data.get("scores"))) == 0:
+        assertion_scores_alert = (
+            '<div class="note warning" style="margin-top: 14px;">'
+            "Assertion scoring produced no score rows, so the assertion report cannot be trusted yet."
+            "</div>"
+        )
     ragas_alert = ""
     if retrieval_data and len(_safe_list(retrieval_data.get("results"))) == 0:
         ragas_alert = (
@@ -529,6 +589,17 @@ def render_smoke_report(
                 "Assertion Prep",
                 _assertion_prep_bullets(assertion_data),
                 assertion_data,
+            )
+        )
+    if assertion_scores_data:
+        artifact_cards.append(
+            _artifact_card(
+                "Assertion Scores",
+                [
+                    f"{len(_safe_list(assertion_scores_data.get('scores')))} score row(s) evaluated.",
+                    "This evaluates prepared assertions against the answer set.",
+                ],
+                assertion_scores_data,
             )
         )
     artifact_cards.append(_artifact_card("AutoE Evaluation", autoe_bullets, evaluation_data))
@@ -904,14 +975,19 @@ def render_smoke_report(
       <section>
         <h2>BenchmarkQED</h2>
         <p class="small">
-          Generation-side artifacts: AutoD summarizes the corpus, AutoQ creates questions, and Assertion Prep shows whether those questions produced usable assertions.
+          Generation-side artifacts: AutoD summarizes the corpus, AutoQ creates questions, Assertion Prep shows whether those questions produced usable assertions, and Assertion Scores shows the assertion evaluation rows if they were run.
         </p>
         <div class="wide-grid">
           {_artifact_card("AutoD", autod_bullets if autod_data else ["No AutoD payload available."], autod_data or {})}
           {_artifact_card("AutoQ", autoq_bullets if autoq_data else ["No AutoQ payload available."], autoq_data or {})}
           {(_artifact_card("Assertion Prep", _assertion_prep_bullets(assertion_data), assertion_data)) if assertion_data else ""}
+          {(_artifact_card("Assertion Scores", [
+              f"{len(_safe_list(assertion_scores_data.get('scores')))} score row(s) evaluated." if assertion_scores_data else "No assertion score payload available.",
+              "This evaluates prepared assertions against the answer set.",
+          ], assertion_scores_data or {})) if assertion_scores_data else ""}
         </div>
         {benchmarkqed_alert}
+        {assertion_scores_alert}
       </section>
 
       <section>
@@ -1020,6 +1096,362 @@ def render_smoke_report(
 
     <footer>
       Rendered by <code>graphrag_ragas_eval.reporting.render_smoke_report</code>.
+    </footer>
+  </div>
+</body>
+</html>
+"""
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(html_text, encoding="utf-8")
+    return html_text
+
+
+def render_assertion_report(
+    *,
+    assertion_scores: Path,
+    output: Path,
+    title: str = "BenchmarkQED Assertion Report",
+    report_metadata: dict[str, Any] | None = None,
+    interpretation: str | None = None,
+) -> str:
+    assertion_data = _load_json(assertion_scores)
+    scores = _safe_list(assertion_data.get("scores"))
+    summary_by_assertion = _safe_list(assertion_data.get("summary_by_assertion"))
+    summary_by_question = _safe_list(assertion_data.get("summary_by_question"))
+    aggregate = _safe_dict(assertion_data.get("aggregate"))
+    metadata = _safe_dict(assertion_data.get("metadata"))
+    report_metadata = report_metadata or {}
+    interpretation_text = interpretation or _assertion_interpretation(
+        assertion_data=assertion_data,
+        report_metadata=report_metadata,
+    )
+    now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+
+    runtime_chips = []
+    if report_metadata.get("chat_model"):
+        runtime_chips.append(_chip("chat model", report_metadata["chat_model"]))
+    if report_metadata.get("provider"):
+        runtime_chips.append(_chip("provider", report_metadata["provider"]))
+    if report_metadata.get("base_url"):
+        runtime_chips.append(_chip("endpoint", report_metadata["base_url"]))
+    if metadata.get("backend"):
+        runtime_chips.append(_chip("backend", metadata["backend"]))
+
+    overview_cards = [
+        _metric_card("score rows", len(scores)),
+        _metric_card("assertion summaries", len(summary_by_assertion)),
+        _metric_card("question summaries", len(summary_by_question)),
+        _metric_card("aggregate metrics", len(aggregate)),
+    ]
+
+    score_rows = "\n".join(_assertion_score_row(score) for score in scores if isinstance(score, dict))
+    assertion_cards = [
+        _artifact_card(
+            "Assertion Scores",
+            [
+                f"{len(scores)} score row(s) evaluated.",
+                "Open the JSON view for the raw per-assertion rows.",
+            ],
+            assertion_data,
+        ),
+        _artifact_card(
+            "Summary by Assertion",
+            [
+                f"{len(summary_by_assertion)} assertion summary row(s).",
+                "This shows how each assertion performed across runs.",
+            ],
+            {"summary_by_assertion": summary_by_assertion},
+        ),
+        _artifact_card(
+            "Summary by Question",
+            [
+                f"{len(summary_by_question)} question summary row(s).",
+                "This groups assertion results by question.",
+            ],
+            {"summary_by_question": summary_by_question},
+        ),
+    ]
+
+    html_text = f"""<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{html.escape(title)}</title>
+  <style>
+    :root {{
+      color-scheme: light;
+      --bg: #eef3ff;
+      --panel: rgba(255, 255, 255, 0.94);
+      --panel-strong: #ffffff;
+      --text: #182033;
+      --muted: #60708f;
+      --accent: #2457ff;
+      --accent-soft: #e8efff;
+      --border: #d9e0ef;
+      --shadow: 0 14px 40px rgba(31, 41, 55, 0.08);
+    }}
+    * {{ box-sizing: border-box; }}
+    html, body {{ min-height: 100%; }}
+    body {{
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, "Noto Sans KR", "Helvetica Neue", Arial, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(36, 87, 255, 0.11), transparent 30%),
+        linear-gradient(180deg, #eef3ff 0%, #f8fbff 18%, #f8fbff 100%);
+      color: var(--text);
+      line-height: 1.55;
+    }}
+    .wrap {{
+      max-width: 1220px;
+      margin: 0 auto;
+      padding: 36px 18px 64px;
+    }}
+    .hero {{
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      padding: 28px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }}
+    .hero h1 {{
+      margin: 0 0 10px;
+      font-size: clamp(2rem, 4vw, 3rem);
+      line-height: 1.08;
+      letter-spacing: -0.03em;
+    }}
+    .subtitle {{
+      margin: 0;
+      color: var(--muted);
+      max-width: 70ch;
+    }}
+    .chips {{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }}
+    .chip {{
+      display: inline-flex;
+      align-items: baseline;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      border: 1px solid rgba(36, 87, 255, 0.12);
+      font-size: 0.92rem;
+      font-weight: 700;
+    }}
+    .chip strong {{ font-weight: 800; }}
+    main {{
+      margin-top: 22px;
+      display: grid;
+      gap: 18px;
+    }}
+    section {{
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 22px;
+      box-shadow: var(--shadow);
+    }}
+    h2 {{
+      margin: 0 0 14px;
+      font-size: 1.28rem;
+      letter-spacing: -0.02em;
+    }}
+    .grid {{
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 14px;
+    }}
+    .wide-grid {{
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 14px;
+    }}
+    .metric-card, .artifact-card {{
+      background: var(--panel-strong);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 16px;
+    }}
+    .metric-title {{
+      color: var(--muted);
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }}
+    .metric-value {{
+      margin-top: 6px;
+      font-size: 1.8rem;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+    }}
+    .metric-desc {{
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }}
+    .note {{
+      border-left: 4px solid var(--accent);
+      background: #f5f8ff;
+      padding: 14px 16px;
+      border-radius: 14px;
+      color: #26314a;
+    }}
+    .small {{ color: var(--muted); font-size: 0.92rem; }}
+    .bullet-list {{
+      margin: 0;
+      padding-left: 20px;
+      color: var(--text);
+    }}
+    .bullet-list li + li {{ margin-top: 6px; }}
+    table {{
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+      background: white;
+      border-radius: 18px;
+      border: 1px solid var(--border);
+    }}
+    th, td {{
+      padding: 12px 10px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      vertical-align: top;
+      font-size: 0.92rem;
+    }}
+    th {{
+      background: #f6f9ff;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 0.78rem;
+    }}
+    tr:last-child td {{ border-bottom: none; }}
+    details {{
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: white;
+      overflow: hidden;
+    }}
+    details + details {{ margin-top: 12px; }}
+    summary {{
+      cursor: pointer;
+      list-style: none;
+      padding: 14px 16px;
+      font-weight: 700;
+      background: #fafcff;
+    }}
+    summary::-webkit-details-marker {{ display: none; }}
+    details[open] summary {{
+      border-bottom: 1px solid var(--border);
+      background: #f5f8ff;
+    }}
+    details > :not(summary) {{ padding: 16px; }}
+    pre {{
+      margin: 0;
+      padding: 14px;
+      border-radius: 14px;
+      background: #0f172a;
+      color: #d8e4ff;
+      overflow: auto;
+      font-size: 0.87rem;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }}
+    footer {{
+      color: var(--muted);
+      font-size: 0.9rem;
+      text-align: center;
+      margin-top: 24px;
+    }}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="hero">
+      <h1>{html.escape(title)}</h1>
+      <p class="subtitle">
+        BenchmarkQED assertion smoke checks assertion scoring and per-question aggregation in one pass.
+      </p>
+      <div class="chips">
+        <span class="chip"><span>generated</span><strong>{html.escape(now)}</strong></span>
+        <span class="chip"><span>score rows</span><strong>{len(scores)}</strong></span>
+        <span class="chip"><span>assertion summaries</span><strong>{len(summary_by_assertion)}</strong></span>
+        <span class="chip"><span>question summaries</span><strong>{len(summary_by_question)}</strong></span>
+        {''.join(runtime_chips)}
+      </div>
+    </header>
+
+    <main>
+      <section>
+        <h2>Overview</h2>
+        <p class="small">
+          This is a BenchmarkQED-only assertion report. It intentionally excludes Ragas and focuses on the assertion scoring path.
+        </p>
+        <div class="grid">
+          {''.join(overview_cards)}
+        </div>
+      </section>
+
+      <section>
+        <h2>BenchmarkQED Assertion</h2>
+        <div class="wide-grid">
+          {''.join(assertion_cards)}
+        </div>
+      </section>
+
+      <section>
+        <h2>Interpretation</h2>
+        <div class="note">
+          <div class="interpretation">{html.escape(interpretation_text)}</div>
+        </div>
+      </section>
+
+      <section>
+        <h2>Score Details</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>question_id</th>
+              <th>question</th>
+              <th>assertion</th>
+              <th>score</th>
+              <th>reason</th>
+            </tr>
+          </thead>
+          <tbody>
+            {score_rows}
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>Supporting Artifacts</h2>
+        <div class="grid">
+          {_artifact_card("Assertion Scores JSON", [
+              f"{len(scores)} score row(s).",
+              f"Metadata backend: {metadata.get('backend', 'benchmark-qed')}.",
+          ], assertion_data)}
+          {_artifact_card("Summary by Assertion JSON", [
+              f"{len(summary_by_assertion)} summary row(s).",
+              "This groups score rows by assertion.",
+          ], {"summary_by_assertion": summary_by_assertion})}
+          {_artifact_card("Summary by Question JSON", [
+              f"{len(summary_by_question)} summary row(s).",
+              "This groups score rows by question.",
+          ], {"summary_by_question": summary_by_question})}
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      Rendered by <code>graphrag_ragas_eval.reporting.render_assertion_report</code>.
     </footer>
   </div>
 </body>
