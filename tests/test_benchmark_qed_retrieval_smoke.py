@@ -160,8 +160,10 @@ def test_run_benchmark_qed_retrieval_smoke_orchestrates_retrieval_steps(monkeypa
     assert calls[1][1]["args"][0].questions == benchmark
     assert calls[1][1]["args"][0].clusters == result.clusters
     assert calls[2][1]["args"][0].output == result.retrieval_results
+    assert calls[2][1]["args"][0].text_units == tmp_path / "graphrag-output" / "text_units.parquet"
     assert calls[3][1]["args"][0].reference_dir == output_dir / "retrieval-reference"
     assert calls[4][1]["kwargs"]["output"] == output_dir / "retrieval-smoke.html"
+    assert calls[3][1]["args"][0].cluster_match_by == "id"
 
 
 def test_benchmark_qed_retrieval_smoke_cli_dispatch(monkeypatch, tmp_path: Path) -> None:
@@ -212,3 +214,4 @@ def test_benchmark_qed_retrieval_smoke_cli_dispatch(monkeypatch, tmp_path: Path)
     assert "wrote retrieval reference" in result.output
     assert "wrote retrieval report" in result.output
     assert captured["plan"].benchmark == tmp_path / "benchmark.json"
+    assert captured["plan"].cluster_match_by == "id"

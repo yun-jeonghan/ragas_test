@@ -26,6 +26,7 @@ from ..upstream_benchmark_qed import (
 class RetrievalPrepPlan:
     search_results: Path
     output: Path
+    text_units: Path | None = None
     context_id_key: str = "chunk_id"
     context_text_key: str = "text"
     metadata: dict[str, Any] = field(default_factory=dict)
@@ -59,7 +60,7 @@ class RetrievalEvaluationPlan:
     relevance_threshold: int = 2
     context_id_key: str = "chunk_id"
     context_text_key: str = "text"
-    cluster_match_by: str = "text"
+    cluster_match_by: str = "id"
     run_significance_test: bool = True
     significance_alpha: float = 0.05
     significance_correction: str = "holm"
@@ -81,7 +82,7 @@ class RetrievalSmokePlan:
     rag_method_name: str = "benchmark-qed"
     reference_filename: str = "reference.json"
     relevance_threshold: int = 2
-    cluster_match_by: str = "text"
+    cluster_match_by: str = "id"
     run_significance_test: bool = True
     significance_alpha: float = 0.05
     significance_correction: str = "holm"
@@ -117,6 +118,49 @@ def _read_json_payload(path: Path) -> object:
     if not path.exists():
         raise FileNotFoundError(path)
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _normalize_text_key(text: str) -> str:
+    return " ".join(text.split()).strip().lower()
+
+
+def _load_text_unit_id_lookup(text_units_path: Path) -> list[tuple[str, str]]:
+    df = _load_dataframe(text_units_path)
+    if df.empty:
+        return []
+
+    id_column = "id" if "id" in df.columns else df.columns[0]
+    text_column = "text" if "text" in df.columns else df.columns[1]
+    lookup: list[tuple[str, str]] = []
+    for text_unit_id, text in df[[id_column, text_column]].itertuples(
+        index=False, name=None
+    ):
+        normalized_text = _normalize_text_key(str(text))
+        if normalized_text:
+            lookup.append((normalized_text, str(text_unit_id)))
+    return lookup
+
+
+def _resolve_text_unit_id(
+    text: str,
+    text_unit_lookup: list[tuple[str, str]],
+) -> str | None:
+    normalized_text = _normalize_text_key(text)
+    if not normalized_text:
+        return None
+
+    for candidate_text, text_unit_id in text_unit_lookup:
+        if candidate_text == normalized_text:
+            return text_unit_id
+
+    for candidate_text, text_unit_id in text_unit_lookup:
+        if (
+            candidate_text.startswith(normalized_text)
+            or normalized_text.startswith(candidate_text)
+        ):
+            return text_unit_id
+
+    return None
 
 
 def _normalize_retrieval_results_payload(
@@ -406,6 +450,9 @@ def _clusters_from_communities(communities: pd.DataFrame) -> list[dict[str, Any]
 def prepare_retrieval_results(plan: RetrievalPrepPlan) -> dict[str, Any]:
     payload = json.loads(plan.search_results.read_text(encoding="utf-8"))
     items = _coerce_items(payload, key="results")
+    text_unit_lookup = (
+        _load_text_unit_id_lookup(plan.text_units) if plan.text_units is not None else []
+    )
 
     prepared: list[dict[str, Any]] = []
     for item in items:
@@ -415,12 +462,23 @@ def prepare_retrieval_results(plan: RetrievalPrepPlan) -> dict[str, Any]:
             for index, ctx in enumerate(contexts):
                 if not isinstance(ctx, dict):
                     continue
+                context_text = str(ctx.get("text") or "")
+                resolved_text_unit_id = (
+                    _resolve_text_unit_id(context_text, text_unit_lookup)
+                    if text_unit_lookup
+                    else None
+                )
                 context_rows.append(
                     {
                         plan.context_id_key: str(
-                            ctx.get("source") or ctx.get("id") or f"context-{index}"
+                            resolved_text_unit_id
+                            or ctx.get("id")
+                            or ctx.get("source_id")
+                            or ctx.get("chunk_id")
+                            or ctx.get("source")
+                            or f"context-{index}"
                         ),
-                        plan.context_text_key: str(ctx.get("text") or ""),
+                        plan.context_text_key: context_text,
                         "score": ctx.get("score"),
                         "metadata": ctx.get("metadata", {}),
                     }
@@ -447,6 +505,7 @@ def prepare_retrieval_results(plan: RetrievalPrepPlan) -> dict[str, Any]:
             "component": "RetrievalPrep",
             "backend": "benchmark-qed",
             "source": str(plan.search_results),
+            "text_units": str(plan.text_units) if plan.text_units is not None else None,
             "context_id_key": plan.context_id_key,
             "context_text_key": plan.context_text_key,
             **plan.metadata,
@@ -629,6 +688,7 @@ def run_benchmark_qed_retrieval_smoke(plan: RetrievalSmokePlan) -> RetrievalSmok
         RetrievalPrepPlan(
             search_results=plan.search_results,
             output=retrieval_results,
+            text_units=plan.graphrag_root / "text_units.parquet",
             metadata={"smoke": True, **plan.metadata},
         )
     )

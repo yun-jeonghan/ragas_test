@@ -184,7 +184,7 @@
         BenchmarkQED retrieval smoke checks reference generation, retrieval preparation, and retrieval scoring in one pass.
       </p>
       <div class="chips">
-        <span class="chip"><span>generated</span><strong>2026-06-03 14:53 UTC</strong></span>
+        <span class="chip"><span>generated</span><strong>2026-06-03 15:21 UTC</strong></span>
         <span class="chip"><span>reference rows</span><strong>1</strong></span>
         <span class="chip"><span>retrieval rows</span><strong>1</strong></span>
         <span class="chip"><span>evaluation rows</span><strong>1</strong></span>
@@ -347,6 +347,7 @@
     &quot;component&quot;: &quot;RetrievalPrep&quot;,
     &quot;backend&quot;: &quot;benchmark-qed&quot;,
     &quot;source&quot;: &quot;data/results/sample_search_results.json&quot;,
+    &quot;text_units&quot;: &quot;workspaces/graphrag/output/text_units.parquet&quot;,
     &quot;context_id_key&quot;: &quot;chunk_id&quot;,
     &quot;context_text_key&quot;: &quot;text&quot;,
     &quot;smoke&quot;: true
@@ -357,7 +358,7 @@
       &quot;question_text&quot;: &quot;Who is Scrooge?&quot;,
       &quot;context&quot;: [
         {
-          &quot;chunk_id&quot;: &quot;scrooge.txt&quot;,
+          &quot;chunk_id&quot;: &quot;ef3bcbd516bc3f8a14de154a9dfb225bcdfb0f870d1c9caeffa2e0fe4ea34ecd06d17d12840d71c65f506c394895f1ee5e76dc9d3b3994b7bafcd92286aeb4c3&quot;,
           &quot;text&quot;: &quot;Scrooge is a miser who loves money more than people.&quot;,
           &quot;score&quot;: 1.0,
           &quot;metadata&quot;: {}
@@ -397,7 +398,7 @@
     &quot;relevance_threshold&quot;: 2,
     &quot;context_id_key&quot;: &quot;chunk_id&quot;,
     &quot;context_text_key&quot;: &quot;text&quot;,
-    &quot;cluster_match_by&quot;: &quot;text&quot;,
+    &quot;cluster_match_by&quot;: &quot;id&quot;,
     &quot;run_significance_test&quot;: true,
     &quot;significance_alpha&quot;: 0.05,
     &quot;significance_correction&quot;: &quot;holm&quot;,
@@ -408,8 +409,8 @@
     {
       &quot;question_set&quot;: &quot;default&quot;,
       &quot;rag_method&quot;: &quot;benchmark-qed&quot;,
-      &quot;binary_precision&quot;: 1.0,
-      &quot;graded_precision&quot;: 1.0,
+      &quot;binary_precision&quot;: 0.0,
+      &quot;graded_precision&quot;: 0.3333333333333333,
       &quot;recall&quot;: 0.0,
       &quot;fidelity&quot;: 0.0,
       &quot;total_queries&quot;: 1
@@ -566,6 +567,7 @@ No aggregate retrieval metrics were found.</div>
     &quot;component&quot;: &quot;RetrievalPrep&quot;,
     &quot;backend&quot;: &quot;benchmark-qed&quot;,
     &quot;source&quot;: &quot;data/results/sample_search_results.json&quot;,
+    &quot;text_units&quot;: &quot;workspaces/graphrag/output/text_units.parquet&quot;,
     &quot;context_id_key&quot;: &quot;chunk_id&quot;,
     &quot;context_text_key&quot;: &quot;text&quot;,
     &quot;smoke&quot;: true
@@ -576,7 +578,7 @@ No aggregate retrieval metrics were found.</div>
       &quot;question_text&quot;: &quot;Who is Scrooge?&quot;,
       &quot;context&quot;: [
         {
-          &quot;chunk_id&quot;: &quot;scrooge.txt&quot;,
+          &quot;chunk_id&quot;: &quot;ef3bcbd516bc3f8a14de154a9dfb225bcdfb0f870d1c9caeffa2e0fe4ea34ecd06d17d12840d71c65f506c394895f1ee5e76dc9d3b3994b7bafcd92286aeb4c3&quot;,
           &quot;text&quot;: &quot;Scrooge is a miser who loves money more than people.&quot;,
           &quot;score&quot;: 1.0,
           &quot;metadata&quot;: {}
@@ -616,7 +618,7 @@ No aggregate retrieval metrics were found.</div>
     &quot;relevance_threshold&quot;: 2,
     &quot;context_id_key&quot;: &quot;chunk_id&quot;,
     &quot;context_text_key&quot;: &quot;text&quot;,
-    &quot;cluster_match_by&quot;: &quot;text&quot;,
+    &quot;cluster_match_by&quot;: &quot;id&quot;,
     &quot;run_significance_test&quot;: true,
     &quot;significance_alpha&quot;: 0.05,
     &quot;significance_correction&quot;: &quot;holm&quot;,
@@ -627,8 +629,8 @@ No aggregate retrieval metrics were found.</div>
     {
       &quot;question_set&quot;: &quot;default&quot;,
       &quot;rag_method&quot;: &quot;benchmark-qed&quot;,
-      &quot;binary_precision&quot;: 1.0,
-      &quot;graded_precision&quot;: 1.0,
+      &quot;binary_precision&quot;: 0.0,
+      &quot;graded_precision&quot;: 0.3333333333333333,
       &quot;recall&quot;: 0.0,
       &quot;fidelity&quot;: 0.0,
       &quot;total_queries&quot;: 1
