@@ -343,11 +343,11 @@
         BenchmarkQED smoke in one place: AutoD prepares the corpus summary, AutoQ generates questions, and AutoE evaluates the saved answers with Ragas.
       </p>
       <div class="chips">
-        <span class="chip"><span>generated</span><strong>2026-06-03 08:01 UTC</strong></span>
+        <span class="chip"><span>generated</span><strong>2026-06-03 08:28 UTC</strong></span>
         <span class="chip"><span>scores</span><strong>4</strong></span>
         <span class="chip"><span>results</span><strong>1</strong></span>
         <span class="chip"><span>aggregate metrics</span><strong>4</strong></span>
-        <span class="chip"><span>chat model</span><strong>qwen2.5:0.5b</strong></span><span class="chip"><span>provider</span><strong>ollama</strong></span><span class="chip"><span>embeddings</span><strong>nomic-embed-text</strong></span><span class="chip"><span>endpoint</span><strong>http://127.0.0.1:11434/v1</strong></span>
+        <span class="chip"><span>chat model</span><strong>qwen2.5:0.5b</strong></span><span class="chip"><span>provider</span><strong>ollama</strong></span><span class="chip"><span>embeddings</span><strong>nomic-embed-text</strong></span><span class="chip"><span>endpoint</span><strong>http://127.0.0.1:11434/v1</strong></span><span class="chip"><span>assertions</span><strong>raw</strong></span>
       </div>
     </header>
 
@@ -396,6 +396,12 @@
         <p class="metric-desc">평가 항목 설명이 아직 등록되지 않았습니다.</p>
       </article>
     
+      <article class="metric-card">
+        <div class="metric-title">assertions</div>
+        <div class="metric-value">0</div>
+        <p class="metric-desc">평가 항목 설명이 아직 등록되지 않았습니다.</p>
+      </article>
+    
         </div>
         <div class="note" style="margin-top: 14px;">
           The metric descriptions below are short guides for reading the scores, not hard thresholds.
@@ -411,9 +417,20 @@
         <ul class="bullet-list"><li>1 document(s) summarized.</li><li>2 theme(s) extracted.</li><li>Scrooge is a miser who loves money more than people. He keeps his office cold and dark.</li><li>The dataset synthesizes content from multiple analysts, focusing on the following topics:
 
 - **Industry Expertise**: The analysis covers a wide range of industries, including technology, finance, healthcare, and more. It highlights how these sectors are interconnected and influenced by technological advancements.
-- **Data Sources**: The data is sourced from various sources such as news articles, research papers, and podcast transcripts. This diversity ensures that the dataset provides a comprehensive view of current trends and developments in each sector.
+  
+- **Data Sources**: The data is sourced from various sources, including news articles, research papers, and podcast transcripts. This diversity ensures that the dataset provides a comprehensive view of current trends and developments in each sector.
 
-The content format is structured around themes like &quot;technology,&quot; &quot;societal implications,&quot; and &quot;industry-specific issues.&quot; It aims to provide insights into how technology impacts different sectors and their broader societal impacts.</li></ul>
+- **Perspective**: The analysts discuss the intersection of technology and society, highlighting how technological innovations are shaping various aspects of daily life and policy-making.
+
+- **Data Provenance**: The data is from multiple sources, including academic papers, industry reports, and news articles. This ensures that the dataset is reliable and up-to-date.
+
+- **Overview**: The dataset covers a broad spectrum of topics, including technology, finance, healthcare, and more. It provides insights into how these sectors are interconnected and influenced by technological advancements.
+
+- **Main Topics**: The main topics covered in the analysts&#x27; summaries include:
+  - Technology: How technology is shaping various industries.
+  - Finance: Analysis of financial markets and economic trends.
+  - Healthcare: Impact of technology on healthcare systems and patient outcomes.
+ </li></ul>
         
       <details>
         <summary>Full JSON view</summary>
@@ -429,7 +446,7 @@ The content format is structured around themes like &quot;technology,&quot; &quo
       &quot;id&quot;: &quot;scrooge_a.txt&quot;,
       &quot;title&quot;: &quot;scrooge_a&quot;,
       &quot;summary&quot;: &quot;Scrooge is a miser who loves money more than people. He keeps his office cold and dark.&quot;,
-      &quot;source_path&quot;: &quot;/tmp/grev-benchmark-qed-smoke-local3/docs/scrooge_a.txt&quot;
+      &quot;source_path&quot;: &quot;/tmp/grev-benchmark-qed-smoke-final/docs/scrooge_a.txt&quot;
     }
   ],
   &quot;corpus_summary&quot;: &quot;Scrooge is a miser who loves money more than people. He keeps his office cold and dark.&quot;,
@@ -438,13 +455,13 @@ The content format is structured around themes like &quot;technology,&quot; &quo
     &quot;He keeps his office cold and dark&quot;
   ],
   &quot;benchmark_qed&quot;: {
-    &quot;summary&quot;: &quot;The dataset synthesizes content from multiple analysts, focusing on the following topics:\n\n- **Industry Expertise**: The analysis covers a wide range of industries, including technology, finance, healthcare, and more. It highlights how these sectors are interconnected and influenced by technological advancements.\n- **Data Sources**: The data is sourced from various sources such as news articles, research papers, and podcast transcripts. This diversity ensures that the dataset provides a comprehensive view of current trends and developments in each sector.\n\nThe content format is structured around themes like \&quot;technology,\&quot; \&quot;societal implications,\&quot; and \&quot;industry-specific issues.\&quot; It aims to provide insights into how technology impacts different sectors and their broader societal impacts.&quot;,
+    &quot;summary&quot;: &quot;The dataset synthesizes content from multiple analysts, focusing on the following topics:\n\n- **Industry Expertise**: The analysis covers a wide range of industries, including technology, finance, healthcare, and more. It highlights how these sectors are interconnected and influenced by technological advancements.\n  \n- **Data Sources**: The data is sourced from various sources, including news articles, research papers, and podcast transcripts. This diversity ensures that the dataset provides a comprehensive view of current trends and developments in each sector.\n\n- **Perspective**: The analysts discuss the intersection of technology and society, highlighting how technological innovations are shaping various aspects of daily life and policy-making.\n\n- **Data Provenance**: The data is from multiple sources, including academic papers, industry reports, and news articles. This ensures that the dataset is reliable and up-to-date.\n\n- **Overview**: The dataset covers a broad spectrum of topics, including technology, finance, healthcare, and more. It provides insights into how these sectors are interconnected and influenced by technological advancements.\n\n- **Main Topics**: The main topics covered in the analysts&#x27; summaries include:\n  - Technology: How technology is shaping various industries.\n  - Finance: Analysis of financial markets and economic trends.\n  - Healthcare: Impact of technology on healthcare systems and patient outcomes.\n &quot;,
     &quot;input_tokens&quot;: 798,
-    &quot;output_tokens&quot;: 173,
+    &quot;output_tokens&quot;: 295,
     &quot;llm_calls&quot;: 2,
     &quot;sample_texts&quot;: [
       {
-        &quot;id&quot;: &quot;64a84cb2-5755-4b35-b8b3-469310be1158&quot;,
+        &quot;id&quot;: &quot;b6767d03-97c9-4281-a8f5-2f1683486b2a&quot;,
         &quot;short_id&quot;: &quot;0&quot;,
         &quot;text&quot;: &quot;Scrooge is a miser who loves money more than people. He keeps his office cold and dark.\n&quot;,
         &quot;document_id&quot;: &quot;04c6ab8a47cb3d1c9d59c75095f57bbafc19dd9af7edc29d99e6bc6b4ac9c3432371bbd82b6237d203084b9a83e20d08c92839ae5208576fe88e9a520f0cec77&quot;,
@@ -1221,7 +1238,7 @@ The content format is structured around themes like &quot;technology,&quot; &quo
         ],
         &quot;cluster_id&quot;: &quot;0&quot;,
         &quot;attributes&quot;: {
-          &quot;date_created&quot;: &quot;2026-06-03 07:01:49 +0000&quot;,
+          &quot;date_created&quot;: &quot;2026-06-03 08:25:42 +0000&quot;,
           &quot;is_representative&quot;: true
         }
       }
@@ -1235,7 +1252,7 @@ The content format is structured around themes like &quot;technology,&quot; &quo
           
       <article class="artifact-card">
         <h3>AutoQ</h3>
-        <ul class="bullet-list"><li>1 question(s) generated.</li><li>Modes: local.</li><li>Claims: 1; assertions: 0.</li><li>Assertions were not populated for this run, so global coverage remains the next thing to tighten.</li><li>First question: What specific actions did Marley take after the visits that led to Scrooge changing his ways? </li></ul>
+        <ul class="bullet-list"><li>1 question(s) generated.</li><li>Modes: local.</li><li>Claims: 1; assertions: 0.</li><li>Assertions were not populated for this run, so global coverage remains the next thing to tighten.</li><li>First question: What events or situations does Marley warn Scrooge about in his letter? </li></ul>
         
       <details>
         <summary>Full JSON view</summary>
@@ -1251,8 +1268,8 @@ The content format is structured around themes like &quot;technology,&quot; &quo
   },
   &quot;questions&quot;: [
     {
-      &quot;id&quot;: &quot;1c90a42f-ceff-4008-a85b-3af06bd7e0b2&quot;,
-      &quot;text&quot;: &quot;What specific actions did Marley take after the visits that led to Scrooge changing his ways? &quot;,
+      &quot;id&quot;: &quot;d9a1701d-e66a-4013-8a06-4e6477f61d36&quot;,
+      &quot;text&quot;: &quot;What events or situations does Marley warn Scrooge about in his letter? &quot;,
       &quot;question_type&quot;: &quot;data_local&quot;,
       &quot;references&quot;: [
         &quot;Input Text 2: Marley warns Scrooge about the chains of greed and loneliness. After the visits, Scrooge changes his ways and becomes generous.\n&quot;
@@ -1282,10 +1299,10 @@ The content format is structured around themes like &quot;technology,&quot; &quo
         &quot;reference_coverage&quot;: 1.0,
         &quot;relevant_reference_count&quot;: 1,
         &quot;reference_count&quot;: 1,
-        &quot;min_reference_similarity&quot;: 0.8230795873605272,
-        &quot;max_reference_similarity&quot;: 0.8230795873605272,
-        &quot;mean_reference_similarity&quot;: 0.8230795873605272,
-        &quot;intra_inter_similarity_ratio&quot;: 1.392099019680597,
+        &quot;min_reference_similarity&quot;: 0.7992223330279304,
+        &quot;max_reference_similarity&quot;: 0.7992223330279304,
+        &quot;mean_reference_similarity&quot;: 0.7992223330279304,
+        &quot;intra_inter_similarity_ratio&quot;: 1.2866672203803355,
         &quot;claim_count&quot;: 1,
         &quot;claims&quot;: [
           {
@@ -1296,7 +1313,7 @@ The content format is structured around themes like &quot;technology,&quot; &quo
                 &quot;text&quot;: &quot;Marley warns Scrooge about the chains of greed and loneliness. After the visits, Scrooge changes his ways and becomes generous.\n&quot;
               }
             ],
-            &quot;score&quot;: 95,
+            &quot;score&quot;: 85,
             &quot;source_ids&quot;: [
               &quot;2&quot;
             ]
@@ -1305,10 +1322,31 @@ The content format is structured around themes like &quot;technology,&quot; &quo
         &quot;assertions&quot;: [],
         &quot;assertion_count&quot;: 0
       },
-      &quot;question&quot;: &quot;What specific actions did Marley take after the visits that led to Scrooge changing his ways? &quot;,
+      &quot;question&quot;: &quot;What events or situations does Marley warn Scrooge about in his letter? &quot;,
       &quot;source&quot;: &quot;candidate&quot;
     }
   ]
+}</pre>
+      </details>
+    
+      </article>
+    
+          
+      <article class="artifact-card">
+        <h3>Assertion Prep</h3>
+        <ul class="bullet-list"><li>0 question(s) with assertions.</li><li>0 total assertion(s).</li><li>Validation: off (min score 1/5)</li><li>No valid assertions were recorded.</li></ul>
+        
+      <details>
+        <summary>Full JSON view</summary>
+        <pre>{
+  &quot;metadata&quot;: {
+    &quot;component&quot;: &quot;AssertionPrep&quot;,
+    &quot;backend&quot;: &quot;benchmark-qed&quot;,
+    &quot;assertion_type&quot;: &quot;local&quot;,
+    &quot;validation_enabled&quot;: false,
+    &quot;min_validation_score&quot;: 1,
+    &quot;settings_path&quot;: &quot;/tmp/grev-benchmark-qed-smoke-final/out/settings.raw.yaml&quot;
+  }
 }</pre>
       </details>
     
@@ -1340,7 +1378,7 @@ The content format is structured around themes like &quot;technology,&quot; &quo
       &quot;sample_id&quot;: &quot;scrooge-1&quot;,
       &quot;metric_name&quot;: &quot;context_recall&quot;,
       &quot;value&quot;: 10.0,
-      &quot;reason&quot;: &quot;The generated answer is a direct paraphrase of the reference answer, which states that Scrooge is a miser who loves money more than people. The context_recall criterion is satisfied because the generated answer accurately reflects the information provided in the reference answer.&quot;,
+      &quot;reason&quot;: &quot;The generated answer is a direct quote from the reference answer, which satisfies the context_recall criterion. The answer accurately represents the information provided in the reference.&quot;,
       &quot;metadata&quot;: {
         &quot;trial&quot;: 0,
         &quot;question_text&quot;: &quot;Who is Scrooge?&quot;,
@@ -1353,7 +1391,7 @@ The content format is structured around themes like &quot;technology,&quot; &quo
       &quot;sample_id&quot;: &quot;scrooge-1&quot;,
       &quot;metric_name&quot;: &quot;faithfulness&quot;,
       &quot;value&quot;: 10.0,
-      &quot;reason&quot;: &quot;The generated answer is a faithful copy of the reference answer. It accurately reflects that Scrooge is a miser who loves money more than people.&quot;,
+      &quot;reason&quot;: &quot;The generated answer is a faithful copy of the reference answer, as it accurately reflects the information provided in the question. It does not include any additional relevant details that contradict or contradict the reference.&quot;,
       &quot;metadata&quot;: {
         &quot;trial&quot;: 0,
         &quot;question_text&quot;: &quot;Who is Scrooge?&quot;,
@@ -1366,7 +1404,7 @@ The content format is structured around themes like &quot;technology,&quot; &quo
       &quot;sample_id&quot;: &quot;scrooge-1&quot;,
       &quot;metric_name&quot;: &quot;answer_relevancy&quot;,
       &quot;value&quot;: 10.0,
-      &quot;reason&quot;: &quot;The generated answer is a direct paraphrase of the reference answer, which states that Scrooge is a miser who loves money more than people. The generated answer does not provide any additional relevant details or context that are present in the reference answer.&quot;,
+      &quot;reason&quot;: &quot;The generated answer is a direct quote from the reference answer, which provides additional relevant details about Scrooge. The answer re-iterates the key information (Scrooge&#x27;s role as a miser) and maintains the same tone and style as the reference answer.&quot;,
       &quot;metadata&quot;: {
         &quot;trial&quot;: 0,
         &quot;question_text&quot;: &quot;Who is Scrooge?&quot;,
@@ -1534,7 +1572,7 @@ The content format is structured around themes like &quot;technology,&quot; &quo
         <td>10</td>
         <td></td>
         <td></td>
-        <td title="The generated answer is a direct paraphrase of the reference answer, which states that Scrooge is a miser who loves money more than people. The context_recall criterion is satisfied because the generated answer accurately reflects the information provided in the reference answer.">The generated answer is a direct paraphrase of the reference answer, which states that Scrooge is a miser who loves mon&hellip;</td>
+        <td title="The generated answer is a direct quote from the reference answer, which satisfies the context_recall criterion. The answer accurately represents the information provided in the reference.">The generated answer is a direct quote from the reference answer, which satisfies the context_recall criterion. The ans&hellip;</td>
       </tr>
     
 
@@ -1544,7 +1582,7 @@ The content format is structured around themes like &quot;technology,&quot; &quo
         <td>10</td>
         <td></td>
         <td></td>
-        <td title="The generated answer is a faithful copy of the reference answer. It accurately reflects that Scrooge is a miser who loves money more than people.">The generated answer is a faithful copy of the reference answer. It accurately reflects that Scrooge is a miser who lov&hellip;</td>
+        <td title="The generated answer is a faithful copy of the reference answer, as it accurately reflects the information provided in the question. It does not include any additional relevant details that contradict or contradict the reference.">The generated answer is a faithful copy of the reference answer, as it accurately reflects the information provided in&hellip;</td>
       </tr>
     
 
@@ -1554,7 +1592,7 @@ The content format is structured around themes like &quot;technology,&quot; &quo
         <td>10</td>
         <td></td>
         <td></td>
-        <td title="The generated answer is a direct paraphrase of the reference answer, which states that Scrooge is a miser who loves money more than people. The generated answer does not provide any additional relevant details or context that are present in the reference answer.">The generated answer is a direct paraphrase of the reference answer, which states that Scrooge is a miser who loves mon&hellip;</td>
+        <td title="The generated answer is a direct quote from the reference answer, which provides additional relevant details about Scrooge. The answer re-iterates the key information (Scrooge&#x27;s role as a miser) and maintains the same tone and style as the reference answer.">The generated answer is a direct quote from the reference answer, which provides additional relevant details about Scro&hellip;</td>
       </tr>
     
             </tbody>
@@ -1609,7 +1647,7 @@ The content format is structured around themes like &quot;technology,&quot; &quo
       <div class="stack">
         <div class="block">
           <h4>Reason</h4>
-          <pre>The generated answer is a direct paraphrase of the reference answer, which states that Scrooge is a miser who loves money more than people. The context_recall criterion is satisfied because the generated answer accurately reflects the information provided in the reference answer.</pre>
+          <pre>The generated answer is a direct quote from the reference answer, which satisfies the context_recall criterion. The answer accurately represents the information provided in the reference.</pre>
         </div>
         <div class="block">
           <h4>Metadata</h4>
@@ -1641,7 +1679,7 @@ The content format is structured around themes like &quot;technology,&quot; &quo
       <div class="stack">
         <div class="block">
           <h4>Reason</h4>
-          <pre>The generated answer is a faithful copy of the reference answer. It accurately reflects that Scrooge is a miser who loves money more than people.</pre>
+          <pre>The generated answer is a faithful copy of the reference answer, as it accurately reflects the information provided in the question. It does not include any additional relevant details that contradict or contradict the reference.</pre>
         </div>
         <div class="block">
           <h4>Metadata</h4>
@@ -1673,7 +1711,7 @@ The content format is structured around themes like &quot;technology,&quot; &quo
       <div class="stack">
         <div class="block">
           <h4>Reason</h4>
-          <pre>The generated answer is a direct paraphrase of the reference answer, which states that Scrooge is a miser who loves money more than people. The generated answer does not provide any additional relevant details or context that are present in the reference answer.</pre>
+          <pre>The generated answer is a direct quote from the reference answer, which provides additional relevant details about Scrooge. The answer re-iterates the key information (Scrooge&#x27;s role as a miser) and maintains the same tone and style as the reference answer.</pre>
         </div>
         <div class="block">
           <h4>Metadata</h4>
@@ -1735,18 +1773,19 @@ The content format is structured around themes like &quot;technology,&quot; &quo
       <section>
         <h2>Interpretation</h2>
         <div class="note">
-          <div class="interpretation">Model lens: qwen2.5:0.5b via ollama (http://127.0.0.1:11434/v1).
-This is a smoke run, so 4 score row(s) and 4 aggregate metric(s) should be read as a sanity check rather than a benchmark.
-context_precision = 10. 검색된 컨텍스트 중 답변에 실제로 도움이 되는 비율.
-context_recall = 10. 정답을 뒷받침하는 컨텍스트를 얼마나 빠짐없이 찾았는지.
-faithfulness = 10. 답변이 검색 컨텍스트에 얼마나 충실한지.
-answer_relevancy = 10. 질문과 답변이 얼마나 직접적으로 연결되는지.
-AutoD produced a corpus summary and benchmark_qed summary, which means the document-side path is wired up correctly.
-AutoD covered 1 document(s) and 2 theme(s).
-AutoQ reported 1 question(s); if this is lower than expected, treat it as a generation coverage issue rather than an evaluation failure.
-AutoQ claim/assertion coverage: 1 claim(s), 0 assertion(s) across 0 question(s) with assertions.
-Claims are being produced, but assertions are still empty; that is a useful signal for the global path and should be called out explicitly.
-If the chat model is qwen2.5:0.5b, this report is best interpreted as a local smoke lens: useful for catching wiring mistakes, not for proving final quality.</div>
+          <div class="interpretation">- **Runtime Details**: The OLLAMA model is trained on the Qwen2.5:0.5b model, which has a base URL of `http://127.0.0.1:11434/v1`. This indicates that the model is running locally and accessing its training data from this endpoint.
+- **Autod Data**: The dataset contains 1 document with 1 theme. The corpus summary provides a concise overview of the content, while the benchmark_qed_summary offers an in-depth analysis of the dataset&#x27;s quality metrics.
+
+### Autod Analysis
+- **Documents**: 1
+- **Themes**: &quot;Scrooge is a miser who loves money more than people&quot; and &quot;He keeps his office cold and dark&quot;
+- **Corpus Summary**: The dataset synthesizes content from multiple analysts, focusing on the following topics:
+  - **Industry Expertise**: Covers various industries including technology, finance, healthcare, etc.
+  - **Data Sources**: Sourced from news articles, research papers, and podcast transcripts.
+  - **Perspective**: Discusses technological advancements affecting daily life and policy-making.
+  - **Data Provenance**: From multiple sources, ensuring reliability and up-to-date information.
+
+### AutoQ Analysis</div>
         </div>
       </section>
 
@@ -1759,9 +1798,20 @@ If the chat model is qwen2.5:0.5b, this report is best interpreted as a local sm
         <ul class="bullet-list"><li>1 document(s) summarized.</li><li>2 theme(s) extracted.</li><li>Scrooge is a miser who loves money more than people. He keeps his office cold and dark.</li><li>The dataset synthesizes content from multiple analysts, focusing on the following topics:
 
 - **Industry Expertise**: The analysis covers a wide range of industries, including technology, finance, healthcare, and more. It highlights how these sectors are interconnected and influenced by technological advancements.
-- **Data Sources**: The data is sourced from various sources such as news articles, research papers, and podcast transcripts. This diversity ensures that the dataset provides a comprehensive view of current trends and developments in each sector.
+  
+- **Data Sources**: The data is sourced from various sources, including news articles, research papers, and podcast transcripts. This diversity ensures that the dataset provides a comprehensive view of current trends and developments in each sector.
 
-The content format is structured around themes like &quot;technology,&quot; &quot;societal implications,&quot; and &quot;industry-specific issues.&quot; It aims to provide insights into how technology impacts different sectors and their broader societal impacts.</li></ul>
+- **Perspective**: The analysts discuss the intersection of technology and society, highlighting how technological innovations are shaping various aspects of daily life and policy-making.
+
+- **Data Provenance**: The data is from multiple sources, including academic papers, industry reports, and news articles. This ensures that the dataset is reliable and up-to-date.
+
+- **Overview**: The dataset covers a broad spectrum of topics, including technology, finance, healthcare, and more. It provides insights into how these sectors are interconnected and influenced by technological advancements.
+
+- **Main Topics**: The main topics covered in the analysts&#x27; summaries include:
+  - Technology: How technology is shaping various industries.
+  - Finance: Analysis of financial markets and economic trends.
+  - Healthcare: Impact of technology on healthcare systems and patient outcomes.
+ </li></ul>
         
       <details>
         <summary>Full JSON view</summary>
@@ -1777,7 +1827,7 @@ The content format is structured around themes like &quot;technology,&quot; &quo
       &quot;id&quot;: &quot;scrooge_a.txt&quot;,
       &quot;title&quot;: &quot;scrooge_a&quot;,
       &quot;summary&quot;: &quot;Scrooge is a miser who loves money more than people. He keeps his office cold and dark.&quot;,
-      &quot;source_path&quot;: &quot;/tmp/grev-benchmark-qed-smoke-local3/docs/scrooge_a.txt&quot;
+      &quot;source_path&quot;: &quot;/tmp/grev-benchmark-qed-smoke-final/docs/scrooge_a.txt&quot;
     }
   ],
   &quot;corpus_summary&quot;: &quot;Scrooge is a miser who loves money more than people. He keeps his office cold and dark.&quot;,
@@ -1786,13 +1836,13 @@ The content format is structured around themes like &quot;technology,&quot; &quo
     &quot;He keeps his office cold and dark&quot;
   ],
   &quot;benchmark_qed&quot;: {
-    &quot;summary&quot;: &quot;The dataset synthesizes content from multiple analysts, focusing on the following topics:\n\n- **Industry Expertise**: The analysis covers a wide range of industries, including technology, finance, healthcare, and more. It highlights how these sectors are interconnected and influenced by technological advancements.\n- **Data Sources**: The data is sourced from various sources such as news articles, research papers, and podcast transcripts. This diversity ensures that the dataset provides a comprehensive view of current trends and developments in each sector.\n\nThe content format is structured around themes like \&quot;technology,\&quot; \&quot;societal implications,\&quot; and \&quot;industry-specific issues.\&quot; It aims to provide insights into how technology impacts different sectors and their broader societal impacts.&quot;,
+    &quot;summary&quot;: &quot;The dataset synthesizes content from multiple analysts, focusing on the following topics:\n\n- **Industry Expertise**: The analysis covers a wide range of industries, including technology, finance, healthcare, and more. It highlights how these sectors are interconnected and influenced by technological advancements.\n  \n- **Data Sources**: The data is sourced from various sources, including news articles, research papers, and podcast transcripts. This diversity ensures that the dataset provides a comprehensive view of current trends and developments in each sector.\n\n- **Perspective**: The analysts discuss the intersection of technology and society, highlighting how technological innovations are shaping various aspects of daily life and policy-making.\n\n- **Data Provenance**: The data is from multiple sources, including academic papers, industry reports, and news articles. This ensures that the dataset is reliable and up-to-date.\n\n- **Overview**: The dataset covers a broad spectrum of topics, including technology, finance, healthcare, and more. It provides insights into how these sectors are interconnected and influenced by technological advancements.\n\n- **Main Topics**: The main topics covered in the analysts&#x27; summaries include:\n  - Technology: How technology is shaping various industries.\n  - Finance: Analysis of financial markets and economic trends.\n  - Healthcare: Impact of technology on healthcare systems and patient outcomes.\n &quot;,
     &quot;input_tokens&quot;: 798,
-    &quot;output_tokens&quot;: 173,
+    &quot;output_tokens&quot;: 295,
     &quot;llm_calls&quot;: 2,
     &quot;sample_texts&quot;: [
       {
-        &quot;id&quot;: &quot;64a84cb2-5755-4b35-b8b3-469310be1158&quot;,
+        &quot;id&quot;: &quot;b6767d03-97c9-4281-a8f5-2f1683486b2a&quot;,
         &quot;short_id&quot;: &quot;0&quot;,
         &quot;text&quot;: &quot;Scrooge is a miser who loves money more than people. He keeps his office cold and dark.\n&quot;,
         &quot;document_id&quot;: &quot;04c6ab8a47cb3d1c9d59c75095f57bbafc19dd9af7edc29d99e6bc6b4ac9c3432371bbd82b6237d203084b9a83e20d08c92839ae5208576fe88e9a520f0cec77&quot;,
@@ -2569,7 +2619,7 @@ The content format is structured around themes like &quot;technology,&quot; &quo
         ],
         &quot;cluster_id&quot;: &quot;0&quot;,
         &quot;attributes&quot;: {
-          &quot;date_created&quot;: &quot;2026-06-03 07:01:49 +0000&quot;,
+          &quot;date_created&quot;: &quot;2026-06-03 08:25:42 +0000&quot;,
           &quot;is_representative&quot;: true
         }
       }
@@ -2583,7 +2633,7 @@ The content format is structured around themes like &quot;technology,&quot; &quo
           
       <article class="artifact-card">
         <h3>AutoQ Questions</h3>
-        <ul class="bullet-list"><li>1 question(s) generated.</li><li>Modes: local.</li><li>First question: What specific actions did Marley take after the visits that led to Scrooge changing his ways? </li></ul>
+        <ul class="bullet-list"><li>1 question(s) generated.</li><li>Modes: local.</li><li>First question: What events or situations does Marley warn Scrooge about in his letter? </li></ul>
         
       <details>
         <summary>Full JSON view</summary>
@@ -2599,8 +2649,8 @@ The content format is structured around themes like &quot;technology,&quot; &quo
   },
   &quot;questions&quot;: [
     {
-      &quot;id&quot;: &quot;1c90a42f-ceff-4008-a85b-3af06bd7e0b2&quot;,
-      &quot;text&quot;: &quot;What specific actions did Marley take after the visits that led to Scrooge changing his ways? &quot;,
+      &quot;id&quot;: &quot;d9a1701d-e66a-4013-8a06-4e6477f61d36&quot;,
+      &quot;text&quot;: &quot;What events or situations does Marley warn Scrooge about in his letter? &quot;,
       &quot;question_type&quot;: &quot;data_local&quot;,
       &quot;references&quot;: [
         &quot;Input Text 2: Marley warns Scrooge about the chains of greed and loneliness. After the visits, Scrooge changes his ways and becomes generous.\n&quot;
@@ -2630,10 +2680,10 @@ The content format is structured around themes like &quot;technology,&quot; &quo
         &quot;reference_coverage&quot;: 1.0,
         &quot;relevant_reference_count&quot;: 1,
         &quot;reference_count&quot;: 1,
-        &quot;min_reference_similarity&quot;: 0.8230795873605272,
-        &quot;max_reference_similarity&quot;: 0.8230795873605272,
-        &quot;mean_reference_similarity&quot;: 0.8230795873605272,
-        &quot;intra_inter_similarity_ratio&quot;: 1.392099019680597,
+        &quot;min_reference_similarity&quot;: 0.7992223330279304,
+        &quot;max_reference_similarity&quot;: 0.7992223330279304,
+        &quot;mean_reference_similarity&quot;: 0.7992223330279304,
+        &quot;intra_inter_similarity_ratio&quot;: 1.2866672203803355,
         &quot;claim_count&quot;: 1,
         &quot;claims&quot;: [
           {
@@ -2644,7 +2694,7 @@ The content format is structured around themes like &quot;technology,&quot; &quo
                 &quot;text&quot;: &quot;Marley warns Scrooge about the chains of greed and loneliness. After the visits, Scrooge changes his ways and becomes generous.\n&quot;
               }
             ],
-            &quot;score&quot;: 95,
+            &quot;score&quot;: 85,
             &quot;source_ids&quot;: [
               &quot;2&quot;
             ]
@@ -2653,7 +2703,7 @@ The content format is structured around themes like &quot;technology,&quot; &quo
         &quot;assertions&quot;: [],
         &quot;assertion_count&quot;: 0
       },
-      &quot;question&quot;: &quot;What specific actions did Marley take after the visits that led to Scrooge changing his ways? &quot;,
+      &quot;question&quot;: &quot;What events or situations does Marley warn Scrooge about in his letter? &quot;,
       &quot;source&quot;: &quot;candidate&quot;
     }
   ]
@@ -2688,7 +2738,7 @@ The content format is structured around themes like &quot;technology,&quot; &quo
       &quot;sample_id&quot;: &quot;scrooge-1&quot;,
       &quot;metric_name&quot;: &quot;context_recall&quot;,
       &quot;value&quot;: 10.0,
-      &quot;reason&quot;: &quot;The generated answer is a direct paraphrase of the reference answer, which states that Scrooge is a miser who loves money more than people. The context_recall criterion is satisfied because the generated answer accurately reflects the information provided in the reference answer.&quot;,
+      &quot;reason&quot;: &quot;The generated answer is a direct quote from the reference answer, which satisfies the context_recall criterion. The answer accurately represents the information provided in the reference.&quot;,
       &quot;metadata&quot;: {
         &quot;trial&quot;: 0,
         &quot;question_text&quot;: &quot;Who is Scrooge?&quot;,
@@ -2701,7 +2751,7 @@ The content format is structured around themes like &quot;technology,&quot; &quo
       &quot;sample_id&quot;: &quot;scrooge-1&quot;,
       &quot;metric_name&quot;: &quot;faithfulness&quot;,
       &quot;value&quot;: 10.0,
-      &quot;reason&quot;: &quot;The generated answer is a faithful copy of the reference answer. It accurately reflects that Scrooge is a miser who loves money more than people.&quot;,
+      &quot;reason&quot;: &quot;The generated answer is a faithful copy of the reference answer, as it accurately reflects the information provided in the question. It does not include any additional relevant details that contradict or contradict the reference.&quot;,
       &quot;metadata&quot;: {
         &quot;trial&quot;: 0,
         &quot;question_text&quot;: &quot;Who is Scrooge?&quot;,
@@ -2714,7 +2764,7 @@ The content format is structured around themes like &quot;technology,&quot; &quo
       &quot;sample_id&quot;: &quot;scrooge-1&quot;,
       &quot;metric_name&quot;: &quot;answer_relevancy&quot;,
       &quot;value&quot;: 10.0,
-      &quot;reason&quot;: &quot;The generated answer is a direct paraphrase of the reference answer, which states that Scrooge is a miser who loves money more than people. The generated answer does not provide any additional relevant details or context that are present in the reference answer.&quot;,
+      &quot;reason&quot;: &quot;The generated answer is a direct quote from the reference answer, which provides additional relevant details about Scrooge. The answer re-iterates the key information (Scrooge&#x27;s role as a miser) and maintains the same tone and style as the reference answer.&quot;,
       &quot;metadata&quot;: {
         &quot;trial&quot;: 0,
         &quot;question_text&quot;: &quot;Who is Scrooge?&quot;,

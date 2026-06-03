@@ -61,6 +61,14 @@ def test_run_benchmark_qed_smoke_orchestrates_all_steps(monkeypatch, tmp_path: P
                 plan = args[0]
                 plan.output.write_text(json.dumps({"results": []}), encoding="utf-8")
                 return {"results": []}
+            if name == "_generate_assertion_prep":
+                output_dir = kwargs["output_dir"]
+                output = output_dir / "assertion-prep.json"
+                output.write_text(
+                    json.dumps({"metadata": {"component": "AssertionPrep"}, "questions": [], "stats": {}}),
+                    encoding="utf-8",
+                )
+                return output
 
             plan = args[0]
             if name == "summarize_dataset":
@@ -85,6 +93,7 @@ def test_run_benchmark_qed_smoke_orchestrates_all_steps(monkeypatch, tmp_path: P
 
     monkeypatch.setattr("graphrag_ragas_eval.benchmark_qed.smoke.summarize_dataset", _record("summarize_dataset"))
     monkeypatch.setattr("graphrag_ragas_eval.benchmark_qed.smoke.generate_queries", _record("generate_queries"))
+    monkeypatch.setattr("graphrag_ragas_eval.benchmark_qed.smoke._generate_assertion_prep", _record("_generate_assertion_prep"))
     monkeypatch.setattr("graphrag_ragas_eval.benchmark_qed.smoke.evaluate_answers", _record("evaluate_answers"))
     monkeypatch.setattr("graphrag_ragas_eval.benchmark_qed.smoke.prepare_retrieval_results", _record("prepare_retrieval_results"))
     monkeypatch.setattr("graphrag_ragas_eval.benchmark_qed.smoke.render_smoke_report", _record("render_smoke_report"))
@@ -108,25 +117,29 @@ def test_run_benchmark_qed_smoke_orchestrates_all_steps(monkeypatch, tmp_path: P
 
     assert result.autod_summary == output_dir / "autod-summary.json"
     assert result.autoq_questions == output_dir / "autoq-questions.json"
+    assert result.assertion_prep == output_dir / "assertion-prep.json"
     assert result.autoe_evaluation == output_dir / "autoe-evaluation.json"
     assert result.retrieval_results == output_dir / "retrieval-results.json"
     assert result.report == report_output
     assert result.autod_summary.exists()
     assert result.autoq_questions.exists()
+    assert result.assertion_prep.exists()
     assert result.autoe_evaluation.exists()
     assert result.retrieval_results.exists()
     assert result.report.exists()
     assert [name for name, _ in calls] == [
         "summarize_dataset",
         "generate_queries",
+        "_generate_assertion_prep",
         "evaluate_answers",
         "prepare_retrieval_results",
         "render_smoke_report",
     ]
     assert calls[0][1]["args"][0].metadata == {"smoke": True, "suite": "benchmark-qed"}
     assert calls[1][1]["args"][0].metadata == {"smoke": True, "suite": "benchmark-qed"}
-    assert calls[2][1]["args"][0].metadata == {"smoke": True, "suite": "benchmark-qed"}
+    assert calls[2][1]["kwargs"]["output_dir"] == output_dir
     assert calls[3][1]["args"][0].metadata == {"smoke": True, "suite": "benchmark-qed"}
+    assert calls[4][1]["args"][0].metadata == {"smoke": True, "suite": "benchmark-qed"}
 
 
 def test_benchmark_qed_smoke_cli_dispatch(monkeypatch, tmp_path: Path) -> None:
@@ -142,6 +155,7 @@ def test_benchmark_qed_smoke_cli_dispatch(monkeypatch, tmp_path: Path) -> None:
             {
                 "autod_summary": tmp_path / "autod.json",
                 "autoq_questions": tmp_path / "autoq.json",
+                "assertion_prep": tmp_path / "assertion.json",
                 "autoe_evaluation": tmp_path / "autoe.json",
                 "retrieval_results": tmp_path / "retrieval.json",
                 "report": tmp_path / "report.html",
@@ -150,6 +164,7 @@ def test_benchmark_qed_smoke_cli_dispatch(monkeypatch, tmp_path: Path) -> None:
         for path in [
             result.autod_summary,
             result.autoq_questions,
+            result.assertion_prep,
             result.autoe_evaluation,
             result.retrieval_results,
             result.report,
@@ -180,6 +195,7 @@ def test_benchmark_qed_smoke_cli_dispatch(monkeypatch, tmp_path: Path) -> None:
 
     assert result.exit_code == 0
     assert "wrote smoke report" in result.output
+    assert "wrote assertion prep" in result.output
     assert captured["plan"].source == tmp_path
 
 

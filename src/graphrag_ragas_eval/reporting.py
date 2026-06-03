@@ -132,6 +132,31 @@ def _artifact_card(title: str, bullets: list[str], payload: dict[str, Any]) -> s
     """
 
 
+def _assertion_prep_bullets(assertion_data: dict[str, Any]) -> list[str]:
+    questions = _safe_list(assertion_data.get("questions"))
+    stats = _safe_dict(assertion_data.get("stats"))
+    metadata = _safe_dict(assertion_data.get("metadata"))
+    total_assertions = int(stats.get("total_assertions") or 0)
+    valid_assertions = int(stats.get("valid_assertions") or 0)
+    bullets = [
+        f"{len(questions)} question(s) with assertions.",
+        f"{total_assertions} total assertion(s).",
+        (
+            f"Validation: {'on' if metadata.get('validation_enabled') else 'off'}"
+            + (
+                f" (min score {metadata.get('min_validation_score')}/5)"
+                if metadata.get("validation_enabled") is not None
+                else ""
+            )
+        ),
+    ]
+    if valid_assertions or total_assertions:
+        bullets.append(f"{valid_assertions} valid assertion(s) recorded.")
+    else:
+        bullets.append("No valid assertions were recorded.")
+    return bullets
+
+
 def _question_assertion_stats(autoq_questions: list[dict[str, Any]]) -> dict[str, int]:
     claim_count = 0
     assertion_count = 0
@@ -291,6 +316,10 @@ def _fallback_interpretation(
             lines.append(
                 "Claims are being produced, but assertions are still empty; that is a useful signal for the global path and should be called out explicitly."
             )
+    if (report_metadata or {}).get("assertion_validation_enabled") is False:
+        lines.append(
+            "This run used raw assertions with validation disabled, so the next step is to inspect whether assertion generation itself is working before tightening validation thresholds."
+        )
     lines.append(
         "If the chat model is qwen2.5:0.5b, this report is best interpreted as a local smoke lens: useful for catching wiring mistakes, not for proving final quality."
     )
@@ -305,6 +334,7 @@ def render_smoke_report(
     generated_questions: Path | None = None,
     autod_summary: Path | None = None,
     autoq_questions: Path | None = None,
+    assertion_prep: Path | None = None,
     retrieval_results: Path | None = None,
     report_metadata: dict[str, Any] | None = None,
     interpretation: str | None = None,
@@ -313,6 +343,7 @@ def render_smoke_report(
     generated_data = _load_json(generated_questions) if generated_questions else None
     autod_data = _load_json(autod_summary) if autod_summary else None
     autoq_data = _load_json(autoq_questions) if autoq_questions else None
+    assertion_data = _load_json(assertion_prep) if assertion_prep else None
     retrieval_data = _load_json(retrieval_results) if retrieval_results else None
 
     scores = _safe_list(evaluation_data.get("scores"))
@@ -338,6 +369,13 @@ def render_smoke_report(
         runtime_chips.append(_chip("embeddings", report_metadata["embeddings_model"]))
     if report_metadata.get("base_url"):
         runtime_chips.append(_chip("endpoint", report_metadata["base_url"]))
+    if report_metadata.get("assertion_validation_enabled") is not None:
+        runtime_chips.append(
+            _chip(
+                "assertions",
+                "raw" if not report_metadata.get("assertion_validation_enabled") else "validated",
+            )
+        )
 
     overview_cards = [
         _metric_card("scores", len(scores)),
@@ -349,6 +387,8 @@ def render_smoke_report(
         overview_cards.append(_metric_card("themes", len(_safe_list(autod_data.get("themes")))))
     if autoq_data:
         overview_cards.append(_metric_card("questions", len(_safe_list(autoq_data.get("questions")))))
+    if assertion_data:
+        overview_cards.append(_metric_card("assertions", len(_safe_list(assertion_data.get("questions")))))
 
     aggregate_cards = [_metric_card(metric_name, value) for metric_name, value in aggregate.items()]
     score_rows = "\n".join(_score_row(score) for score in scores if isinstance(score, dict))
@@ -423,6 +463,14 @@ def render_smoke_report(
         artifact_cards.append(_artifact_card("AutoD Summary", autod_bullets, autod_data))
     if autoq_data:
         artifact_cards.append(_artifact_card("AutoQ Questions", autoq_bullets, autoq_data))
+    if assertion_data:
+        artifact_cards.append(
+            _artifact_card(
+                "Assertion Prep",
+                _assertion_prep_bullets(assertion_data),
+                assertion_data,
+            )
+        )
     artifact_cards.append(_artifact_card("AutoE Evaluation", autoe_bullets, evaluation_data))
 
     html_text = f"""<!doctype html>
@@ -798,6 +846,7 @@ def render_smoke_report(
         <div class="wide-grid">
           {_artifact_card("AutoD", autod_bullets if autod_data else ["No AutoD payload available."], autod_data or {})}
           {_artifact_card("AutoQ", autoq_bullets if autoq_data else ["No AutoQ payload available."], autoq_data or {})}
+          {(_artifact_card("Assertion Prep", _assertion_prep_bullets(assertion_data), assertion_data)) if assertion_data else ""}
           {_artifact_card("AutoE", autoe_bullets, evaluation_data)}
         </div>
       </section>
