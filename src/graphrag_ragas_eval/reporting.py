@@ -326,6 +326,40 @@ def _fallback_interpretation(
     return "\n".join(lines)
 
 
+def _retrieval_interpretation(
+    *,
+    reference_data: dict[str, Any] | None,
+    retrieval_data: dict[str, Any] | None,
+    evaluation_data: dict[str, Any] | None,
+    report_metadata: dict[str, Any] | None,
+) -> str:
+    metadata = report_metadata or {}
+    model = metadata.get("chat_model") or metadata.get("model") or "qwen2.5:0.5b"
+    provider = metadata.get("provider") or "ollama"
+    base_url = metadata.get("base_url") or "http://127.0.0.1:11434/v1"
+    reference_count = len(_safe_list((reference_data or {}).get("references")))
+    retrieval_count = len(_safe_list((retrieval_data or {}).get("results")))
+    summary_rows = len(_safe_list((evaluation_data or {}).get("summary")))
+    aggregate = _safe_dict((evaluation_data or {}).get("aggregate"))
+    lines = [
+        f"Model lens: {model} via {provider} ({base_url}).",
+        f"Retrieval smoke is wired if reference rows, prepared retrieval rows, and evaluation rows all appear together.",
+    ]
+    lines.append(f"Reference rows: {reference_count}.")
+    lines.append(f"Prepared retrieval rows: {retrieval_count}.")
+    lines.append(f"Evaluation summary rows: {summary_rows}.")
+    if aggregate:
+        for metric_name, value in aggregate.items():
+            lines.append(f"{metric_name} = {_format_metric_value(value)}. {_metric_description(metric_name)}.")
+    if retrieval_count == 0:
+        lines.append("No retrieval rows were prepared, so the scoring path cannot be trusted yet.")
+    if reference_count == 0:
+        lines.append("No retrieval references were generated, so the benchmark-side reference path is still missing.")
+    if not aggregate:
+        lines.append("No aggregate retrieval metrics were found.")
+    return "\n".join(lines)
+
+
 def render_smoke_report(
     evaluation: Path,
     output: Path,
@@ -986,6 +1020,312 @@ def render_smoke_report(
 
     <footer>
       Rendered by <code>graphrag_ragas_eval.reporting.render_smoke_report</code>.
+    </footer>
+  </div>
+</body>
+</html>
+"""
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(html_text, encoding="utf-8")
+    return html_text
+
+
+def render_retrieval_smoke_report(
+    *,
+    retrieval_reference: Path,
+    retrieval_results: Path,
+    retrieval_evaluation: Path,
+    output: Path,
+    title: str = "BenchmarkQED Retrieval Smoke Report",
+    report_metadata: dict[str, Any] | None = None,
+    interpretation: str | None = None,
+) -> str:
+    reference_data = _load_json(retrieval_reference)
+    retrieval_data = _load_json(retrieval_results)
+    evaluation_data = _load_json(retrieval_evaluation)
+
+    reference_rows = _safe_list(reference_data.get("references"))
+    retrieval_rows = _safe_list(retrieval_data.get("results"))
+    evaluation_scores = _safe_list(evaluation_data.get("summary"))
+    evaluation_metadata = _safe_dict(evaluation_data.get("metadata"))
+    aggregate = _safe_dict(evaluation_data.get("aggregate"))
+    report_metadata = report_metadata or {}
+    interpretation_text = interpretation or _retrieval_interpretation(
+        reference_data=reference_data,
+        retrieval_data=retrieval_data,
+        evaluation_data=evaluation_data,
+        report_metadata=report_metadata,
+    )
+    now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+
+    runtime_chips = []
+    if report_metadata.get("chat_model"):
+        runtime_chips.append(_chip("chat model", report_metadata["chat_model"]))
+    if report_metadata.get("provider"):
+        runtime_chips.append(_chip("provider", report_metadata["provider"]))
+    if report_metadata.get("embeddings_model"):
+        runtime_chips.append(_chip("embeddings", report_metadata["embeddings_model"]))
+    if report_metadata.get("base_url"):
+        runtime_chips.append(_chip("endpoint", report_metadata["base_url"]))
+
+    overview_cards = [
+        _metric_card("reference rows", len(reference_rows)),
+        _metric_card("retrieval rows", len(retrieval_rows)),
+        _metric_card("evaluation rows", len(evaluation_scores)),
+        _metric_card("aggregate metrics", len(aggregate)),
+    ]
+
+    html_text = f"""<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{html.escape(title)}</title>
+  <style>
+    :root {{
+      color-scheme: light;
+      --bg: #eef3ff;
+      --panel: rgba(255, 255, 255, 0.94);
+      --panel-strong: #ffffff;
+      --text: #182033;
+      --muted: #60708f;
+      --accent: #2457ff;
+      --accent-soft: #e8efff;
+      --border: #d9e0ef;
+      --shadow: 0 14px 40px rgba(31, 41, 55, 0.08);
+    }}
+    * {{ box-sizing: border-box; }}
+    html, body {{ min-height: 100%; }}
+    body {{
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, "Noto Sans KR", "Helvetica Neue", Arial, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(36, 87, 255, 0.11), transparent 30%),
+        linear-gradient(180deg, #eef3ff 0%, #f8fbff 18%, #f8fbff 100%);
+      color: var(--text);
+      line-height: 1.55;
+    }}
+    .wrap {{
+      max-width: 1220px;
+      margin: 0 auto;
+      padding: 36px 18px 64px;
+    }}
+    .hero {{
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      padding: 28px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }}
+    .hero h1 {{
+      margin: 0 0 10px;
+      font-size: clamp(2rem, 4vw, 3rem);
+      line-height: 1.08;
+      letter-spacing: -0.03em;
+    }}
+    .subtitle {{
+      margin: 0;
+      color: var(--muted);
+      max-width: 70ch;
+    }}
+    .chips {{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }}
+    .chip {{
+      display: inline-flex;
+      align-items: baseline;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      border: 1px solid rgba(36, 87, 255, 0.12);
+      font-size: 0.92rem;
+      font-weight: 700;
+    }}
+    .chip strong {{ font-weight: 800; }}
+    main {{
+      margin-top: 22px;
+      display: grid;
+      gap: 18px;
+    }}
+    section {{
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 22px;
+      box-shadow: var(--shadow);
+    }}
+    h2 {{
+      margin: 0 0 14px;
+      font-size: 1.28rem;
+      letter-spacing: -0.02em;
+    }}
+    .grid {{
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 14px;
+    }}
+    .wide-grid {{
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 14px;
+    }}
+    .metric-card, .artifact-card {{
+      background: var(--panel-strong);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 16px;
+    }}
+    .metric-title {{
+      color: var(--muted);
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }}
+    .metric-value {{
+      margin-top: 6px;
+      font-size: 1.8rem;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+    }}
+    .metric-desc {{
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }}
+    .note {{
+      border-left: 4px solid var(--accent);
+      background: #f5f8ff;
+      padding: 14px 16px;
+      border-radius: 14px;
+      color: #26314a;
+    }}
+    .small {{ color: var(--muted); font-size: 0.92rem; }}
+    .bullet-list {{
+      margin: 0;
+      padding-left: 20px;
+      color: var(--text);
+    }}
+    .bullet-list li + li {{ margin-top: 6px; }}
+    details {{
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: white;
+      overflow: hidden;
+    }}
+    details + details {{ margin-top: 12px; }}
+    summary {{
+      cursor: pointer;
+      list-style: none;
+      padding: 14px 16px;
+      font-weight: 700;
+      background: #fafcff;
+    }}
+    summary::-webkit-details-marker {{ display: none; }}
+    details[open] summary {{
+      border-bottom: 1px solid var(--border);
+      background: #f5f8ff;
+    }}
+    details > :not(summary) {{ padding: 16px; }}
+    pre {{
+      margin: 0;
+      padding: 14px;
+      border-radius: 14px;
+      background: #0f172a;
+      color: #d8e4ff;
+      overflow: auto;
+      font-size: 0.87rem;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }}
+    .artifact-card h3 {{ margin: 0 0 8px; }}
+    footer {{
+      color: var(--muted);
+      font-size: 0.9rem;
+      text-align: center;
+      margin-top: 24px;
+    }}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="hero">
+      <h1>{html.escape(title)}</h1>
+      <p class="subtitle">
+        BenchmarkQED retrieval smoke checks reference generation, retrieval preparation, and retrieval scoring in one pass.
+      </p>
+      <div class="chips">
+        <span class="chip"><span>generated</span><strong>{html.escape(now)}</strong></span>
+        <span class="chip"><span>reference rows</span><strong>{len(reference_rows)}</strong></span>
+        <span class="chip"><span>retrieval rows</span><strong>{len(retrieval_rows)}</strong></span>
+        <span class="chip"><span>evaluation rows</span><strong>{len(evaluation_scores)}</strong></span>
+        {''.join(runtime_chips)}
+      </div>
+    </header>
+
+    <main>
+      <section>
+        <h2>Overview</h2>
+        <p class="small">
+          This is a BenchmarkQED-only retrieval report. It intentionally excludes Ragas and focuses on the retrieval reference and scoring path.
+        </p>
+        <div class="grid">
+          {''.join(overview_cards)}
+        </div>
+      </section>
+
+      <section>
+        <h2>BenchmarkQED Retrieval</h2>
+        <div class="wide-grid">
+          {_artifact_card("Retrieval Reference", [
+              f"{len(reference_rows)} reference row(s) generated.",
+              "Open the JSON view for the reference clusters and question relevance labels.",
+          ], reference_data)}
+          {_artifact_card("Retrieval Prep", [
+              f"{len(retrieval_rows)} retrieval row(s) prepared.",
+              "This normalizes the search results into the vendor retrieval-evaluation shape.",
+          ], retrieval_data)}
+          {_artifact_card("Retrieval Evaluation", [
+              f"{len(evaluation_scores)} evaluation summary row(s).",
+              f"{len(aggregate)} aggregate metric(s) in the payload.",
+          ], evaluation_data)}
+        </div>
+      </section>
+
+      <section>
+        <h2>Interpretation</h2>
+        <div class="note">
+          <div class="interpretation">{html.escape(interpretation_text)}</div>
+        </div>
+      </section>
+
+      <section>
+        <h2>Supporting Artifacts</h2>
+        <div class="grid">
+          {_artifact_card("Retrieval Reference JSON", [
+              f"{len(reference_rows)} reference row(s).",
+              "Cluster-level relevance labels live here.",
+          ], reference_data)}
+          {_artifact_card("Retrieval Results JSON", [
+              f"{len(retrieval_rows)} prepared row(s).",
+              "These are the normalized search results used by BenchmarkQED retrieval scoring.",
+          ], retrieval_data)}
+          {_artifact_card("Retrieval Evaluation JSON", [
+              f"{len(evaluation_scores)} summary row(s).",
+              f"Metadata backend: {evaluation_metadata.get('backend', 'benchmark-qed')}.",
+          ], evaluation_data)}
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      Rendered by <code>graphrag_ragas_eval.reporting.render_retrieval_smoke_report</code>.
     </footer>
   </div>
 </body>

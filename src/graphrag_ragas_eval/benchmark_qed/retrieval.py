@@ -13,6 +13,7 @@ import pandas as pd
 from ..llm import load_llm_runtime_config
 from ..graphrag.loaders import load_graphrag_tables
 from ..schemas import GraphRAGTableSet
+from ..reporting import render_retrieval_smoke_report
 from ..upstream_benchmark_qed import (
     build_vendor_llm_config,
     build_vendor_model_factory_runtime,
@@ -75,6 +76,7 @@ class RetrievalSmokePlan:
     search_results: Path
     graphrag_root: Path
     output_dir: Path = Path("/tmp/grev-benchmark-qed-retrieval-smoke")
+    report_output: Path | None = None
     question_sets: tuple[str, ...] = ("default",)
     rag_method_name: str = "benchmark-qed"
     reference_filename: str = "reference.json"
@@ -98,6 +100,7 @@ class RetrievalSmokeResult:
     retrieval_reference: Path
     retrieval_results: Path
     retrieval_evaluation: Path
+    report: Path
 
 
 def _coerce_items(payload: object, *, key: str) -> list[dict[str, Any]]:
@@ -594,7 +597,9 @@ def run_benchmark_qed_retrieval_smoke(plan: RetrievalSmokePlan) -> RetrievalSmok
     if plan.output_dir.exists():
         shutil.rmtree(plan.output_dir)
     plan.output_dir.mkdir(parents=True, exist_ok=True)
+    report_output = plan.report_output or (plan.output_dir / "retrieval-smoke.html")
 
+    runtime = load_llm_runtime_config(dict(os.environ), prefix="GREV_BENCHMARKQED")
     tables = load_graphrag_tables(GraphRAGTableSet(root=plan.graphrag_root))
     clusters_path = plan.output_dir / "clusters.json"
     clusters_payload = _clusters_from_communities(tables.communities)
@@ -633,6 +638,7 @@ def run_benchmark_qed_retrieval_smoke(plan: RetrievalSmokePlan) -> RetrievalSmok
         RetrievalEvaluationPlan(
             reference_dir=reference_dir,
             clusters=clusters_path,
+            text_units=plan.graphrag_root / "text_units.parquet",
             retrieval_results=retrieval_results,
             output=evaluation_path,
             question_sets=plan.question_sets,
@@ -651,11 +657,26 @@ def run_benchmark_qed_retrieval_smoke(plan: RetrievalSmokePlan) -> RetrievalSmok
         )
     )
 
+    render_retrieval_smoke_report(
+        retrieval_reference=reference_path,
+        retrieval_results=retrieval_results,
+        retrieval_evaluation=evaluation_path,
+        output=report_output,
+        title="BenchmarkQED Retrieval Smoke Report",
+        report_metadata={
+            "chat_model": runtime.model,
+            "provider": runtime.provider,
+            "base_url": runtime.base_url,
+            "embeddings_model": runtime.embeddings_model,
+        },
+    )
+
     return RetrievalSmokeResult(
         clusters=clusters_path,
         retrieval_reference=reference_path,
         retrieval_results=retrieval_results,
         retrieval_evaluation=evaluation_path,
+        report=report_output,
     )
 
 

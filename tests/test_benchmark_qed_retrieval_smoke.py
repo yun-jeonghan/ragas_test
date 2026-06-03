@@ -92,22 +92,29 @@ def test_run_benchmark_qed_retrieval_smoke_orchestrates_retrieval_steps(monkeypa
     def _record(name: str):
         def _inner(*args, **kwargs):
             calls.append((name, {"args": args, "kwargs": kwargs}))
-            plan = args[0]
             if name == "generate_retrieval_reference":
+                plan = args[0]
                 payload = {"metadata": {"component": "RetrievalReference"}, "references": []}
                 plan.output.parent.mkdir(parents=True, exist_ok=True)
                 plan.output.write_text(json.dumps(payload), encoding="utf-8")
                 return payload
             if name == "prepare_retrieval_results":
+                plan = args[0]
                 payload = {"metadata": {"component": "RetrievalPrep"}, "results": []}
                 plan.output.parent.mkdir(parents=True, exist_ok=True)
                 plan.output.write_text(json.dumps(payload), encoding="utf-8")
                 return payload
             if name == "evaluate_retrieval_results":
+                plan = args[0]
                 payload = {"metadata": {"component": "RetrievalEvaluation"}, "rows": 1}
                 plan.output.parent.mkdir(parents=True, exist_ok=True)
                 plan.output.write_text(json.dumps(payload), encoding="utf-8")
                 return payload
+            if name == "render_retrieval_smoke_report":
+                output = kwargs["output"]
+                output.parent.mkdir(parents=True, exist_ok=True)
+                output.write_text("<html>retrieval smoke</html>", encoding="utf-8")
+                return "<html>retrieval smoke</html>"
             raise AssertionError(name)
 
         return _inner
@@ -116,6 +123,7 @@ def test_run_benchmark_qed_retrieval_smoke_orchestrates_retrieval_steps(monkeypa
     monkeypatch.setattr("graphrag_ragas_eval.benchmark_qed.retrieval.generate_retrieval_reference", _record("generate_retrieval_reference"))
     monkeypatch.setattr("graphrag_ragas_eval.benchmark_qed.retrieval.prepare_retrieval_results", _record("prepare_retrieval_results"))
     monkeypatch.setattr("graphrag_ragas_eval.benchmark_qed.retrieval.evaluate_retrieval_results", _record("evaluate_retrieval_results"))
+    monkeypatch.setattr("graphrag_ragas_eval.benchmark_qed.retrieval.render_retrieval_smoke_report", _record("render_retrieval_smoke_report"))
 
     output_dir = tmp_path / "retrieval-smoke"
     result = run_benchmark_qed_retrieval_smoke(
@@ -132,15 +140,18 @@ def test_run_benchmark_qed_retrieval_smoke_orchestrates_retrieval_steps(monkeypa
     assert result.retrieval_reference == output_dir / "retrieval-reference" / "reference.json"
     assert result.retrieval_results == output_dir / "retrieval-results.json"
     assert result.retrieval_evaluation == output_dir / "retrieval-evaluation.json"
+    assert result.report == output_dir / "retrieval-smoke.html"
     assert result.clusters.exists()
     assert result.retrieval_reference.exists()
     assert result.retrieval_results.exists()
     assert result.retrieval_evaluation.exists()
+    assert result.report.exists()
     assert [name for name, _ in calls] == [
         "load_graphrag_tables",
         "generate_retrieval_reference",
         "prepare_retrieval_results",
         "evaluate_retrieval_results",
+        "render_retrieval_smoke_report",
     ]
     clusters_payload = json.loads(result.clusters.read_text(encoding="utf-8"))
     assert clusters_payload[0]["cluster_id"] == "community-1"
@@ -150,6 +161,7 @@ def test_run_benchmark_qed_retrieval_smoke_orchestrates_retrieval_steps(monkeypa
     assert calls[1][1]["args"][0].clusters == result.clusters
     assert calls[2][1]["args"][0].output == result.retrieval_results
     assert calls[3][1]["args"][0].reference_dir == output_dir / "retrieval-reference"
+    assert calls[4][1]["kwargs"]["output"] == output_dir / "retrieval-smoke.html"
 
 
 def test_benchmark_qed_retrieval_smoke_cli_dispatch(monkeypatch, tmp_path: Path) -> None:
@@ -165,12 +177,14 @@ def test_benchmark_qed_retrieval_smoke_cli_dispatch(monkeypatch, tmp_path: Path)
             retrieval_reference=tmp_path / "reference.json",
             retrieval_results=tmp_path / "retrieval-results.json",
             retrieval_evaluation=tmp_path / "retrieval-evaluation.json",
+            report=tmp_path / "retrieval-smoke.html",
         )
         for path in [
             result.clusters,
             result.retrieval_reference,
             result.retrieval_results,
             result.retrieval_evaluation,
+            result.report,
         ]:
             Path(path).write_text("{}", encoding="utf-8")
         return result
@@ -196,4 +210,5 @@ def test_benchmark_qed_retrieval_smoke_cli_dispatch(monkeypatch, tmp_path: Path)
 
     assert result.exit_code == 0
     assert "wrote retrieval reference" in result.output
+    assert "wrote retrieval report" in result.output
     assert captured["plan"].benchmark == tmp_path / "benchmark.json"

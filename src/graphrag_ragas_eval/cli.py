@@ -348,6 +348,7 @@ def benchmark_qed_retrieval_smoke(
     search_results: Path = typer.Option(Path("data/results/sample_search_results.json"), exists=True, file_okay=True, dir_okay=False, help="retrieval 결과 JSON"),
     graphrag_root: Path = typer.Option(Path("workspaces/graphrag/output"), file_okay=False, dir_okay=True, help="GraphRAG output root"),
     output_dir: Path = typer.Option(Path("/tmp/grev-benchmark-qed-retrieval-smoke"), file_okay=False, dir_okay=True, help="스모크 산출물 디렉터리"),
+    report_output: Path = typer.Option(Path("/tmp/grev-benchmark-qed-retrieval-smoke/retrieval-smoke.html"), file_okay=True, dir_okay=False, help="스모크 리포트 HTML 경로"),
     question_sets: list[str] = typer.Option(["default"], help="평가할 question set 이름"),
     rag_method_name: str = typer.Option("benchmark-qed", help="평가할 RAG method 이름"),
     reference_filename: str = typer.Option("reference.json", help="reference 파일 이름"),
@@ -369,6 +370,7 @@ def benchmark_qed_retrieval_smoke(
             search_results=search_results,
             graphrag_root=graphrag_root,
             output_dir=output_dir,
+            report_output=report_output,
             question_sets=tuple(question_sets),
             rag_method_name=rag_method_name,
             reference_filename=reference_filename,
@@ -389,6 +391,7 @@ def benchmark_qed_retrieval_smoke(
     typer.echo(f"wrote retrieval reference to {payload.retrieval_reference}")
     typer.echo(f"wrote retrieval results to {payload.retrieval_results}")
     typer.echo(f"wrote retrieval evaluation to {payload.retrieval_evaluation}")
+    typer.echo(f"wrote retrieval report to {payload.report}")
 
 
 @benchmark_qed_app.command("smoke")
