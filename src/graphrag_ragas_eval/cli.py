@@ -11,8 +11,10 @@ from .benchmark_qed.autoq import AutoQPlan, generate_queries
 from .benchmark_qed.retrieval import (
     RetrievalEvaluationPlan,
     RetrievalReferencePlan,
+    RetrievalSmokePlan,
     evaluate_retrieval_results,
     generate_retrieval_reference,
+    run_benchmark_qed_retrieval_smoke,
 )
 from .benchmark_qed.smoke import BenchmarkQEDSmokePlan, run_benchmark_qed_smoke
 from .config import DEFAULT_CHAT_MODEL, DEFAULT_EMBEDDING_MODEL, ProjectPaths
@@ -338,6 +340,55 @@ def benchmark_qed_retrieval_score(
     )
     typer.echo(f"wrote retrieval evaluation to {output}")
     typer.echo(f"rows: {payload['rows']}")
+
+
+@benchmark_qed_app.command("retrieval-smoke")
+def benchmark_qed_retrieval_smoke(
+    benchmark: Path = typer.Option(Path("data/benchmarks/sample_benchmark.json"), exists=True, file_okay=True, dir_okay=False, help="질문 JSON 또는 JSONL"),
+    search_results: Path = typer.Option(Path("data/results/sample_search_results.json"), exists=True, file_okay=True, dir_okay=False, help="retrieval 결과 JSON"),
+    graphrag_root: Path = typer.Option(Path("workspaces/graphrag/output"), file_okay=False, dir_okay=True, help="GraphRAG output root"),
+    output_dir: Path = typer.Option(Path("/tmp/grev-benchmark-qed-retrieval-smoke"), file_okay=False, dir_okay=True, help="스모크 산출물 디렉터리"),
+    question_sets: list[str] = typer.Option(["default"], help="평가할 question set 이름"),
+    rag_method_name: str = typer.Option("benchmark-qed", help="평가할 RAG method 이름"),
+    reference_filename: str = typer.Option("reference.json", help="reference 파일 이름"),
+    relevance_threshold: int = typer.Option(2, min=0, max=3, help="relevance 임계값"),
+    cluster_match_by: str = typer.Option("text", help="cluster 매칭 기준: text, id, short_id"),
+    run_significance_test: bool = typer.Option(True, help="significance test를 수행할지 여부"),
+    significance_alpha: float = typer.Option(0.05, min=0.0, max=1.0, help="significance alpha"),
+    significance_correction: str = typer.Option("holm", help="p-value correction 방식"),
+    fidelity_metric: str = typer.Option("js", help="fidelity metric: js or tvd"),
+    assessor_type: str = typer.Option("rationale", help="relevance assessor 타입: rationale 또는 bing"),
+    semantic_neighbors: int = typer.Option(10, min=1, help="query별 semantic neighbors 수"),
+    centroid_neighbors: int = typer.Option(5, min=1, help="query별 centroid neighbors 수"),
+    concurrent_requests: int = typer.Option(16, min=1, help="동시 relevance 요청 수"),
+    max_concurrent: int = typer.Option(8, min=1, help="평가 동시성 상한"),
+) -> None:
+    payload = run_benchmark_qed_retrieval_smoke(
+        RetrievalSmokePlan(
+            benchmark=benchmark,
+            search_results=search_results,
+            graphrag_root=graphrag_root,
+            output_dir=output_dir,
+            question_sets=tuple(question_sets),
+            rag_method_name=rag_method_name,
+            reference_filename=reference_filename,
+            relevance_threshold=relevance_threshold,
+            cluster_match_by=cluster_match_by,
+            run_significance_test=run_significance_test,
+            significance_alpha=significance_alpha,
+            significance_correction=significance_correction,
+            fidelity_metric=fidelity_metric,
+            assessor_type=assessor_type,
+            semantic_neighbors=semantic_neighbors,
+            centroid_neighbors=centroid_neighbors,
+            concurrent_requests=concurrent_requests,
+            max_concurrent=max_concurrent,
+        )
+    )
+    typer.echo(f"wrote clusters to {payload.clusters}")
+    typer.echo(f"wrote retrieval reference to {payload.retrieval_reference}")
+    typer.echo(f"wrote retrieval results to {payload.retrieval_results}")
+    typer.echo(f"wrote retrieval evaluation to {payload.retrieval_evaluation}")
 
 
 @benchmark_qed_app.command("smoke")

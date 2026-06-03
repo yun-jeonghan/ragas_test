@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import json
 import os
+import shutil
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -10,6 +11,8 @@ from typing import Any
 import pandas as pd
 
 from ..llm import load_llm_runtime_config
+from ..graphrag.loaders import load_graphrag_tables
+from ..schemas import GraphRAGTableSet
 from ..upstream_benchmark_qed import (
     build_vendor_llm_config,
     build_vendor_model_factory_runtime,
@@ -64,6 +67,37 @@ class RetrievalEvaluationPlan:
     concurrent_requests: int = 16
     max_concurrent: int = 8
     metadata: dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass(frozen=True, slots=True)
+class RetrievalSmokePlan:
+    benchmark: Path
+    search_results: Path
+    graphrag_root: Path
+    output_dir: Path = Path("/tmp/grev-benchmark-qed-retrieval-smoke")
+    question_sets: tuple[str, ...] = ("default",)
+    rag_method_name: str = "benchmark-qed"
+    reference_filename: str = "reference.json"
+    relevance_threshold: int = 2
+    cluster_match_by: str = "text"
+    run_significance_test: bool = True
+    significance_alpha: float = 0.05
+    significance_correction: str = "holm"
+    fidelity_metric: str = "js"
+    assessor_type: str = "rationale"
+    semantic_neighbors: int = 10
+    centroid_neighbors: int = 5
+    concurrent_requests: int = 16
+    max_concurrent: int = 8
+    metadata: dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass(frozen=True, slots=True)
+class RetrievalSmokeResult:
+    clusters: Path
+    retrieval_reference: Path
+    retrieval_results: Path
+    retrieval_evaluation: Path
 
 
 def _coerce_items(payload: object, *, key: str) -> list[dict[str, Any]]:
@@ -325,6 +359,47 @@ def _coerce_fidelity_metric(metric: str) -> Any:
     raise ValueError(msg)
 
 
+def _coerce_cluster_ids(value: Any) -> list[str]:
+    if value is None:
+        return []
+    if hasattr(value, "tolist") and not isinstance(value, list):
+        value = value.tolist()
+    if isinstance(value, (list, tuple, set)):
+        return [str(item) for item in value if item not in (None, "")]
+    return [str(value)]
+
+
+def _clusters_from_communities(communities: pd.DataFrame) -> list[dict[str, Any]]:
+    clusters: list[dict[str, Any]] = []
+    for index, community in enumerate(communities.to_dict(orient="records")):
+        text_unit_ids = _coerce_cluster_ids(community.get("text_unit_ids"))
+        if not text_unit_ids:
+            msg = f"Community row at index {index} does not contain text_unit_ids"
+            raise ValueError(msg)
+        cluster_id = str(
+            community.get("id")
+            or community.get("human_readable_id")
+            or community.get("community")
+            or index
+        )
+        clusters.append(
+            {
+                "cluster_id": cluster_id,
+                "text_unit_ids": text_unit_ids,
+                "metadata": {
+                    "community": community.get("community"),
+                    "human_readable_id": community.get("human_readable_id"),
+                    "level": community.get("level"),
+                    "parent": community.get("parent"),
+                    "title": community.get("title"),
+                    "period": community.get("period"),
+                    "size": community.get("size"),
+                },
+            }
+        )
+    return clusters
+
+
 def prepare_retrieval_results(plan: RetrievalPrepPlan) -> dict[str, Any]:
     payload = json.loads(plan.search_results.read_text(encoding="utf-8"))
     items = _coerce_items(payload, key="results")
@@ -513,6 +588,75 @@ def evaluate_retrieval_results(plan: RetrievalEvaluationPlan) -> dict[str, Any]:
     plan.output.parent.mkdir(parents=True, exist_ok=True)
     plan.output.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     return payload
+
+
+def run_benchmark_qed_retrieval_smoke(plan: RetrievalSmokePlan) -> RetrievalSmokeResult:
+    if plan.output_dir.exists():
+        shutil.rmtree(plan.output_dir)
+    plan.output_dir.mkdir(parents=True, exist_ok=True)
+
+    tables = load_graphrag_tables(GraphRAGTableSet(root=plan.graphrag_root))
+    clusters_path = plan.output_dir / "clusters.json"
+    clusters_payload = _clusters_from_communities(tables.communities)
+    clusters_path.write_text(
+        json.dumps(clusters_payload, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+
+    reference_dir = plan.output_dir / "retrieval-reference"
+    reference_path = reference_dir / plan.reference_filename
+    generate_retrieval_reference(
+        RetrievalReferencePlan(
+            questions=plan.benchmark,
+            clusters=clusters_path,
+            text_units=plan.graphrag_root / "text_units.parquet",
+            output=reference_path,
+            assessor_type=plan.assessor_type,
+            semantic_neighbors=plan.semantic_neighbors,
+            centroid_neighbors=plan.centroid_neighbors,
+            concurrent_requests=plan.concurrent_requests,
+            metadata={"smoke": True, **plan.metadata},
+        )
+    )
+
+    retrieval_results = plan.output_dir / "retrieval-results.json"
+    prepare_retrieval_results(
+        RetrievalPrepPlan(
+            search_results=plan.search_results,
+            output=retrieval_results,
+            metadata={"smoke": True, **plan.metadata},
+        )
+    )
+
+    evaluation_path = plan.output_dir / "retrieval-evaluation.json"
+    evaluate_retrieval_results(
+        RetrievalEvaluationPlan(
+            reference_dir=reference_dir,
+            clusters=clusters_path,
+            retrieval_results=retrieval_results,
+            output=evaluation_path,
+            question_sets=plan.question_sets,
+            rag_method_name=plan.rag_method_name,
+            reference_filename=plan.reference_filename,
+            relevance_threshold=plan.relevance_threshold,
+            cluster_match_by=plan.cluster_match_by,
+            run_significance_test=plan.run_significance_test,
+            significance_alpha=plan.significance_alpha,
+            significance_correction=plan.significance_correction,
+            fidelity_metric=plan.fidelity_metric,
+            assessor_type=plan.assessor_type,
+            concurrent_requests=plan.concurrent_requests,
+            max_concurrent=plan.max_concurrent,
+            metadata={"smoke": True, **plan.metadata},
+        )
+    )
+
+    return RetrievalSmokeResult(
+        clusters=clusters_path,
+        retrieval_reference=reference_path,
+        retrieval_results=retrieval_results,
+        retrieval_evaluation=evaluation_path,
+    )
 
 
 def _metadata_from_item(item: dict[str, Any]) -> dict[str, Any]:
