@@ -1,13 +1,22 @@
-# BenchmarkQED vs Ragas
+# Benchmarking Stack: BenchmarkQED and Ragas
 
-이 문서는 `benchmarkqed`와 `ragas`를 헷갈리지 않도록, 각 프로젝트의 역할과 이 저장소에서의 쓰임을 공식 문서 기준으로 정리한 메모다.
+이 문서는 `benchmarkqed`와 `ragas`를 같은 계열의 평가/생성 라이브러리로 보고, 이 저장소에서 어떻게 공통 스택으로 다루는지 공식 문서 기준으로 정리한 메모다.
 
 ## 한 줄 요약
 
-- `BenchmarkQED`는 RAG 벤치마크를 자동 생성하고, AutoE로 다양한 비교/평가 모드를 제공하는 도구 묶음이다.
-- `Ragas`는 `retrieved_contexts`, `reference_answer`, `reference_contexts`, `response` 등을 사용해 RAG 품질을 점수화하는 평가 라이브러리다.
+- `BenchmarkQED`와 `Ragas`는 둘 다 RAG 벤치마크를 만들고 평가하는 역할을 하는 라이브러리다.
+- `BenchmarkQED`는 벤치마크 생성과 AutoE 계열의 특수 평가 모드가 강하고, `Ragas`는 일반 RAG metric 평가와 testset generation이 강하다.
+- 이 저장소는 둘을 서로 다른 “업무”가 아니라, 같은 평가 스택의 두 구현체로 다룬다.
 
-## BenchmarkQED가 하는 일
+## 공통 역할
+
+두 라이브러리 모두 다음 역할을 수행한다.
+
+- 평가용 질문/테스트셋 생성
+- 검색 결과와 답변의 품질 평가
+- retrieval 관련 reference 또는 ground truth 비슷한 평가 기준 구성
+
+## BenchmarkQED가 더 강한 영역
 
 공식 문서 기준으로 BenchmarkQED는 AutoD, AutoQ, AutoE, retrieval metrics notebook을 통해 벤치마크 데이터 생성과 평가를 자동화한다.
 
@@ -33,7 +42,7 @@ AutoE에는 다음과 같은 모드가 있다.
 
 BenchmarkQED retrieval notebook은 Part 1에서 query별 cluster references를 만들고, Part 2에서 그 pre-generated reference clusters를 사용해 retrieval scoring을 수행한다. Part 2는 Part 1과 독립적으로 실행할 수 있지만, reference 파일은 필요하다.
 
-## Ragas가 하는 일
+## Ragas가 더 강한 영역
 
 Ragas는 RAG 품질을 여러 metric으로 평가하는 라이브러리다. 여기서 중요한 점은, BenchmarkQED의 AutoE와는 별개의 도구라는 것이다.
 
@@ -53,16 +62,17 @@ Ragas는 RAG 품질을 여러 metric으로 평가하는 라이브러리다. 여�
 
 ## 가장 중요한 구분
 
-### 1) BenchmarkQED는 “벤치마크 생성/수집/특수 평가” 쪽
+### 1) 둘은 같은 역할의 라이브러리다
 
-- AutoD/AutoQ/AutoE 흐름을 가진다.
-- assertions를 만들고 점수화할 수 있다.
-- retrieval reference clusters를 만들고 retrieval scoring을 할 수 있다.
+- 둘 다 질문 생성과 평가를 다루는 라이브러리다.
+- 둘 다 retrieval 관련 평가를 다룰 수 있다.
+- 둘 다 synthetic testset 또는 benchmark artifact를 만들어낼 수 있다.
 
-### 2) Ragas는 “RAG 출력 품질을 metric으로 측정”하는 쪽
+### 2) 차이는 평가 디테일과 초점이다
 
-- generated answer와 retrieved contexts를 metric 단위로 평가한다.
-- `faithfulness`, `context_precision`, `context_recall`, `answer_relevancy` 같은 metric이 핵심이다.
+- `BenchmarkQED`는 pairwise, reference, assertion, hierarchical assertion, retrieval reference 같은 모드가 강하다.
+- `Ragas`는 faithfulness, context precision, context recall, answer relevancy 같은 metric 체계가 강하다.
+- 그래서 운영상으로는 같은 “평가 스택”이지만, 구현 상세는 서로 다르다.
 
 ### 3) retrieval 평가를 말할 때도 기준이 다르다
 
@@ -84,6 +94,12 @@ Ragas는 RAG 품질을 여러 metric으로 평가하는 라이브러리다. 여�
 - `adapters/`
   - BenchmarkQED와 Ragas 사이의 데이터 형태 변환
 
+## 실무적 해석
+
+- 먼저 “같은 역할의 두 라이브러리”라고 생각하고 구현한다.
+- 그 다음에 각 라이브러리의 고유한 평가 디테일만 분리해서 다룬다.
+- 이 저장소는 그 차이를 코드 레벨에서 흡수하는 어댑터 레이어를 가진다.
+
 ## 공식 문서
 
 - BenchmarkQED AutoE CLI: <https://microsoft.github.io/benchmark-qed/cli/autoe/>
@@ -93,4 +109,3 @@ Ragas는 RAG 품질을 여러 metric으로 평가하는 라이브러리다. 여�
 - Ragas Context Precision: <https://docs.ragas.io/en/stable/concepts/metrics/available_metrics/context_precision/>
 - Ragas Context Recall: <https://docs.ragas.io/en/stable/concepts/metrics/available_metrics/context_recall/>
 - Ragas Answer Relevancy: <https://docs.ragas.io/en/stable/concepts/metrics/available_metrics/answer_relevance/>
-

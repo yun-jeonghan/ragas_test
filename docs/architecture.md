@@ -9,6 +9,7 @@ This project is a benchmark and evaluation harness, not a user facing chatbot.
 - command.md - copy-paste execution commands.
 - docs/environment.md - Ragas and BenchmarkQED LLM environment variables.
 - docs/benchmark-qed.md - BenchmarkQED-style AutoD/AutoQ/AutoE mapping.
+- docs/benchmarkqed-vs-ragas.md - shared benchmarking vocabulary and role split.
 - src/graphrag_ragas_eval/ - application code.
 - tests/ - unit tests for loaders, schemas, and metric wiring.
 - data/
