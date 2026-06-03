@@ -11,13 +11,17 @@ from .autoe import AutoEPlan, evaluate_answers
 from .autoq import AutoQPlan, generate_queries
 
 
+def _repo_root() -> Path:
+    return Path(__file__).resolve().parents[3]
+
+
 @dataclass(frozen=True, slots=True)
 class BenchmarkQEDSmokePlan:
     source: Path = Path("examples/sample_docs")
     benchmark: Path = Path("data/benchmarks/sample_benchmark.json")
     search_results: Path = Path("data/results/sample_search_results.json")
-    output_dir: Path = Path("data/benchmark-qed/smoke")
-    report_output: Path = Path("reports/benchmark-qed-smoke.html")
+    output_dir: Path = Path("/tmp/grev-benchmark-qed-smoke")
+    report_output: Path = _repo_root() / "reports" / "benchmark-qed-smoke.html"
     target_size: int = 1
     num_questions: int = 1
     modes: tuple[str, ...] = ("local",)

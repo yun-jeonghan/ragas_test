@@ -31,6 +31,10 @@ kg_correctness_app = typer.Typer(no_args_is_help=True, add_completion=False)
 report_app = typer.Typer(no_args_is_help=True, add_completion=False)
 
 
+def _repo_root() -> Path:
+    return Path(__file__).resolve().parents[2]
+
+
 def _build_pdf_policy(pdf_mode: str | None = None) -> PdfExtractionPolicy:
     runtime_env = dict(os.environ)
     if pdf_mode is not None:
@@ -255,8 +259,8 @@ def benchmark_qed_smoke(
     source: Path = typer.Option(Path("examples/sample_docs"), exists=True, file_okay=True, dir_okay=True, help="스모크 입력 문서 또는 디렉터리"),
     benchmark: Path = typer.Option(Path("data/benchmarks/sample_benchmark.json"), exists=True, file_okay=True, dir_okay=False, help="AutoE용 benchmark JSON 또는 JSONL"),
     search_results: Path = typer.Option(Path("data/results/sample_search_results.json"), exists=True, file_okay=True, dir_okay=False, help="AutoE용 search results JSON"),
-    output_dir: Path = typer.Option(Path("data/benchmark-qed/smoke"), file_okay=False, dir_okay=True, help="스모크 산출물 디렉터리"),
-    report_output: Path = typer.Option(Path("reports/benchmark-qed-smoke.html"), file_okay=True, dir_okay=False, help="스모크 리포트 HTML 경로"),
+    output_dir: Path = typer.Option(Path("/tmp/grev-benchmark-qed-smoke"), file_okay=False, dir_okay=True, help="스모크 산출물 디렉터리"),
+    report_output: Path = typer.Option(_repo_root() / "reports" / "benchmark-qed-smoke.html", file_okay=True, dir_okay=False, help="스모크 리포트 HTML 경로"),
     target_size: int = typer.Option(1, min=1, help="AutoD에 사용할 문서 수"),
     num_questions: int = typer.Option(1, min=1, help="AutoQ로 생성할 질문 수"),
     modes: list[str] = typer.Option(["local"], help="local, global, multi-hop, unanswerable"),
