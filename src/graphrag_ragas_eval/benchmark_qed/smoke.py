@@ -8,12 +8,14 @@ from pathlib import Path
 import shutil
 from typing import Any
 
+from ..eval import DEFAULT_RAGAS_METRICS
 from ..reporting import render_smoke_report
 from ..llm import load_llm_runtime_config
 from ..upstream_benchmark_qed import build_vendor_model_factory_runtime
 from .autod import AutoDPlan, summarize_dataset
 from .autoe import AutoEPlan, evaluate_answers
 from .autoq import AutoQPlan, generate_queries
+from .retrieval import RetrievalPrepPlan, prepare_retrieval_results
 
 
 def _repo_root() -> Path:
@@ -30,7 +32,7 @@ class BenchmarkQEDSmokePlan:
     target_size: int = 1
     num_questions: int = 1
     modes: tuple[str, ...] = ("local",)
-    metrics: tuple[str, ...] = ("context_precision",)
+    metrics: tuple[str, ...] = DEFAULT_RAGAS_METRICS
     report_title: str = "BenchmarkQED Smoke Report"
     metadata: dict[str, Any] = field(default_factory=dict)
 
@@ -40,6 +42,7 @@ class BenchmarkQEDSmokeResult:
     autod_summary: Path
     autoq_questions: Path
     autoe_evaluation: Path
+    retrieval_results: Path
     report: Path
 
 
@@ -135,6 +138,7 @@ def run_benchmark_qed_smoke(plan: BenchmarkQEDSmokePlan) -> BenchmarkQEDSmokeRes
     autod_summary = plan.output_dir / "autod-summary.json"
     autoq_questions = plan.output_dir / "autoq-questions.json"
     autoe_evaluation = plan.output_dir / "autoe-evaluation.json"
+    retrieval_results = plan.output_dir / "retrieval-results.json"
 
     summarize_dataset(
         AutoDPlan(
@@ -162,6 +166,13 @@ def run_benchmark_qed_smoke(plan: BenchmarkQEDSmokePlan) -> BenchmarkQEDSmokeRes
             metadata={"smoke": True, **plan.metadata},
         )
     )
+    prepare_retrieval_results(
+        RetrievalPrepPlan(
+            search_results=plan.search_results,
+            output=retrieval_results,
+            metadata={"smoke": True, **plan.metadata},
+        )
+    )
 
     interpretation = _build_interpretation(runtime, autod_summary, autoq_questions, autoe_evaluation)
 
@@ -172,6 +183,7 @@ def run_benchmark_qed_smoke(plan: BenchmarkQEDSmokePlan) -> BenchmarkQEDSmokeRes
         autod_summary=autod_summary,
         autoq_questions=autoq_questions,
         title=plan.report_title,
+        retrieval_results=retrieval_results,
         report_metadata={
             "chat_model": runtime.model,
             "provider": runtime.provider,
@@ -185,5 +197,6 @@ def run_benchmark_qed_smoke(plan: BenchmarkQEDSmokePlan) -> BenchmarkQEDSmokeRes
         autod_summary=autod_summary,
         autoq_questions=autoq_questions,
         autoe_evaluation=autoe_evaluation,
+        retrieval_results=retrieval_results,
         report=plan.report_output,
     )

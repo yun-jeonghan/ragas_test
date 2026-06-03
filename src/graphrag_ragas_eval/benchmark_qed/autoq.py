@@ -41,6 +41,14 @@ def _mode_name(mode: Any) -> str:
     return str(getattr(mode, "value", mode))
 
 
+def _normalize_question(item: dict[str, Any], *, source: str) -> dict[str, Any]:
+    normalized = dict(item)
+    if "question" not in normalized and "text" in normalized:
+        normalized["question"] = normalized.get("text")
+    normalized["source"] = source
+    return normalized
+
+
 def generate_queries(plan: AutoQPlan):
     ensure_vendor_path()
     documents = load_documents(plan.source)
@@ -112,11 +120,23 @@ def generate_queries(plan: AutoQPlan):
     for generation_type in generation_types:
         question_dir = output_dir / f"{generation_type.value}_questions"
         selected_path = question_dir / "selected_questions.json"
+        candidate_path = question_dir / "candidate_questions.json"
         if not selected_path.exists():
             continue
         questions = json.loads(selected_path.read_text(encoding="utf-8"))
         if isinstance(questions, list):
-            collected.extend(questions)
+            selected = [_normalize_question(question, source="selected") for question in questions if isinstance(question, dict)]
+            if selected:
+                collected.extend(selected)
+                continue
+        if candidate_path.exists():
+            candidates = json.loads(candidate_path.read_text(encoding="utf-8"))
+            if isinstance(candidates, list):
+                collected.extend(
+                    _normalize_question(question, source="candidate")
+                    for question in candidates
+                    if isinstance(question, dict)
+                )
 
     payload = {
         "metadata": {

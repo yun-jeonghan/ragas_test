@@ -264,7 +264,7 @@ def benchmark_qed_smoke(
     target_size: int = typer.Option(1, min=1, help="AutoD에 사용할 문서 수"),
     num_questions: int = typer.Option(1, min=1, help="AutoQ로 생성할 질문 수"),
     modes: list[str] = typer.Option(["local"], help="local, global, multi-hop, unanswerable"),
-    metrics: list[str] = typer.Option(["context_precision"], help="AutoE metric 이름"),
+    metrics: list[str] = typer.Option(list(DEFAULT_RAGAS_METRICS), help="AutoE metric 이름"),
     title: str = typer.Option("BenchmarkQED Smoke Report", help="리포트 제목"),
 ) -> None:
     result = run_benchmark_qed_smoke(
@@ -284,6 +284,7 @@ def benchmark_qed_smoke(
     typer.echo(f"wrote AutoD summary to {result.autod_summary}")
     typer.echo(f"wrote AutoQ questions to {result.autoq_questions}")
     typer.echo(f"wrote AutoE evaluation to {result.autoe_evaluation}")
+    typer.echo(f"wrote retrieval prep to {result.retrieval_results}")
     typer.echo(f"wrote smoke report to {result.report}")
 
 

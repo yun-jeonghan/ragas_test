@@ -57,6 +57,10 @@ def test_run_benchmark_qed_smoke_orchestrates_all_steps(monkeypatch, tmp_path: P
                 output = kwargs["output"]
                 output.write_text("<html>smoke</html>", encoding="utf-8")
                 return "<html>smoke</html>"
+            if name == "prepare_retrieval_results":
+                plan = args[0]
+                plan.output.write_text(json.dumps({"results": []}), encoding="utf-8")
+                return {"results": []}
 
             plan = args[0]
             if name == "summarize_dataset":
@@ -82,6 +86,7 @@ def test_run_benchmark_qed_smoke_orchestrates_all_steps(monkeypatch, tmp_path: P
     monkeypatch.setattr("graphrag_ragas_eval.benchmark_qed.smoke.summarize_dataset", _record("summarize_dataset"))
     monkeypatch.setattr("graphrag_ragas_eval.benchmark_qed.smoke.generate_queries", _record("generate_queries"))
     monkeypatch.setattr("graphrag_ragas_eval.benchmark_qed.smoke.evaluate_answers", _record("evaluate_answers"))
+    monkeypatch.setattr("graphrag_ragas_eval.benchmark_qed.smoke.prepare_retrieval_results", _record("prepare_retrieval_results"))
     monkeypatch.setattr("graphrag_ragas_eval.benchmark_qed.smoke.render_smoke_report", _record("render_smoke_report"))
     monkeypatch.setattr("graphrag_ragas_eval.benchmark_qed.smoke.build_vendor_model_factory_runtime", _fake_model_factory_runtime)
 
@@ -104,20 +109,24 @@ def test_run_benchmark_qed_smoke_orchestrates_all_steps(monkeypatch, tmp_path: P
     assert result.autod_summary == output_dir / "autod-summary.json"
     assert result.autoq_questions == output_dir / "autoq-questions.json"
     assert result.autoe_evaluation == output_dir / "autoe-evaluation.json"
+    assert result.retrieval_results == output_dir / "retrieval-results.json"
     assert result.report == report_output
     assert result.autod_summary.exists()
     assert result.autoq_questions.exists()
     assert result.autoe_evaluation.exists()
+    assert result.retrieval_results.exists()
     assert result.report.exists()
     assert [name for name, _ in calls] == [
         "summarize_dataset",
         "generate_queries",
         "evaluate_answers",
+        "prepare_retrieval_results",
         "render_smoke_report",
     ]
     assert calls[0][1]["args"][0].metadata == {"smoke": True, "suite": "benchmark-qed"}
     assert calls[1][1]["args"][0].metadata == {"smoke": True, "suite": "benchmark-qed"}
     assert calls[2][1]["args"][0].metadata == {"smoke": True, "suite": "benchmark-qed"}
+    assert calls[3][1]["args"][0].metadata == {"smoke": True, "suite": "benchmark-qed"}
 
 
 def test_benchmark_qed_smoke_cli_dispatch(monkeypatch, tmp_path: Path) -> None:
@@ -134,10 +143,17 @@ def test_benchmark_qed_smoke_cli_dispatch(monkeypatch, tmp_path: Path) -> None:
                 "autod_summary": tmp_path / "autod.json",
                 "autoq_questions": tmp_path / "autoq.json",
                 "autoe_evaluation": tmp_path / "autoe.json",
+                "retrieval_results": tmp_path / "retrieval.json",
                 "report": tmp_path / "report.html",
             },
         )()
-        for path in [result.autod_summary, result.autoq_questions, result.autoe_evaluation, result.report]:
+        for path in [
+            result.autod_summary,
+            result.autoq_questions,
+            result.autoe_evaluation,
+            result.retrieval_results,
+            result.report,
+        ]:
             path.write_text("{}", encoding="utf-8")
         return result
 
@@ -192,6 +208,57 @@ def test_autoq_uses_tiktoken_encoding_name(monkeypatch, tmp_path: Path) -> None:
 
     settings = (output.parent / ".autoq.benchmark-qed" / "settings.yaml").read_text(encoding="utf-8")
     assert "model_name: o200k_base" in settings
+
+
+def test_autoq_falls_back_to_candidate_questions(monkeypatch, tmp_path: Path) -> None:
+    import tiktoken
+
+    source = tmp_path / "docs"
+    source.mkdir()
+    (source / "sample.txt").write_text(
+        "Scrooge is a miser who loves money more than people. "
+        "He is visited by three spirits and learns to change his ways. "
+        "Marley warns him about greed and loneliness.",
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(tiktoken, "get_encoding", lambda name: object())
+    ensure_vendor_path()
+    import benchmark_qed.autoq.cli as vendor_autoq_cli
+
+    def _fake_autoq(**kwargs):  # type: ignore[no-untyped-def]
+        output_data_path = kwargs["output_data_path"]
+        question_dir = output_data_path / "data_local_questions"
+        question_dir.mkdir(parents=True, exist_ok=True)
+        (question_dir / "selected_questions.json").write_text("[]", encoding="utf-8")
+        (question_dir / "candidate_questions.json").write_text(
+            json.dumps(
+                [
+                    {
+                        "id": "candidate-1",
+                        "text": "What is the name of the main character?",
+                        "question_type": "data_local",
+                    }
+                ]
+            ),
+            encoding="utf-8",
+        )
+
+    monkeypatch.setattr(vendor_autoq_cli, "autoq", _fake_autoq)
+
+    output = tmp_path / "autoq.json"
+    payload = generate_queries(
+        AutoQPlan(
+            source=source,
+            output=output,
+            num_questions=1,
+            modes=("local",),
+        )
+    )
+
+    assert payload[0]["question"] == "What is the name of the main character?"
+    saved = json.loads(output.read_text(encoding="utf-8"))
+    assert saved["questions"][0]["source"] == "candidate"
 
 
 def test_autoe_accepts_list_inputs(monkeypatch, tmp_path: Path) -> None:

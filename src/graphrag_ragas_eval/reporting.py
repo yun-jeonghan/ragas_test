@@ -273,6 +273,7 @@ def render_smoke_report(
     generated_questions: Path | None = None,
     autod_summary: Path | None = None,
     autoq_questions: Path | None = None,
+    retrieval_results: Path | None = None,
     report_metadata: dict[str, Any] | None = None,
     interpretation: str | None = None,
 ) -> str:
@@ -280,6 +281,7 @@ def render_smoke_report(
     generated_data = _load_json(generated_questions) if generated_questions else None
     autod_data = _load_json(autod_summary) if autod_summary else None
     autoq_data = _load_json(autoq_questions) if autoq_questions else None
+    retrieval_data = _load_json(retrieval_results) if retrieval_results else None
 
     scores = _safe_list(evaluation_data.get("scores"))
     results = _safe_list(evaluation_data.get("results"))
@@ -363,6 +365,17 @@ def render_smoke_report(
                     "Open the JSON view for the full sample list.",
                 ],
                 generated_data or {},
+            )
+        )
+    if retrieval_data:
+        artifact_cards.append(
+            _artifact_card(
+                "Retrieval Prep",
+                [
+                    f"{len(_safe_list(retrieval_data.get('results')))} retrieval row(s) prepared.",
+                    "This normalizes current search results into the vendor retrieval-evaluation shape.",
+                ],
+                retrieval_data,
             )
         )
     if autod_data:
