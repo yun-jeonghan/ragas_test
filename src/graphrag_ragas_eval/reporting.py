@@ -548,11 +548,11 @@ def render_smoke_report(
             "Assertion scoring produced no score rows, so the assertion report cannot be trusted yet."
             "</div>"
         )
-    ragas_alert = ""
+    retrieval_alert = ""
     if retrieval_data and len(_safe_list(retrieval_data.get("results"))) == 0:
-        ragas_alert = (
+        retrieval_alert = (
             '<div class="note warning" style="margin-top: 14px;">'
-            "Retrieval prep produced no rows, so the Ragas side cannot score retrieved contexts yet."
+            "Retrieval prep produced no rows, so the BenchmarkQED retrieval path is still missing data."
             "</div>"
         )
 
@@ -946,7 +946,7 @@ def render_smoke_report(
     <header class="hero">
       <h1>{html.escape(title)}</h1>
       <p class="subtitle">
-        BenchmarkQED prepares the benchmark-side generation artifacts and Ragas evaluates retrieval and answer quality.
+        BenchmarkQED generates benchmark artifacts and runs its own AutoE and retrieval scoring paths. Ragas supplies the metric vocabulary that AutoE uses in this repo.
       </p>
       <div class="chips">
         <span class="chip"><span>generated</span><strong>{html.escape(now)}</strong></span>
@@ -962,7 +962,7 @@ def render_smoke_report(
         <h2>Overview</h2>
         <p class="small">
           This is a smoke report, so the numbers are for wiring validation first and quality judgment second.
-          Use it to confirm that the BenchmarkQED pipeline, Ragas scoring, and report rendering all line up.
+          Use it to confirm that the BenchmarkQED pipeline, the Ragas metric vocabulary, and report rendering all line up.
         </p>
         <div class="grid">
           {''.join(overview_cards)}
@@ -975,7 +975,7 @@ def render_smoke_report(
       <section>
         <h2>BenchmarkQED</h2>
         <p class="small">
-          Generation-side artifacts: AutoD summarizes the corpus, AutoQ creates questions, Assertion Prep shows whether those questions produced usable assertions, and Assertion Scores shows the assertion evaluation rows if they were run.
+          BenchmarkQED-side artifacts: AutoD summarizes the corpus, AutoQ creates questions, Assertion Prep shows whether those questions produced usable assertions, Assertion Scores shows the assertion evaluation rows if they were run, Retrieval Prep normalizes search output for retrieval scoring, and AutoE reports metric scores.
         </p>
         <div class="wide-grid">
           {_artifact_card("AutoD", autod_bullets if autod_data else ["No AutoD payload available."], autod_data or {})}
@@ -985,31 +985,28 @@ def render_smoke_report(
               f"{len(_safe_list(assertion_scores_data.get('scores')))} score row(s) evaluated." if assertion_scores_data else "No assertion score payload available.",
               "This evaluates prepared assertions against the answer set.",
           ], assertion_scores_data or {})) if assertion_scores_data else ""}
+          {(_artifact_card("Retrieval Prep", [
+              f"{len(_safe_list(retrieval_data.get('results')))} retrieval row(s) prepared." if retrieval_data else "No retrieval payload available.",
+              "This normalizes current search results into the vendor retrieval-evaluation shape.",
+          ], retrieval_data or {})) if retrieval_data else ""}
+          {_artifact_card("AutoE", autoe_bullets, evaluation_data)}
         </div>
         {benchmarkqed_alert}
         {assertion_scores_alert}
+        {retrieval_alert}
       </section>
 
       <section>
         <h2>Ragas</h2>
         <p class="small">
-          Evaluation-side artifacts: Retrieval Prep normalizes search output into the retrieval-eval format, and AutoE reports metric scores on those rows.
+          Ragas provides the metric vocabulary used by this repo. BenchmarkQED AutoE uses these metric names in smoke runs, but this report does not execute a standalone Ragas pipeline.
         </p>
-        <div class="wide-grid">
-          {_artifact_card("Retrieval Prep", [
-              f"{len(_safe_list(retrieval_data.get('results')))} retrieval row(s) prepared." if retrieval_data else "No retrieval payload available.",
-              "This normalizes current search results into the vendor retrieval-evaluation shape.",
-          ], retrieval_data) if retrieval_data else '<article class="artifact-card"><h3>Retrieval Prep</h3><ul class="bullet-list"><li>No retrieval payload available.</li></ul></article>'}
-          {_artifact_card("AutoE", autoe_bullets, evaluation_data)}
-        </div>
-        {ragas_alert}
-      </section>
-
-      <section>
-        <h2>Metric Guide</h2>
         <div class="grid">
           {''.join(_metric_card(metric_name, aggregate.get(metric_name, 0)) for metric_name in aggregate)}
           {''.join(_metric_card(metric_name, "—") for metric_name in METRIC_DESCRIPTIONS if metric_name not in aggregate)}
+        </div>
+        <div class="note" style="margin-top: 14px;">
+          The metric names below are the Ragas metrics surfaced in this smoke via BenchmarkQED AutoE.
         </div>
       </section>
 

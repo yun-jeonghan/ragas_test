@@ -101,7 +101,7 @@ def test_render_smoke_report(tmp_path: Path) -> None:
     assert "Smoke" in html
     assert "BenchmarkQED" in html
     assert "Ragas" in html
-    assert "Metric Guide" in html
+    assert "Ragas provides the metric vocabulary used by this repo" in html
     assert "<details" in html
     assert "Interpretation" in html
     assert "Assertion Prep" in html
