@@ -2,6 +2,8 @@
 
 이 문서는 `benchmarkqed`와 `ragas`를 같은 계열의 평가/생성 라이브러리로 보고, 이 저장소에서 어떻게 공통 스택으로 다루는지 공식 문서 기준으로 정리한 메모다.
 
+좀 더 실무적인 체크리스트는 [`docs/benchmarkqed-ragas-checklist.md`](./benchmarkqed-ragas-checklist.md)를 보면 된다.
+
 ## 한 줄 요약
 
 - `BenchmarkQED`와 `Ragas`는 둘 다 RAG 벤치마크를 만들고 평가하는 역할을 하는 라이브러리다.
