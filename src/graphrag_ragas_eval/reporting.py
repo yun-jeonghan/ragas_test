@@ -132,6 +132,24 @@ def _artifact_card(title: str, bullets: list[str], payload: dict[str, Any]) -> s
     """
 
 
+def _question_assertion_stats(autoq_questions: list[dict[str, Any]]) -> dict[str, int]:
+    claim_count = 0
+    assertion_count = 0
+    questions_with_assertions = 0
+    for question in autoq_questions:
+        attributes = _safe_dict(question.get("attributes"))
+        claim_count += int(attributes.get("claim_count") or 0)
+        assertion_count += int(attributes.get("assertion_count") or 0)
+        if int(attributes.get("assertion_count") or 0) > 0:
+            questions_with_assertions += 1
+    return {
+        "claim_count": claim_count,
+        "assertion_count": assertion_count,
+        "questions_with_assertions": questions_with_assertions,
+        "question_count": len(autoq_questions),
+    }
+
+
 def _score_row(score: dict[str, Any]) -> str:
     metadata = _safe_dict(score.get("metadata"))
     return f"""
@@ -256,9 +274,23 @@ def _fallback_interpretation(
                 f"AutoD covered {document_count} document(s) and {len(themes)} theme(s)."
             )
     if autoq_data:
+        autoq_questions = [
+            question for question in _safe_list(autoq_data.get("questions")) if isinstance(question, dict)
+        ]
+        stats = _question_assertion_stats(autoq_questions)
         lines.append(
             f"AutoQ reported {question_count} question(s); if this is lower than expected, treat it as a generation coverage issue rather than an evaluation failure."
         )
+        if stats["claim_count"] or stats["assertion_count"]:
+            lines.append(
+                "AutoQ claim/assertion coverage: "
+                f"{stats['claim_count']} claim(s), {stats['assertion_count']} assertion(s) "
+                f"across {stats['questions_with_assertions']} question(s) with assertions."
+            )
+        if stats["claim_count"] and stats["assertion_count"] == 0:
+            lines.append(
+                "Claims are being produced, but assertions are still empty; that is a useful signal for the global path and should be called out explicitly."
+            )
     lines.append(
         "If the chat model is qwen2.5:0.5b, this report is best interpreted as a local smoke lens: useful for catching wiring mistakes, not for proving final quality."
     )
@@ -327,6 +359,9 @@ def render_smoke_report(
     autod_documents = _safe_list((autod_data or {}).get("documents"))
     autod_themes = _safe_list((autod_data or {}).get("themes"))
     autoq_questions_payload = _safe_list((autoq_data or {}).get("questions"))
+    autoq_assertion_stats = _question_assertion_stats(
+        [question for question in autoq_questions_payload if isinstance(question, dict)]
+    )
 
     autod_bullets = [
         f"{len(autod_documents)} document(s) summarized.",
@@ -338,6 +373,12 @@ def render_smoke_report(
     autoq_bullets = [
         f"{len(autoq_questions_payload)} question(s) generated.",
         f"Modes: {', '.join(map(str, _safe_list((autoq_data or {}).get('metadata', {}).get('modes')))) or 'not recorded'}.",
+        f"Claims: {autoq_assertion_stats['claim_count']}; assertions: {autoq_assertion_stats['assertion_count']}.",
+        (
+            "Assertions were not populated for this run, so global coverage remains the next thing to tighten."
+            if autoq_assertion_stats["assertion_count"] == 0 and autoq_assertion_stats["claim_count"] > 0
+            else f"Questions with assertions: {autoq_assertion_stats['questions_with_assertions']}."
+        ),
         (
             f"First question: {autoq_questions_payload[0].get('question')}"
             if autoq_questions_payload and isinstance(autoq_questions_payload[0], dict)

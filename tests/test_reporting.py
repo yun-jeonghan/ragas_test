@@ -62,3 +62,48 @@ def test_render_smoke_report(tmp_path: Path) -> None:
     assert "context_precision" in html
     assert "검색된 컨텍스트 중 답변에 실제로 도움이 되는 비율" in html
     assert "Scrooge is a miser." in html
+
+
+def test_render_smoke_report_shows_autoq_assertion_status(tmp_path: Path) -> None:
+    evaluation = tmp_path / "evaluation.json"
+    autoq_questions = tmp_path / "autoq.json"
+    output = tmp_path / "report.html"
+
+    evaluation.write_text(
+        json.dumps(
+            {
+                "scores": [],
+                "results": [],
+                "aggregate": {},
+            }
+        ),
+        encoding="utf-8",
+    )
+    autoq_questions.write_text(
+        json.dumps(
+            {
+                "questions": [
+                    {
+                        "question": "What happened?",
+                        "attributes": {
+                            "claim_count": 1,
+                            "assertion_count": 0,
+                            "assertions": [],
+                        },
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    html = render_smoke_report(
+        evaluation=evaluation,
+        output=output,
+        autoq_questions=autoq_questions,
+        title="Smoke",
+    )
+
+    assert output.exists()
+    assert "Claims: 1; assertions: 0." in html
+    assert "Assertions were not populated for this run" in html

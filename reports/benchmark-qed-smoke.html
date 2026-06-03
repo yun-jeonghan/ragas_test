@@ -343,7 +343,7 @@
         BenchmarkQED smoke in one place: AutoD prepares the corpus summary, AutoQ generates questions, and AutoE evaluates the saved answers with Ragas.
       </p>
       <div class="chips">
-        <span class="chip"><span>generated</span><strong>2026-06-03 07:03 UTC</strong></span>
+        <span class="chip"><span>generated</span><strong>2026-06-03 08:01 UTC</strong></span>
         <span class="chip"><span>scores</span><strong>4</strong></span>
         <span class="chip"><span>results</span><strong>1</strong></span>
         <span class="chip"><span>aggregate metrics</span><strong>4</strong></span>
@@ -1235,7 +1235,7 @@ The content format is structured around themes like &quot;technology,&quot; &quo
           
       <article class="artifact-card">
         <h3>AutoQ</h3>
-        <ul class="bullet-list"><li>1 question(s) generated.</li><li>Modes: local.</li><li>First question: What specific actions did Marley take after the visits that led to Scrooge changing his ways? </li></ul>
+        <ul class="bullet-list"><li>1 question(s) generated.</li><li>Modes: local.</li><li>Claims: 1; assertions: 0.</li><li>Assertions were not populated for this run, so global coverage remains the next thing to tighten.</li><li>First question: What specific actions did Marley take after the visits that led to Scrooge changing his ways? </li></ul>
         
       <details>
         <summary>Full JSON view</summary>
@@ -1735,20 +1735,18 @@ The content format is structured around themes like &quot;technology,&quot; &quo
       <section>
         <h2>Interpretation</h2>
         <div class="note">
-          <div class="interpretation">- **Runtime**: The OLLAMA model is running in the `ollama` provider, with a base URL of `http://127.0.0.1:11434/v1`. It uses the `nomic-embed-text` embedding model.
-  
-  - **Autod**: The dataset contains 1 document and 1 theme:
-    - &quot;Scrooge is a miser who loves money more than people.&quot;
-    - &quot;He keeps his office cold and dark.&quot;
-
-  - **Benchmark QED**: The dataset synthesizes content from multiple analysts, focusing on the following topics:
-    - **Industry Expertise**: Covers various industries including technology, finance, healthcare.
-    - **Data Sources**: Sourced from news articles, research papers, and podcast transcripts.
-    - **Content Format**: Structured around themes like &quot;technology,&quot; &quot;societal implications,&quot; and &quot;industry-specific issues.&quot;
-  
-  - **AutoQ**: The question asked is: &quot;What specific actions did Marley take after the visits that led to Scrooge changing his ways? &quot;
-  
-- **Autoe**: The aggregate model&#x27;s performance is evaluated using the `autoe` metric, which includes precision, recall, and answer relevance. It has a context</div>
+          <div class="interpretation">Model lens: qwen2.5:0.5b via ollama (http://127.0.0.1:11434/v1).
+This is a smoke run, so 4 score row(s) and 4 aggregate metric(s) should be read as a sanity check rather than a benchmark.
+context_precision = 10. 검색된 컨텍스트 중 답변에 실제로 도움이 되는 비율.
+context_recall = 10. 정답을 뒷받침하는 컨텍스트를 얼마나 빠짐없이 찾았는지.
+faithfulness = 10. 답변이 검색 컨텍스트에 얼마나 충실한지.
+answer_relevancy = 10. 질문과 답변이 얼마나 직접적으로 연결되는지.
+AutoD produced a corpus summary and benchmark_qed summary, which means the document-side path is wired up correctly.
+AutoD covered 1 document(s) and 2 theme(s).
+AutoQ reported 1 question(s); if this is lower than expected, treat it as a generation coverage issue rather than an evaluation failure.
+AutoQ claim/assertion coverage: 1 claim(s), 0 assertion(s) across 0 question(s) with assertions.
+Claims are being produced, but assertions are still empty; that is a useful signal for the global path and should be called out explicitly.
+If the chat model is qwen2.5:0.5b, this report is best interpreted as a local smoke lens: useful for catching wiring mistakes, not for proving final quality.</div>
         </div>
       </section>
 
