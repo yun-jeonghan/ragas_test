@@ -7,7 +7,9 @@ dist/
 build/
 *.egg-info/
 data/results/
-reports/
+reports/*
+!reports/benchmark-qed-smoke.html
+!reports/benchmark-qed-retrieval-smoke.html
 !data/results/
 data/results/*
 !data/results/sample_search_results.json

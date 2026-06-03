@@ -1,0 +1,662 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BenchmarkQED Retrieval Smoke Report</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #eef3ff;
+      --panel: rgba(255, 255, 255, 0.94);
+      --panel-strong: #ffffff;
+      --text: #182033;
+      --muted: #60708f;
+      --accent: #2457ff;
+      --accent-soft: #e8efff;
+      --border: #d9e0ef;
+      --shadow: 0 14px 40px rgba(31, 41, 55, 0.08);
+    }
+    * { box-sizing: border-box; }
+    html, body { min-height: 100%; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, "Noto Sans KR", "Helvetica Neue", Arial, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(36, 87, 255, 0.11), transparent 30%),
+        linear-gradient(180deg, #eef3ff 0%, #f8fbff 18%, #f8fbff 100%);
+      color: var(--text);
+      line-height: 1.55;
+    }
+    .wrap {
+      max-width: 1220px;
+      margin: 0 auto;
+      padding: 36px 18px 64px;
+    }
+    .hero {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      padding: 28px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }
+    .hero h1 {
+      margin: 0 0 10px;
+      font-size: clamp(2rem, 4vw, 3rem);
+      line-height: 1.08;
+      letter-spacing: -0.03em;
+    }
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      max-width: 70ch;
+    }
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+    .chip {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      border: 1px solid rgba(36, 87, 255, 0.12);
+      font-size: 0.92rem;
+      font-weight: 700;
+    }
+    .chip strong { font-weight: 800; }
+    main {
+      margin-top: 22px;
+      display: grid;
+      gap: 18px;
+    }
+    section {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 22px;
+      box-shadow: var(--shadow);
+    }
+    h2 {
+      margin: 0 0 14px;
+      font-size: 1.28rem;
+      letter-spacing: -0.02em;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 14px;
+    }
+    .wide-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 14px;
+    }
+    .metric-card, .artifact-card {
+      background: var(--panel-strong);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 16px;
+    }
+    .metric-title {
+      color: var(--muted);
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .metric-value {
+      margin-top: 6px;
+      font-size: 1.8rem;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+    }
+    .metric-desc {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+    .note {
+      border-left: 4px solid var(--accent);
+      background: #f5f8ff;
+      padding: 14px 16px;
+      border-radius: 14px;
+      color: #26314a;
+    }
+    .small { color: var(--muted); font-size: 0.92rem; }
+    .bullet-list {
+      margin: 0;
+      padding-left: 20px;
+      color: var(--text);
+    }
+    .bullet-list li + li { margin-top: 6px; }
+    details {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: white;
+      overflow: hidden;
+    }
+    details + details { margin-top: 12px; }
+    summary {
+      cursor: pointer;
+      list-style: none;
+      padding: 14px 16px;
+      font-weight: 700;
+      background: #fafcff;
+    }
+    summary::-webkit-details-marker { display: none; }
+    details[open] summary {
+      border-bottom: 1px solid var(--border);
+      background: #f5f8ff;
+    }
+    details > :not(summary) { padding: 16px; }
+    pre {
+      margin: 0;
+      padding: 14px;
+      border-radius: 14px;
+      background: #0f172a;
+      color: #d8e4ff;
+      overflow: auto;
+      font-size: 0.87rem;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .artifact-card h3 { margin: 0 0 8px; }
+    footer {
+      color: var(--muted);
+      font-size: 0.9rem;
+      text-align: center;
+      margin-top: 24px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="hero">
+      <h1>BenchmarkQED Retrieval Smoke Report</h1>
+      <p class="subtitle">
+        BenchmarkQED retrieval smoke checks reference generation, retrieval preparation, and retrieval scoring in one pass.
+      </p>
+      <div class="chips">
+        <span class="chip"><span>generated</span><strong>2026-06-03 14:53 UTC</strong></span>
+        <span class="chip"><span>reference rows</span><strong>1</strong></span>
+        <span class="chip"><span>retrieval rows</span><strong>1</strong></span>
+        <span class="chip"><span>evaluation rows</span><strong>1</strong></span>
+        <span class="chip"><span>chat model</span><strong>qwen2.5:0.5b</strong></span><span class="chip"><span>provider</span><strong>ollama</strong></span><span class="chip"><span>embeddings</span><strong>nomic-embed-text</strong></span><span class="chip"><span>endpoint</span><strong>http://127.0.0.1:11434/v1</strong></span>
+      </div>
+    </header>
+
+    <main>
+      <section>
+        <h2>Overview</h2>
+        <p class="small">
+          This is a BenchmarkQED-only retrieval report. It intentionally excludes Ragas and focuses on the retrieval reference and scoring path.
+        </p>
+        <div class="grid">
+          
+      <article class="metric-card">
+        <div class="metric-title">reference rows</div>
+        <div class="metric-value">1</div>
+        <p class="metric-desc">평가 항목 설명이 아직 등록되지 않았습니다.</p>
+      </article>
+    
+      <article class="metric-card">
+        <div class="metric-title">retrieval rows</div>
+        <div class="metric-value">1</div>
+        <p class="metric-desc">평가 항목 설명이 아직 등록되지 않았습니다.</p>
+      </article>
+    
+      <article class="metric-card">
+        <div class="metric-title">evaluation rows</div>
+        <div class="metric-value">1</div>
+        <p class="metric-desc">평가 항목 설명이 아직 등록되지 않았습니다.</p>
+      </article>
+    
+      <article class="metric-card">
+        <div class="metric-title">aggregate metrics</div>
+        <div class="metric-value">0</div>
+        <p class="metric-desc">평가 항목 설명이 아직 등록되지 않았습니다.</p>
+      </article>
+    
+        </div>
+      </section>
+
+      <section>
+        <h2>BenchmarkQED Retrieval</h2>
+        <div class="wide-grid">
+          
+      <article class="artifact-card">
+        <h3>Retrieval Reference</h3>
+        <ul class="bullet-list"><li>1 reference row(s) generated.</li><li>Open the JSON view for the reference clusters and question relevance labels.</li></ul>
+        
+      <details>
+        <summary>Full JSON view</summary>
+        <pre>{
+  &quot;total_questions&quot;: 1,
+  &quot;references&quot;: [
+    {
+      &quot;question_id&quot;: &quot;scrooge-1&quot;,
+      &quot;question_text&quot;: &quot;Who is Scrooge?&quot;,
+      &quot;cluster_results&quot;: [
+        {
+          &quot;cluster_id&quot;: &quot;22137dfa-c7d3-40ae-8dc7-0860dd6e6abb&quot;,
+          &quot;cluster_size&quot;: 1,
+          &quot;num_assessments&quot;: 1,
+          &quot;num_overlapping_chunks&quot;: 1,
+          &quot;semantic_neighbor_assessments&quot;: {
+            &quot;assessment&quot;: [
+              {
+                &quot;text_unit&quot;: {
+                  &quot;id&quot;: &quot;ef3bcbd516bc3f8a14de154a9dfb225bcdfb0f870d1c9caeffa2e0fe4ea34ecd06d17d12840d71c65f506c394895f1ee5e76dc9d3b3994b7bafcd92286aeb4c3&quot;,
+                  &quot;short_id&quot;: &quot;0&quot;,
+                  &quot;text&quot;: &quot;Scrooge is a miser who loves money more than people.\nHe is visited by three spirits and learns to change his ways.\n\n&quot;,
+                  &quot;document_id&quot;: &quot;ef3bcbd516bc3f8a14de154a9dfb225bcdfb0f870d1c9caeffa2e0fe4ea34ecd06d17d12840d71c65f506c394895f1ee5e76dc9d3b3994b7bafcd92286aeb4c3&quot;,
+                  &quot;n_tokens&quot;: 26,
+                  &quot;cluster_id&quot;: &quot;22137dfa-c7d3-40ae-8dc7-0860dd6e6abb&quot;,
+                  &quot;attributes&quot;: null
+                },
+                &quot;reasoning&quot;: &quot;The passage contains the query and provides information about Scrooge, which seems to be related to the topic. The content matches the query (M) and the trustworthiness of the passage (T). However, the passage does not provide a clear answer for the query, so it is not in category 3.&quot;,
+                &quot;score&quot;: 2
+              }
+            ]
+          },
+          &quot;centroid_neighbor_assessments&quot;: {
+            &quot;assessment&quot;: [
+              {
+                &quot;text_unit&quot;: {
+                  &quot;id&quot;: &quot;ef3bcbd516bc3f8a14de154a9dfb225bcdfb0f870d1c9caeffa2e0fe4ea34ecd06d17d12840d71c65f506c394895f1ee5e76dc9d3b3994b7bafcd92286aeb4c3&quot;,
+                  &quot;short_id&quot;: &quot;0&quot;,
+                  &quot;text&quot;: &quot;Scrooge is a miser who loves money more than people.\nHe is visited by three spirits and learns to change his ways.\n\n&quot;,
+                  &quot;document_id&quot;: &quot;ef3bcbd516bc3f8a14de154a9dfb225bcdfb0f870d1c9caeffa2e0fe4ea34ecd06d17d12840d71c65f506c394895f1ee5e76dc9d3b3994b7bafcd92286aeb4c3&quot;,
+                  &quot;n_tokens&quot;: 26,
+                  &quot;cluster_id&quot;: &quot;22137dfa-c7d3-40ae-8dc7-0860dd6e6abb&quot;,
+                  &quot;attributes&quot;: null
+                },
+                &quot;reasoning&quot;: &quot;The passage contains the query and provides information about Scrooge, which seems to be related to the topic. The content matches the query (M) and the trustworthiness of the passage (T). However, the passage does not provide a clear answer for the query, so it is not in category 3.&quot;,
+                &quot;score&quot;: 2
+              }
+            ]
+          },
+          &quot;all_assessments&quot;: {
+            &quot;assessment&quot;: [
+              {
+                &quot;text_unit&quot;: {
+                  &quot;id&quot;: &quot;ef3bcbd516bc3f8a14de154a9dfb225bcdfb0f870d1c9caeffa2e0fe4ea34ecd06d17d12840d71c65f506c394895f1ee5e76dc9d3b3994b7bafcd92286aeb4c3&quot;,
+                  &quot;short_id&quot;: &quot;0&quot;,
+                  &quot;text&quot;: &quot;Scrooge is a miser who loves money more than people.\nHe is visited by three spirits and learns to change his ways.\n\n&quot;,
+                  &quot;document_id&quot;: &quot;ef3bcbd516bc3f8a14de154a9dfb225bcdfb0f870d1c9caeffa2e0fe4ea34ecd06d17d12840d71c65f506c394895f1ee5e76dc9d3b3994b7bafcd92286aeb4c3&quot;,
+                  &quot;n_tokens&quot;: 26,
+                  &quot;cluster_id&quot;: &quot;22137dfa-c7d3-40ae-8dc7-0860dd6e6abb&quot;,
+                  &quot;attributes&quot;: null
+                },
+                &quot;reasoning&quot;: &quot;The passage contains the query and provides information about Scrooge, which seems to be related to the topic. The content matches the query (M) and the trustworthiness of the passage (T). However, the passage does not provide a clear answer for the query, so it is not in category 3.&quot;,
+                &quot;score&quot;: 2
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  &quot;clusters&quot;: [
+    {
+      &quot;id&quot;: &quot;22137dfa-c7d3-40ae-8dc7-0860dd6e6abb&quot;,
+      &quot;text_units&quot;: [
+        {
+          &quot;id&quot;: &quot;ef3bcbd516bc3f8a14de154a9dfb225bcdfb0f870d1c9caeffa2e0fe4ea34ecd06d17d12840d71c65f506c394895f1ee5e76dc9d3b3994b7bafcd92286aeb4c3&quot;,
+          &quot;short_id&quot;: &quot;0&quot;,
+          &quot;text&quot;: &quot;Scrooge is a miser who loves money more than people.\nHe is visited by three spirits and learns to change his ways.\n\n&quot;
+        }
+      ]
+    }
+  ],
+  &quot;metadata&quot;: {
+    &quot;component&quot;: &quot;RetrievalReference&quot;,
+    &quot;backend&quot;: &quot;benchmark-qed&quot;,
+    &quot;assessor_type&quot;: &quot;rationale&quot;,
+    &quot;questions&quot;: &quot;data/benchmarks/sample_benchmark.json&quot;,
+    &quot;clusters&quot;: &quot;/tmp/grev-benchmark-qed-retrieval-smoke/clusters.json&quot;,
+    &quot;text_units&quot;: &quot;workspaces/graphrag/output/text_units.parquet&quot;,
+    &quot;question_count&quot;: 1,
+    &quot;cluster_count&quot;: 1,
+    &quot;semantic_neighbors&quot;: 10,
+    &quot;centroid_neighbors&quot;: 5,
+    &quot;include_clusters&quot;: true,
+    &quot;smoke&quot;: true
+  }
+}</pre>
+      </details>
+    
+      </article>
+    
+          
+      <article class="artifact-card">
+        <h3>Retrieval Prep</h3>
+        <ul class="bullet-list"><li>1 retrieval row(s) prepared.</li><li>This normalizes the search results into the vendor retrieval-evaluation shape.</li></ul>
+        
+      <details>
+        <summary>Full JSON view</summary>
+        <pre>{
+  &quot;metadata&quot;: {
+    &quot;component&quot;: &quot;RetrievalPrep&quot;,
+    &quot;backend&quot;: &quot;benchmark-qed&quot;,
+    &quot;source&quot;: &quot;data/results/sample_search_results.json&quot;,
+    &quot;context_id_key&quot;: &quot;chunk_id&quot;,
+    &quot;context_text_key&quot;: &quot;text&quot;,
+    &quot;smoke&quot;: true
+  },
+  &quot;results&quot;: [
+    {
+      &quot;question_id&quot;: &quot;scrooge-1&quot;,
+      &quot;question_text&quot;: &quot;Who is Scrooge?&quot;,
+      &quot;context&quot;: [
+        {
+          &quot;chunk_id&quot;: &quot;scrooge.txt&quot;,
+          &quot;text&quot;: &quot;Scrooge is a miser who loves money more than people.&quot;,
+          &quot;score&quot;: 1.0,
+          &quot;metadata&quot;: {}
+        }
+      ],
+      &quot;metadata&quot;: {
+        &quot;search_mode&quot;: &quot;local&quot;,
+        &quot;backend&quot;: &quot;sample&quot;,
+        &quot;smoke&quot;: true
+      }
+    }
+  ]
+}</pre>
+      </details>
+    
+      </article>
+    
+          
+      <article class="artifact-card">
+        <h3>Retrieval Evaluation</h3>
+        <ul class="bullet-list"><li>1 evaluation summary row(s).</li><li>0 aggregate metric(s) in the payload.</li></ul>
+        
+      <details>
+        <summary>Full JSON view</summary>
+        <pre>{
+  &quot;metadata&quot;: {
+    &quot;component&quot;: &quot;RetrievalEvaluation&quot;,
+    &quot;backend&quot;: &quot;benchmark-qed&quot;,
+    &quot;reference_dir&quot;: &quot;/tmp/grev-benchmark-qed-retrieval-smoke/retrieval-reference&quot;,
+    &quot;clusters&quot;: &quot;/tmp/grev-benchmark-qed-retrieval-smoke/clusters.json&quot;,
+    &quot;text_units&quot;: &quot;workspaces/graphrag/output/text_units.parquet&quot;,
+    &quot;retrieval_results&quot;: &quot;/tmp/grev-benchmark-qed-retrieval-smoke/retrieval-results.json&quot;,
+    &quot;question_sets&quot;: [
+      &quot;default&quot;
+    ],
+    &quot;rag_method_name&quot;: &quot;benchmark-qed&quot;,
+    &quot;relevance_threshold&quot;: 2,
+    &quot;context_id_key&quot;: &quot;chunk_id&quot;,
+    &quot;context_text_key&quot;: &quot;text&quot;,
+    &quot;cluster_match_by&quot;: &quot;text&quot;,
+    &quot;run_significance_test&quot;: true,
+    &quot;significance_alpha&quot;: 0.05,
+    &quot;significance_correction&quot;: &quot;holm&quot;,
+    &quot;fidelity_metric&quot;: &quot;js&quot;,
+    &quot;smoke&quot;: true
+  },
+  &quot;summary&quot;: [
+    {
+      &quot;question_set&quot;: &quot;default&quot;,
+      &quot;rag_method&quot;: &quot;benchmark-qed&quot;,
+      &quot;binary_precision&quot;: 1.0,
+      &quot;graded_precision&quot;: 1.0,
+      &quot;recall&quot;: 0.0,
+      &quot;fidelity&quot;: 0.0,
+      &quot;total_queries&quot;: 1
+    }
+  ],
+  &quot;columns&quot;: [
+    &quot;question_set&quot;,
+    &quot;rag_method&quot;,
+    &quot;binary_precision&quot;,
+    &quot;graded_precision&quot;,
+    &quot;recall&quot;,
+    &quot;fidelity&quot;,
+    &quot;total_queries&quot;
+  ],
+  &quot;rows&quot;: 1,
+  &quot;output_dir&quot;: &quot;/tmp/grev-benchmark-qed-retrieval-smoke/.retrieval-evaluation.benchmark-qed&quot;
+}</pre>
+      </details>
+    
+      </article>
+    
+        </div>
+      </section>
+
+      <section>
+        <h2>Interpretation</h2>
+        <div class="note">
+          <div class="interpretation">Model lens: qwen2.5:0.5b via ollama (http://127.0.0.1:11434/v1).
+Retrieval smoke is wired if reference rows, prepared retrieval rows, and evaluation rows all appear together.
+Reference rows: 1.
+Prepared retrieval rows: 1.
+Evaluation summary rows: 1.
+No aggregate retrieval metrics were found.</div>
+        </div>
+      </section>
+
+      <section>
+        <h2>Supporting Artifacts</h2>
+        <div class="grid">
+          
+      <article class="artifact-card">
+        <h3>Retrieval Reference JSON</h3>
+        <ul class="bullet-list"><li>1 reference row(s).</li><li>Cluster-level relevance labels live here.</li></ul>
+        
+      <details>
+        <summary>Full JSON view</summary>
+        <pre>{
+  &quot;total_questions&quot;: 1,
+  &quot;references&quot;: [
+    {
+      &quot;question_id&quot;: &quot;scrooge-1&quot;,
+      &quot;question_text&quot;: &quot;Who is Scrooge?&quot;,
+      &quot;cluster_results&quot;: [
+        {
+          &quot;cluster_id&quot;: &quot;22137dfa-c7d3-40ae-8dc7-0860dd6e6abb&quot;,
+          &quot;cluster_size&quot;: 1,
+          &quot;num_assessments&quot;: 1,
+          &quot;num_overlapping_chunks&quot;: 1,
+          &quot;semantic_neighbor_assessments&quot;: {
+            &quot;assessment&quot;: [
+              {
+                &quot;text_unit&quot;: {
+                  &quot;id&quot;: &quot;ef3bcbd516bc3f8a14de154a9dfb225bcdfb0f870d1c9caeffa2e0fe4ea34ecd06d17d12840d71c65f506c394895f1ee5e76dc9d3b3994b7bafcd92286aeb4c3&quot;,
+                  &quot;short_id&quot;: &quot;0&quot;,
+                  &quot;text&quot;: &quot;Scrooge is a miser who loves money more than people.\nHe is visited by three spirits and learns to change his ways.\n\n&quot;,
+                  &quot;document_id&quot;: &quot;ef3bcbd516bc3f8a14de154a9dfb225bcdfb0f870d1c9caeffa2e0fe4ea34ecd06d17d12840d71c65f506c394895f1ee5e76dc9d3b3994b7bafcd92286aeb4c3&quot;,
+                  &quot;n_tokens&quot;: 26,
+                  &quot;cluster_id&quot;: &quot;22137dfa-c7d3-40ae-8dc7-0860dd6e6abb&quot;,
+                  &quot;attributes&quot;: null
+                },
+                &quot;reasoning&quot;: &quot;The passage contains the query and provides information about Scrooge, which seems to be related to the topic. The content matches the query (M) and the trustworthiness of the passage (T). However, the passage does not provide a clear answer for the query, so it is not in category 3.&quot;,
+                &quot;score&quot;: 2
+              }
+            ]
+          },
+          &quot;centroid_neighbor_assessments&quot;: {
+            &quot;assessment&quot;: [
+              {
+                &quot;text_unit&quot;: {
+                  &quot;id&quot;: &quot;ef3bcbd516bc3f8a14de154a9dfb225bcdfb0f870d1c9caeffa2e0fe4ea34ecd06d17d12840d71c65f506c394895f1ee5e76dc9d3b3994b7bafcd92286aeb4c3&quot;,
+                  &quot;short_id&quot;: &quot;0&quot;,
+                  &quot;text&quot;: &quot;Scrooge is a miser who loves money more than people.\nHe is visited by three spirits and learns to change his ways.\n\n&quot;,
+                  &quot;document_id&quot;: &quot;ef3bcbd516bc3f8a14de154a9dfb225bcdfb0f870d1c9caeffa2e0fe4ea34ecd06d17d12840d71c65f506c394895f1ee5e76dc9d3b3994b7bafcd92286aeb4c3&quot;,
+                  &quot;n_tokens&quot;: 26,
+                  &quot;cluster_id&quot;: &quot;22137dfa-c7d3-40ae-8dc7-0860dd6e6abb&quot;,
+                  &quot;attributes&quot;: null
+                },
+                &quot;reasoning&quot;: &quot;The passage contains the query and provides information about Scrooge, which seems to be related to the topic. The content matches the query (M) and the trustworthiness of the passage (T). However, the passage does not provide a clear answer for the query, so it is not in category 3.&quot;,
+                &quot;score&quot;: 2
+              }
+            ]
+          },
+          &quot;all_assessments&quot;: {
+            &quot;assessment&quot;: [
+              {
+                &quot;text_unit&quot;: {
+                  &quot;id&quot;: &quot;ef3bcbd516bc3f8a14de154a9dfb225bcdfb0f870d1c9caeffa2e0fe4ea34ecd06d17d12840d71c65f506c394895f1ee5e76dc9d3b3994b7bafcd92286aeb4c3&quot;,
+                  &quot;short_id&quot;: &quot;0&quot;,
+                  &quot;text&quot;: &quot;Scrooge is a miser who loves money more than people.\nHe is visited by three spirits and learns to change his ways.\n\n&quot;,
+                  &quot;document_id&quot;: &quot;ef3bcbd516bc3f8a14de154a9dfb225bcdfb0f870d1c9caeffa2e0fe4ea34ecd06d17d12840d71c65f506c394895f1ee5e76dc9d3b3994b7bafcd92286aeb4c3&quot;,
+                  &quot;n_tokens&quot;: 26,
+                  &quot;cluster_id&quot;: &quot;22137dfa-c7d3-40ae-8dc7-0860dd6e6abb&quot;,
+                  &quot;attributes&quot;: null
+                },
+                &quot;reasoning&quot;: &quot;The passage contains the query and provides information about Scrooge, which seems to be related to the topic. The content matches the query (M) and the trustworthiness of the passage (T). However, the passage does not provide a clear answer for the query, so it is not in category 3.&quot;,
+                &quot;score&quot;: 2
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  &quot;clusters&quot;: [
+    {
+      &quot;id&quot;: &quot;22137dfa-c7d3-40ae-8dc7-0860dd6e6abb&quot;,
+      &quot;text_units&quot;: [
+        {
+          &quot;id&quot;: &quot;ef3bcbd516bc3f8a14de154a9dfb225bcdfb0f870d1c9caeffa2e0fe4ea34ecd06d17d12840d71c65f506c394895f1ee5e76dc9d3b3994b7bafcd92286aeb4c3&quot;,
+          &quot;short_id&quot;: &quot;0&quot;,
+          &quot;text&quot;: &quot;Scrooge is a miser who loves money more than people.\nHe is visited by three spirits and learns to change his ways.\n\n&quot;
+        }
+      ]
+    }
+  ],
+  &quot;metadata&quot;: {
+    &quot;component&quot;: &quot;RetrievalReference&quot;,
+    &quot;backend&quot;: &quot;benchmark-qed&quot;,
+    &quot;assessor_type&quot;: &quot;rationale&quot;,
+    &quot;questions&quot;: &quot;data/benchmarks/sample_benchmark.json&quot;,
+    &quot;clusters&quot;: &quot;/tmp/grev-benchmark-qed-retrieval-smoke/clusters.json&quot;,
+    &quot;text_units&quot;: &quot;workspaces/graphrag/output/text_units.parquet&quot;,
+    &quot;question_count&quot;: 1,
+    &quot;cluster_count&quot;: 1,
+    &quot;semantic_neighbors&quot;: 10,
+    &quot;centroid_neighbors&quot;: 5,
+    &quot;include_clusters&quot;: true,
+    &quot;smoke&quot;: true
+  }
+}</pre>
+      </details>
+    
+      </article>
+    
+          
+      <article class="artifact-card">
+        <h3>Retrieval Results JSON</h3>
+        <ul class="bullet-list"><li>1 prepared row(s).</li><li>These are the normalized search results used by BenchmarkQED retrieval scoring.</li></ul>
+        
+      <details>
+        <summary>Full JSON view</summary>
+        <pre>{
+  &quot;metadata&quot;: {
+    &quot;component&quot;: &quot;RetrievalPrep&quot;,
+    &quot;backend&quot;: &quot;benchmark-qed&quot;,
+    &quot;source&quot;: &quot;data/results/sample_search_results.json&quot;,
+    &quot;context_id_key&quot;: &quot;chunk_id&quot;,
+    &quot;context_text_key&quot;: &quot;text&quot;,
+    &quot;smoke&quot;: true
+  },
+  &quot;results&quot;: [
+    {
+      &quot;question_id&quot;: &quot;scrooge-1&quot;,
+      &quot;question_text&quot;: &quot;Who is Scrooge?&quot;,
+      &quot;context&quot;: [
+        {
+          &quot;chunk_id&quot;: &quot;scrooge.txt&quot;,
+          &quot;text&quot;: &quot;Scrooge is a miser who loves money more than people.&quot;,
+          &quot;score&quot;: 1.0,
+          &quot;metadata&quot;: {}
+        }
+      ],
+      &quot;metadata&quot;: {
+        &quot;search_mode&quot;: &quot;local&quot;,
+        &quot;backend&quot;: &quot;sample&quot;,
+        &quot;smoke&quot;: true
+      }
+    }
+  ]
+}</pre>
+      </details>
+    
+      </article>
+    
+          
+      <article class="artifact-card">
+        <h3>Retrieval Evaluation JSON</h3>
+        <ul class="bullet-list"><li>1 summary row(s).</li><li>Metadata backend: benchmark-qed.</li></ul>
+        
+      <details>
+        <summary>Full JSON view</summary>
+        <pre>{
+  &quot;metadata&quot;: {
+    &quot;component&quot;: &quot;RetrievalEvaluation&quot;,
+    &quot;backend&quot;: &quot;benchmark-qed&quot;,
+    &quot;reference_dir&quot;: &quot;/tmp/grev-benchmark-qed-retrieval-smoke/retrieval-reference&quot;,
+    &quot;clusters&quot;: &quot;/tmp/grev-benchmark-qed-retrieval-smoke/clusters.json&quot;,
+    &quot;text_units&quot;: &quot;workspaces/graphrag/output/text_units.parquet&quot;,
+    &quot;retrieval_results&quot;: &quot;/tmp/grev-benchmark-qed-retrieval-smoke/retrieval-results.json&quot;,
+    &quot;question_sets&quot;: [
+      &quot;default&quot;
+    ],
+    &quot;rag_method_name&quot;: &quot;benchmark-qed&quot;,
+    &quot;relevance_threshold&quot;: 2,
+    &quot;context_id_key&quot;: &quot;chunk_id&quot;,
+    &quot;context_text_key&quot;: &quot;text&quot;,
+    &quot;cluster_match_by&quot;: &quot;text&quot;,
+    &quot;run_significance_test&quot;: true,
+    &quot;significance_alpha&quot;: 0.05,
+    &quot;significance_correction&quot;: &quot;holm&quot;,
+    &quot;fidelity_metric&quot;: &quot;js&quot;,
+    &quot;smoke&quot;: true
+  },
+  &quot;summary&quot;: [
+    {
+      &quot;question_set&quot;: &quot;default&quot;,
+      &quot;rag_method&quot;: &quot;benchmark-qed&quot;,
+      &quot;binary_precision&quot;: 1.0,
+      &quot;graded_precision&quot;: 1.0,
+      &quot;recall&quot;: 0.0,
+      &quot;fidelity&quot;: 0.0,
+      &quot;total_queries&quot;: 1
+    }
+  ],
+  &quot;columns&quot;: [
+    &quot;question_set&quot;,
+    &quot;rag_method&quot;,
+    &quot;binary_precision&quot;,
+    &quot;graded_precision&quot;,
+    &quot;recall&quot;,
+    &quot;fidelity&quot;,
+    &quot;total_queries&quot;
+  ],
+  &quot;rows&quot;: 1,
+  &quot;output_dir&quot;: &quot;/tmp/grev-benchmark-qed-retrieval-smoke/.retrieval-evaluation.benchmark-qed&quot;
+}</pre>
+      </details>
+    
+      </article>
+    
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      Rendered by <code>graphrag_ragas_eval.reporting.render_retrieval_smoke_report</code>.
+    </footer>
+  </div>
+</body>
+</html>
