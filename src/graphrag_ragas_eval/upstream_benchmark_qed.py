@@ -28,6 +28,11 @@ def ensure_autoe_import_shim() -> None:
         module = types.ModuleType("benchmark_qed.autoe")
         module.__path__ = [str(package_root)]  # type: ignore[attr-defined]
         sys.modules["benchmark_qed.autoe"] = module
+    parent = sys.modules.get("benchmark_qed")
+    if parent is None:
+        parent = __import__("benchmark_qed")
+    if getattr(parent, "autoe", None) is not module:
+        setattr(parent, "autoe", module)
 
 
 def build_vendor_llm_config(

@@ -8,6 +8,12 @@ import typer
 from .benchmark_qed.autod import AutoDPlan, summarize_dataset
 from .benchmark_qed.autoe import AutoEPlan, evaluate_answers
 from .benchmark_qed.autoq import AutoQPlan, generate_queries
+from .benchmark_qed.retrieval import (
+    RetrievalEvaluationPlan,
+    RetrievalReferencePlan,
+    evaluate_retrieval_results,
+    generate_retrieval_reference,
+)
 from .benchmark_qed.smoke import BenchmarkQEDSmokePlan, run_benchmark_qed_smoke
 from .config import DEFAULT_CHAT_MODEL, DEFAULT_EMBEDDING_MODEL, ProjectPaths
 from .integrations import evaluate_kg_correctness, evaluate_kggen_mine, evaluate_ragas
@@ -252,6 +258,86 @@ def benchmark_qed_autoe(
     )
     typer.echo(f"wrote AutoE evaluation to {output}")
     typer.echo(f"aggregate: {run.aggregate()}")
+
+
+@benchmark_qed_app.command("retrieval-reference")
+def benchmark_qed_retrieval_reference(
+    questions: Path = typer.Option(..., exists=True, file_okay=True, dir_okay=False, help="질문 JSON 또는 JSONL"),
+    clusters: Path = typer.Option(..., exists=True, file_okay=True, dir_okay=False, help="클러스터 JSON"),
+    text_units: Path | None = typer.Option(None, exists=True, file_okay=True, dir_okay=False, help="clusters가 text_unit_ids만 가질 때 사용할 text units"),
+    output: Path = typer.Option(Path("data/benchmark-qed/retrieval-reference.json"), file_okay=True, dir_okay=False, help="retrieval reference 저장 경로"),
+    max_questions: int | None = typer.Option(None, min=1, help="reference 생성에 사용할 질문 수 상한"),
+    assessor_type: str = typer.Option("rationale", help="relevance assessor 타입: rationale 또는 bing"),
+    semantic_neighbors: int = typer.Option(10, min=1, help="query별 semantic neighbors 수"),
+    centroid_neighbors: int = typer.Option(5, min=1, help="query별 centroid neighbors 수"),
+    concurrent_requests: int = typer.Option(16, min=1, help="동시 relevance 요청 수"),
+    include_clusters: bool = typer.Option(True, help="reference JSON에 clusters를 같이 저장할지 여부"),
+) -> None:
+    payload = generate_retrieval_reference(
+        RetrievalReferencePlan(
+            questions=questions,
+            clusters=clusters,
+            text_units=text_units,
+            output=output,
+            max_questions=max_questions,
+            assessor_type=assessor_type,
+            semantic_neighbors=semantic_neighbors,
+            centroid_neighbors=centroid_neighbors,
+            concurrent_requests=concurrent_requests,
+            include_clusters=include_clusters,
+        )
+    )
+    typer.echo(f"wrote retrieval reference to {output}")
+    typer.echo(f"references: {len(payload.get('references', []))}")
+
+
+@benchmark_qed_app.command("retrieval-score")
+def benchmark_qed_retrieval_score(
+    reference_dir: Path = typer.Option(..., exists=True, file_okay=False, dir_okay=True, help="reference.json 이 들어있는 디렉터리"),
+    clusters: Path = typer.Option(..., exists=True, file_okay=True, dir_okay=False, help="클러스터 JSON"),
+    retrieval_results: Path = typer.Option(..., exists=True, file_okay=True, dir_okay=False, help="retrieval-results JSON"),
+    output: Path = typer.Option(Path("data/benchmark-qed/retrieval-evaluation.json"), file_okay=True, dir_okay=False, help="retrieval 평가 요약 저장 경로"),
+    text_units: Path | None = typer.Option(None, exists=True, file_okay=True, dir_okay=False, help="clusters가 text_unit_ids만 가질 때 사용할 text units"),
+    question_sets: list[str] = typer.Option(["default"], help="평가할 question set 이름"),
+    rag_method_name: str = typer.Option("benchmark-qed", help="평가할 RAG method 이름"),
+    reference_filename: str = typer.Option("reference.json", help="reference 파일 이름"),
+    relevance_threshold: int = typer.Option(2, min=0, max=3, help="relevance 임계값"),
+    context_id_key: str = typer.Option("chunk_id", help="retrieval context ID 키"),
+    context_text_key: str = typer.Option("text", help="retrieval context text 키"),
+    cluster_match_by: str = typer.Option("text", help="cluster 매칭 기준: text, id, short_id"),
+    run_significance_test: bool = typer.Option(True, help="significance test를 수행할지 여부"),
+    significance_alpha: float = typer.Option(0.05, min=0.0, max=1.0, help="significance alpha"),
+    significance_correction: str = typer.Option("holm", help="p-value correction 방식"),
+    fidelity_metric: str = typer.Option("js", help="fidelity metric: js or tvd"),
+    assessor_type: str = typer.Option("rationale", help="relevance assessor 타입: rationale 또는 bing"),
+    concurrent_requests: int = typer.Option(16, min=1, help="동시 relevance 요청 수"),
+    max_concurrent: int = typer.Option(8, min=1, help="평가 동시성 상한"),
+) -> None:
+    payload = evaluate_retrieval_results(
+        RetrievalEvaluationPlan(
+            reference_dir=reference_dir,
+            clusters=clusters,
+            text_units=text_units,
+            retrieval_results=retrieval_results,
+            output=output,
+            question_sets=tuple(question_sets),
+            rag_method_name=rag_method_name,
+            reference_filename=reference_filename,
+            relevance_threshold=relevance_threshold,
+            context_id_key=context_id_key,
+            context_text_key=context_text_key,
+            cluster_match_by=cluster_match_by,
+            run_significance_test=run_significance_test,
+            significance_alpha=significance_alpha,
+            significance_correction=significance_correction,
+            fidelity_metric=fidelity_metric,
+            assessor_type=assessor_type,
+            concurrent_requests=concurrent_requests,
+            max_concurrent=max_concurrent,
+        )
+    )
+    typer.echo(f"wrote retrieval evaluation to {output}")
+    typer.echo(f"rows: {payload['rows']}")
 
 
 @benchmark_qed_app.command("smoke")
