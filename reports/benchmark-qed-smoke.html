@@ -340,14 +340,14 @@
     <header class="hero">
       <h1>BenchmarkQED Smoke Report</h1>
       <p class="subtitle">
-        BenchmarkQED prepares the benchmark-side generation artifacts and RAGAS evaluates retrieval and answer quality.
+        BenchmarkQED prepares the benchmark-side generation artifacts and Ragas evaluates retrieval and answer quality.
       </p>
       <div class="chips">
-        <span class="chip"><span>generated</span><strong>2026-06-03 13:35 UTC</strong></span>
+        <span class="chip"><span>generated</span><strong>2026-06-03 14:06 UTC</strong></span>
         <span class="chip"><span>scores</span><strong>4</strong></span>
         <span class="chip"><span>results</span><strong>1</strong></span>
         <span class="chip"><span>aggregate metrics</span><strong>4</strong></span>
-        <span class="chip"><span>chat model</span><strong>qwen2.5:0.5b</strong></span><span class="chip"><span>provider</span><strong>ollama</strong></span><span class="chip"><span>embeddings</span><strong>nomic-embed-text</strong></span><span class="chip"><span>endpoint</span><strong>http://127.0.0.1:11434/v1</strong></span><span class="chip"><span>assertions</span><strong>raw</strong></span>
+        <span class="chip"><span>chat model</span><strong>qwen2.5:0.5b</strong></span><span class="chip"><span>provider</span><strong>ollama</strong></span><span class="chip"><span>embeddings</span><strong>nomic-embed-text</strong></span>
       </div>
     </header>
 
@@ -1445,7 +1445,7 @@
       </section>
 
       <section>
-        <h2>RAGAS</h2>
+        <h2>Ragas</h2>
         <p class="small">
           Evaluation-side artifacts: Retrieval Prep normalizes search output into the retrieval-eval format, and AutoE reports metric scores on those rows.
         </p>
@@ -1912,23 +1912,18 @@
       <section>
         <h2>Interpretation</h2>
         <div class="note">
-          <div class="interpretation">- **Runtime Details**: The OLLAMA model is trained on the Qwen2.5:0.5b model, with a base URL of `http://127.0.0.1:11434/v1`. The embeddings model used is `nomic-embed-text`.
-  
-  - **Autod**: The dataset contains 1 document and 1 theme.
-  - **AutoQ**: The question count for the aggregate mode is 1, with a mean score of 2.0.
-
-- **Assertions**:
-  - **Questions**: 1
-  - **Stats**: Total questions: 1, Assertions per question: 2, Mean assertion score: 2.0.
-  
-  - **Sources and Unique Sources per Question**: 
-    - **Source Count**: 2
-    - **Mean Source Score**: 1.0
-    - **Unique Claim Sources Per Question**: 1
-
-- **Validation Scores**:
-  - **Min Validation Score**: 1
-  - **Validation Enabled**: False</div>
+          <div class="interpretation">Model lens: qwen2.5:0.5b via ollama (http://127.0.0.1:11434/v1).
+This is a smoke run, so 4 score row(s) and 4 aggregate metric(s) should be read as a sanity check rather than a benchmark.
+context_precision = 10. 검색된 컨텍스트 중 답변에 실제로 도움이 되는 비율.
+context_recall = 10. 정답을 뒷받침하는 컨텍스트를 얼마나 빠짐없이 찾았는지.
+faithfulness = 10. 답변이 검색 컨텍스트에 얼마나 충실한지.
+answer_relevancy = 10. 질문과 답변이 얼마나 직접적으로 연결되는지.
+AutoD produced a corpus summary and benchmark_qed summary, which means the document-side path is wired up correctly.
+AutoD covered 1 document(s) and 2 theme(s).
+AutoQ reported 1 question(s); if this is lower than expected, treat it as a generation coverage issue rather than an evaluation failure.
+AutoQ claim/assertion coverage: 1 claim(s), 0 assertion(s) across 0 question(s) with assertions.
+Claims are being produced, but assertions are still empty; that is a useful signal for the global path and should be called out explicitly.
+If the chat model is qwen2.5:0.5b, this report is best interpreted as a local smoke lens: useful for catching wiring mistakes, not for proving final quality.</div>
         </div>
       </section>
 

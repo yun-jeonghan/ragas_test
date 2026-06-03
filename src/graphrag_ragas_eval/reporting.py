@@ -458,7 +458,7 @@ def render_smoke_report(
     if retrieval_data and len(_safe_list(retrieval_data.get("results"))) == 0:
         ragas_alert = (
             '<div class="note warning" style="margin-top: 14px;">'
-            "Retrieval prep produced no rows, so the RAGAS side cannot score retrieved contexts yet."
+            "Retrieval prep produced no rows, so the Ragas side cannot score retrieved contexts yet."
             "</div>"
         )
 
@@ -841,7 +841,7 @@ def render_smoke_report(
     <header class="hero">
       <h1>{html.escape(title)}</h1>
       <p class="subtitle">
-        BenchmarkQED prepares the benchmark-side generation artifacts and RAGAS evaluates retrieval and answer quality.
+        BenchmarkQED prepares the benchmark-side generation artifacts and Ragas evaluates retrieval and answer quality.
       </p>
       <div class="chips">
         <span class="chip"><span>generated</span><strong>{html.escape(now)}</strong></span>
@@ -881,7 +881,7 @@ def render_smoke_report(
       </section>
 
       <section>
-        <h2>RAGAS</h2>
+        <h2>Ragas</h2>
         <p class="small">
           Evaluation-side artifacts: Retrieval Prep normalizes search output into the retrieval-eval format, and AutoE reports metric scores on those rows.
         </p>
