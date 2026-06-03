@@ -133,7 +133,23 @@ def test_evaluate_retrieval_results_writes_summary(monkeypatch, tmp_path: Path) 
     clusters = tmp_path / "clusters.json"
     clusters.write_text("[]", encoding="utf-8")
     retrieval_results = tmp_path / "retrieval-results.json"
-    retrieval_results.write_text("[]", encoding="utf-8")
+    retrieval_results.write_text(
+        json.dumps(
+            {
+                "metadata": {"component": "RetrievalPrep"},
+                "results": [
+                    {
+                        "question_id": "q1",
+                        "question_text": "Who is Scrooge?",
+                        "context": [
+                            {"chunk_id": "scrooge.txt", "text": "Scrooge is a miser."}
+                        ],
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
     output = tmp_path / "retrieval-evaluation.json"
 
     captured: dict[str, object] = {}
@@ -182,4 +198,4 @@ def test_evaluate_retrieval_results_writes_summary(monkeypatch, tmp_path: Path) 
     assert payload["rows"] == 1
     assert payload["summary"][0]["rag_method"] == "benchmark-qed"
     assert captured["kwargs"]["question_sets"] == ["default"]
-    assert captured["kwargs"]["rag_methods"][0]["retrieval_results_path"] == retrieval_results
+    assert captured["kwargs"]["rag_methods"][0]["retrieval_results_path"].name == "retrieval-results.normalized.json"

@@ -82,6 +82,54 @@ def _read_json_payload(path: Path) -> object:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def _normalize_retrieval_results_payload(
+    payload: object,
+    *,
+    context_id_key: str,
+    context_text_key: str,
+) -> list[dict[str, Any]]:
+    def _normalize_context(context: dict[str, Any]) -> dict[str, str]:
+        return {
+            context_id_key: str(
+                context.get(context_id_key)
+                or context.get("source_id")
+                or context.get("chunk_id")
+                or context.get("source")
+                or context.get("id")
+                or ""
+            ),
+            context_text_key: str(
+                context.get(context_text_key)
+                or context.get("source_text")
+                or context.get("text")
+                or ""
+            ),
+        }
+
+    def _normalize_item(item: dict[str, Any]) -> dict[str, Any]:
+        normalized = dict(item)
+        if "text" not in normalized and "question_text" in normalized:
+            normalized["text"] = normalized.get("question_text") or ""
+        if "question_text" not in normalized and "text" in normalized:
+            normalized["question_text"] = normalized.get("text") or ""
+        contexts = normalized.get("context", [])
+        if isinstance(contexts, list):
+            normalized["context"] = [
+                _normalize_context(context)
+                for context in contexts
+                if isinstance(context, dict)
+            ]
+        return normalized
+
+    if isinstance(payload, list):
+        return [_normalize_item(item) for item in payload if isinstance(item, dict)]
+    if isinstance(payload, dict):
+        results = payload.get("results", [])
+        if isinstance(results, list):
+            return [_normalize_item(item) for item in results if isinstance(item, dict)]
+    return []
+
+
 def _load_questions(path: Path, *, max_questions: int | None = None) -> list[Any]:
     ensure_vendor_path()
     from benchmark_qed.autoq.data_model.question import Question
@@ -264,6 +312,19 @@ def _build_relevance_rater(
     return relevance_rater, TextEmbedder(embedding_model)
 
 
+def _coerce_fidelity_metric(metric: str) -> Any:
+    ensure_vendor_path()
+    from benchmark_qed.autoe.retrieval_metrics.scoring.fidelity import FidelityMetric
+
+    normalized = metric.strip().lower()
+    if normalized in {"js", "jensen-shannon", "jensen_shannon"}:
+        return FidelityMetric.JENSEN_SHANNON
+    if normalized in {"tvd", "total-variation", "total_variation"}:
+        return FidelityMetric.TOTAL_VARIATION
+    msg = f"Unsupported fidelity metric: {metric}"
+    raise ValueError(msg)
+
+
 def prepare_retrieval_results(plan: RetrievalPrepPlan) -> dict[str, Any]:
     payload = json.loads(plan.search_results.read_text(encoding="utf-8"))
     items = _coerce_items(payload, key="results")
@@ -387,13 +448,23 @@ def evaluate_retrieval_results(plan: RetrievalEvaluationPlan) -> dict[str, Any]:
 
     workdir = plan.output.parent / f".{plan.output.stem}.benchmark-qed"
     workdir.mkdir(parents=True, exist_ok=True)
+    retrieval_payload = _read_json_payload(plan.retrieval_results)
+    retrieval_rows = _normalize_retrieval_results_payload(
+        retrieval_payload,
+        context_id_key=plan.context_id_key,
+        context_text_key=plan.context_text_key,
+    )
+    normalized_retrieval_results = workdir / "retrieval-results.normalized.json"
+    normalized_retrieval_results.write_text(
+        json.dumps(retrieval_rows, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
     overall_df = asyncio.run(
         run_retrieval_evaluation(
             relevance_rater=relevance_rater,
             rag_methods=[
                 {
                     "name": plan.rag_method_name,
-                    "retrieval_results_path": plan.retrieval_results,
+                    "retrieval_results_path": normalized_retrieval_results,
                 }
             ],
             question_sets=list(plan.question_sets),
@@ -406,7 +477,7 @@ def evaluate_retrieval_results(plan: RetrievalEvaluationPlan) -> dict[str, Any]:
             run_significance_test=plan.run_significance_test,
             significance_alpha=plan.significance_alpha,
             significance_correction=plan.significance_correction,
-            fidelity_metric=plan.fidelity_metric,
+            fidelity_metric=_coerce_fidelity_metric(plan.fidelity_metric),
             max_concurrent=plan.max_concurrent,
             reference_filename=plan.reference_filename,
             cluster_match_by=plan.cluster_match_by,
