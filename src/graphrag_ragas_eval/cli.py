@@ -8,6 +8,7 @@ import typer
 from .benchmark_qed.autod import AutoDPlan, summarize_dataset
 from .benchmark_qed.autoe import AutoEPlan, evaluate_answers
 from .benchmark_qed.autoq import AutoQPlan, generate_queries
+from .benchmark_qed.smoke import BenchmarkQEDSmokePlan, run_benchmark_qed_smoke
 from .config import DEFAULT_CHAT_MODEL, DEFAULT_EMBEDDING_MODEL, ProjectPaths
 from .integrations import evaluate_kg_correctness, evaluate_kggen_mine, evaluate_ragas
 from .ingest import PdfExtractionPolicy, load_pdf_extraction_policy, normalize_source_tree
@@ -247,6 +248,39 @@ def benchmark_qed_autoe(
     )
     typer.echo(f"wrote AutoE evaluation to {output}")
     typer.echo(f"aggregate: {run.aggregate()}")
+
+
+@benchmark_qed_app.command("smoke")
+def benchmark_qed_smoke(
+    source: Path = typer.Option(Path("examples/sample_docs"), exists=True, file_okay=True, dir_okay=True, help="스모크 입력 문서 또는 디렉터리"),
+    benchmark: Path = typer.Option(Path("data/benchmarks/sample_benchmark.json"), exists=True, file_okay=True, dir_okay=False, help="AutoE용 benchmark JSON 또는 JSONL"),
+    search_results: Path = typer.Option(Path("data/results/sample_search_results.json"), exists=True, file_okay=True, dir_okay=False, help="AutoE용 search results JSON"),
+    output_dir: Path = typer.Option(Path("data/benchmark-qed/smoke"), file_okay=False, dir_okay=True, help="스모크 산출물 디렉터리"),
+    report_output: Path = typer.Option(Path("reports/benchmark-qed-smoke.html"), file_okay=True, dir_okay=False, help="스모크 리포트 HTML 경로"),
+    target_size: int = typer.Option(1, min=1, help="AutoD에 사용할 문서 수"),
+    num_questions: int = typer.Option(1, min=1, help="AutoQ로 생성할 질문 수"),
+    modes: list[str] = typer.Option(["local"], help="local, global, multi-hop, unanswerable"),
+    metrics: list[str] = typer.Option(["context_precision"], help="AutoE metric 이름"),
+    title: str = typer.Option("BenchmarkQED Smoke Report", help="리포트 제목"),
+) -> None:
+    result = run_benchmark_qed_smoke(
+        BenchmarkQEDSmokePlan(
+            source=source,
+            benchmark=benchmark,
+            search_results=search_results,
+            output_dir=output_dir,
+            report_output=report_output,
+            target_size=target_size,
+            num_questions=num_questions,
+            modes=tuple(modes),
+            metrics=tuple(metrics),
+            report_title=title,
+        )
+    )
+    typer.echo(f"wrote AutoD summary to {result.autod_summary}")
+    typer.echo(f"wrote AutoQ questions to {result.autoq_questions}")
+    typer.echo(f"wrote AutoE evaluation to {result.autoe_evaluation}")
+    typer.echo(f"wrote smoke report to {result.report}")
 
 
 @kg_gen_mine_app.command("evaluate")

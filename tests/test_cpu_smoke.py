@@ -228,6 +228,7 @@ def test_cpu_index_and_evaluate_smoke(monkeypatch, tmp_path: Path) -> None:
     ]
 
     metric_instances: list[object] = []
+    expected_questions = iter(["Who is Scrooge?", "What is Scrooge like?"])
 
     class FakeMetric:
         def __init__(self, llm=None, embeddings=None) -> None:
@@ -236,7 +237,7 @@ def test_cpu_index_and_evaluate_smoke(monkeypatch, tmp_path: Path) -> None:
             metric_instances.append(self)
 
         async def ascore(self, question=None, response=None, retrieved_contexts=None, reference_contexts=None):
-            assert question == "Who is Scrooge?"
+            assert question == next(expected_questions)
             assert response == "Scrooge is a miser."
             return SimpleNamespace(value=0.5)
 

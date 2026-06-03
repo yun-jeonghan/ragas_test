@@ -26,6 +26,10 @@ GraphRAG 검색 결과를 JSON으로 저장해 두면 평가 러너가 읽을 �
 `grev evaluate --benchmark data/benchmarks/sample_benchmark.json --search-results data/results/sample_search_results.json --output data/results/evaluation.json`
 `grev report smoke --evaluation data/results/sample_evaluation.json --output reports/pdf-smoke-test-report.html`
 
+BenchmarkQED 경로까지 한 번에 훑는 스모크는 아래처럼 한 번에 실행할 수 있습니다.
+
+`grev benchmark-qed smoke`
+
 스모크 실행에서는 질문 수와 입력 길이를 아주 작게 둡니다.
 
 - `grev generate-questions --source examples/sample_docs --output data/benchmarks/generated_questions.json --num-questions 1 --modes local`
@@ -33,6 +37,7 @@ GraphRAG 검색 결과를 JSON으로 저장해 두면 평가 러너가 읽을 �
 - `grev benchmark-qed autoq --source examples/sample_docs --output data/benchmark-qed/autoq-questions.json --num-questions 1 --modes local`
 - `grev benchmark-qed autoe --benchmark data/benchmarks/sample_benchmark.json --search-results data/results/sample_search_results.json --output data/benchmark-qed/autoe-evaluation.json --metrics context_precision`
 - `grev report smoke --evaluation data/results/sample_evaluation.json --output reports/pdf-smoke-test-report.html`
+- `grev benchmark-qed smoke --source examples/sample_docs --benchmark data/benchmarks/sample_benchmark.json --search-results data/results/sample_search_results.json --output-dir data/benchmark-qed/smoke --report-output reports/benchmark-qed-smoke.html`
 
 이 방식의 장점은 다음과 같습니다.
 

@@ -66,7 +66,8 @@ def generate_queries(plan: AutoQPlan):
         input=InputConfig(dataset_path=input_csv),
         concurrent_requests=1,
         encoding=EncodingModelConfig(
-            model_name=runtime.embeddings_model,
+            # BenchmarkQED expects a tiktoken encoding name here, not the embedding model id.
+            model_name="o200k_base",
             chunk_size=600,
             chunk_overlap=100,
         ),

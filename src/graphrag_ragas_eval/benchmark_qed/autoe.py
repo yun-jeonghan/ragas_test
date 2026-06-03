@@ -74,9 +74,18 @@ def evaluate_answers(plan: AutoEPlan) -> EvaluationRun:
     from benchmark_qed.config.model.score import Criteria
     from benchmark_qed.config.llm_config import LLMConfig, LLMProvider
 
+    def _coerce_items(payload: object, *, key: str) -> list[dict[str, Any]]:
+        if isinstance(payload, list):
+            return [item for item in payload if isinstance(item, dict)]
+        if isinstance(payload, dict):
+            items = payload.get(key, [])
+            if isinstance(items, list):
+                return [item for item in items if isinstance(item, dict)]
+        return []
+
     def _load_samples(path: Path) -> list[BenchmarkSample]:
         payload = json.loads(path.read_text(encoding="utf-8"))
-        items = payload.get("questions", payload if isinstance(payload, list) else [])
+        items = _coerce_items(payload, key="questions")
         samples: list[BenchmarkSample] = []
         for item in items:
             samples.append(
@@ -96,7 +105,7 @@ def evaluate_answers(plan: AutoEPlan) -> EvaluationRun:
 
     def _load_results(path: Path) -> list[GraphRAGSearchResult]:
         payload = json.loads(path.read_text(encoding="utf-8"))
-        items = payload.get("results", payload if isinstance(payload, list) else [])
+        items = _coerce_items(payload, key="results")
         results: list[GraphRAGSearchResult] = []
         for item in items:
             results.append(
@@ -116,6 +125,7 @@ def evaluate_answers(plan: AutoEPlan) -> EvaluationRun:
 
     samples = _load_samples(plan.benchmark)
     results = _load_results(plan.search_results)
+    question_id_by_text = {sample.question: sample.sample_id for sample in samples}
 
     criteria = [Criteria(name=metric, description=metric) for metric in plan.metrics]
     generated_answers = _load_answer_rows(results)
@@ -125,7 +135,11 @@ def evaluate_answers(plan: AutoEPlan) -> EvaluationRun:
         api_key=runtime.api_key or "EMPTY",
         llm_provider=LLMProvider.OpenAIChat,
         init_args={"api_base": runtime.base_url or ""},
-        call_args={"temperature": 0.0, "seed": 42},
+        call_args={
+            "temperature": 0.0,
+            "seed": 42,
+            **({"max_tokens": runtime.max_tokens} if runtime.max_tokens is not None else {}),
+        },
     )
     scored = get_reference_scores(
         llm_client=chat_model,
@@ -142,13 +156,13 @@ def evaluate_answers(plan: AutoEPlan) -> EvaluationRun:
 
     scores = tuple(
         EvaluationScore(
-            sample_id=str(row["question_id"]),
+            sample_id=str(row.get("question_id") or question_id_by_text.get(str(row.get("question", "")), "")),
             metric_name=str(row["criteria"]),
             value=float(row["score"]),
             reason=str(row.get("reasoning", "")) or None,
             metadata={
                 "trial": row.get("trial"),
-                "question_text": row.get("question_text"),
+                "question_text": row.get("question_text") or row.get("question"),
                 "reference_answer": row.get("reference_answer"),
                 "generated_answer": row.get("generated_answer"),
                 "backend": "benchmark-qed",

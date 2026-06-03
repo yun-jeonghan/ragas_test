@@ -1,0 +1,5052 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../autoq/">
+      
+      
+        <link rel="next" href="../retrieval_scores/">
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.14">
+    
+    
+      
+        <title>AutoE - BenchmarkQED</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.342714a4.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+        <script src="https://wcpstatic.microsoft.com/mscc/lib/v2/wcp-consent.js"></script>
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#pairwise-scoring-configuration" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="BenchmarkQED" class="md-header__button md-logo" aria-label="BenchmarkQED" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19.375 8.5a3.25 3.25 0 1 1-3.163 4h-3a3.252 3.252 0 0 1-4.443 2.509L7.214 17.76a3.25 3.25 0 1 1-1.342-.674l1.672-2.957A3.24 3.24 0 0 1 6.75 12c0-.907.371-1.727.97-2.316L6.117 6.846A3.253 3.253 0 0 1 1.875 3.75a3.25 3.25 0 1 1 5.526 2.32l1.603 2.836A3.25 3.25 0 0 1 13.093 11h3.119a3.25 3.25 0 0 1 3.163-2.5M10 10.25a1.75 1.75 0 1 0-.001 3.499A1.75 1.75 0 0 0 10 10.25M5.125 2a1.75 1.75 0 1 0 0 3.5 1.75 1.75 0 0 0 0-3.5m12.5 9.75a1.75 1.75 0 1 0 3.5 0 1.75 1.75 0 0 0-3.5 0m-14.25 8.5a1.75 1.75 0 1 0 3.501-.001 1.75 1.75 0 0 0-3.501.001"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            BenchmarkQED
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              AutoE
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/microsoft/benchmark-qed" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    benchmark-qed
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../.." class="md-tabs__link">
+          
+  
+  
+  Home
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../autoq/" class="md-tabs__link">
+          
+  
+  
+  CLI
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../notebooks/autoq/" class="md-tabs__link">
+          
+  
+  
+  Notebooks
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../datasets/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Datasets
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="BenchmarkQED" class="md-nav__button md-logo" aria-label="BenchmarkQED" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19.375 8.5a3.25 3.25 0 1 1-3.163 4h-3a3.252 3.252 0 0 1-4.443 2.509L7.214 17.76a3.25 3.25 0 1 1-1.342-.674l1.672-2.957A3.24 3.24 0 0 1 6.75 12c0-.907.371-1.727.97-2.316L6.117 6.846A3.253 3.253 0 0 1 1.875 3.75a3.25 3.25 0 1 1 5.526 2.32l1.603 2.836A3.25 3.25 0 0 1 13.093 11h3.119a3.25 3.25 0 0 1 3.163-2.5M10 10.25a1.75 1.75 0 1 0-.001 3.499A1.75 1.75 0 0 0 10 10.25M5.125 2a1.75 1.75 0 1 0 0 3.5 1.75 1.75 0 0 0 0-3.5m12.5 9.75a1.75 1.75 0 1 0 3.5 0 1.75 1.75 0 0 0-3.5 0m-14.25 8.5a1.75 1.75 0 1 0 3.501-.001 1.75 1.75 0 0 0-3.501.001"/></svg>
+
+    </a>
+    BenchmarkQED
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/microsoft/benchmark-qed" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    benchmark-qed
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_1" id="__nav_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1">
+            <span class="md-nav__icon md-icon"></span>
+            Home
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Welcome
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../developing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Developing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    CLI
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            CLI
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../autoq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    AutoQ
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    AutoE
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    AutoE
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#pairwise-scoring-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Pairwise Scoring Configuration
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Pairwise Scoring Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#storage-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Storage Configuration
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#classes-and-fields" class="md-nav__link">
+    <span class="md-ellipsis">
+      Classes and Fields
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Classes and Fields">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#condition" class="md-nav__link">
+    <span class="md-ellipsis">
+      Condition
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#criteria" class="md-nav__link">
+    <span class="md-ellipsis">
+      Criteria
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pairwiseconfig" class="md-nav__link">
+    <span class="md-ellipsis">
+      PairwiseConfig
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#yaml-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      YAML Example
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#providing-prompts-file-or-text" class="md-nav__link">
+    <span class="md-ellipsis">
+      Providing Prompts: File or Text
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Providing Prompts: File or Text">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-file-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example (File Path)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-direct-text" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example (Direct Text)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reference-based-scoring-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Reference-Based Scoring Configuration
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Reference-Based Scoring Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#classes-and-fields_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Classes and Fields
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Classes and Fields">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#condition_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Condition
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#criteria_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Criteria
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#referenceconfig" class="md-nav__link">
+    <span class="md-ellipsis">
+      ReferenceConfig
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#yaml-example_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      YAML Example
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#assertion-based-scoring-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Assertion-Based Scoring Configuration
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Assertion-Based Scoring Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cli-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      CLI Usage
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#single-rag-configuration-legacy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Single-RAG Configuration (Legacy)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Single-RAG Configuration (Legacy)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#classes-and-fields_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Classes and Fields
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#condition_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Condition
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#assertions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Assertions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#assertionconfig" class="md-nav__link">
+    <span class="md-ellipsis">
+      AssertionConfig
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#yaml-example_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      YAML Example
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multi-rag-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Multi-RAG Configuration
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Multi-RAG Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#multiragassertionconfig" class="md-nav__link">
+    <span class="md-ellipsis">
+      MultiRAGAssertionConfig
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#yaml-example_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      YAML Example
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#expected-directory-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Expected Directory Structure
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#output-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Output Structure
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hierarchical-assertion-scoring-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Hierarchical Assertion Scoring Configuration
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Hierarchical Assertion Scoring Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cli-usage_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      CLI Usage
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#single-rag-configuration-legacy_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Single-RAG Configuration (Legacy)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Single-RAG Configuration (Legacy)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#hierarchicalassertionconfig" class="md-nav__link">
+    <span class="md-ellipsis">
+      HierarchicalAssertionConfig
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#evaluation-modes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Evaluation Modes
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#yaml-example-single-rag" class="md-nav__link">
+    <span class="md-ellipsis">
+      YAML Example (Single-RAG)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multi-rag-configuration_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Multi-RAG Configuration
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Multi-RAG Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#multiraghierarchicalassertionconfig" class="md-nav__link">
+    <span class="md-ellipsis">
+      MultiRAGHierarchicalAssertionConfig
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#yaml-example-multi-rag" class="md-nav__link">
+    <span class="md-ellipsis">
+      YAML Example (Multi-RAG)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#expected-directory-structure-multi-rag" class="md-nav__link">
+    <span class="md-ellipsis">
+      Expected Directory Structure (Multi-RAG)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#output-structure-multi-rag" class="md-nav__link">
+    <span class="md-ellipsis">
+      Output Structure (Multi-RAG)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#output-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      Output Metrics
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#assertion-significance-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Assertion Significance Testing
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Assertion Significance Testing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#standard-assertion-significance-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Standard Assertion Significance Testing
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Standard Assertion Significance Testing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#configuration-schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration Schema
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#yaml-example_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      YAML Example
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#expected-directory-structure_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Expected Directory Structure
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hierarchical-assertion-significance-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Hierarchical Assertion Significance Testing
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Hierarchical Assertion Significance Testing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#configuration-schema_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration Schema
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#yaml-example_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      YAML Example
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#output-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      Output Files
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#statistical-tests-used" class="md-nav__link">
+    <span class="md-ellipsis">
+      Statistical Tests Used
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cli-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      CLI Reference
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#autoe" class="md-nav__link">
+    <span class="md-ellipsis">
+      autoe
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="autoe">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Usage
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arguments" class="md-nav__link">
+    <span class="md-ellipsis">
+      Arguments
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Options
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      Commands
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sub-commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      Sub Commands
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Sub Commands">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#autoe-pairwise-scores" class="md-nav__link">
+    <span class="md-ellipsis">
+      autoe pairwise-scores
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="autoe pairwise-scores">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#usage_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Usage
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arguments_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Arguments
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Options
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#autoe-reference-scores" class="md-nav__link">
+    <span class="md-ellipsis">
+      autoe reference-scores
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="autoe reference-scores">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#usage_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Usage
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arguments_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Arguments
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Options
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#autoe-assertion-scores" class="md-nav__link">
+    <span class="md-ellipsis">
+      autoe assertion-scores
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="autoe assertion-scores">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#usage_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Usage
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arguments_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Arguments
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Options
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#autoe-hierarchical-assertion-scores" class="md-nav__link">
+    <span class="md-ellipsis">
+      autoe hierarchical-assertion-scores
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="autoe hierarchical-assertion-scores">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#usage_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      Usage
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arguments_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      Arguments
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      Options
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#autoe-assertion-significance" class="md-nav__link">
+    <span class="md-ellipsis">
+      autoe assertion-significance
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="autoe assertion-significance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#usage_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      Usage
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arguments_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      Arguments
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      Options
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#autoe-hierarchical-assertion-significance" class="md-nav__link">
+    <span class="md-ellipsis">
+      autoe hierarchical-assertion-significance
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="autoe hierarchical-assertion-significance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#usage_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      Usage
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arguments_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      Arguments
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      Options
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#autoe-generate-retrieval-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      autoe generate-retrieval-reference
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="autoe generate-retrieval-reference">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#usage_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      Usage
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arguments_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      Arguments
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      Options
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#autoe-retrieval-scores" class="md-nav__link">
+    <span class="md-ellipsis">
+      autoe retrieval-scores
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="autoe retrieval-scores">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#usage_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      Usage
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arguments_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      Arguments
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      Options
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../retrieval_scores/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Retrieval Metrics
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../llm_config/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    LLM Configuration
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../config_init/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Config Init
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../data/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Dataset Download
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Notebooks
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Notebooks
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../notebooks/autoq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    AutoQ
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../notebooks/autoe/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    AutoE
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../notebooks/autod/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    AutoD
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../notebooks/assertion_gen/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Assertion Generation for Existing Questions
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../notebooks/retrieval_metrics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Retrieval Metrics
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../datasets/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Datasets
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#pairwise-scoring-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Pairwise Scoring Configuration
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Pairwise Scoring Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#storage-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Storage Configuration
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#classes-and-fields" class="md-nav__link">
+    <span class="md-ellipsis">
+      Classes and Fields
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Classes and Fields">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#condition" class="md-nav__link">
+    <span class="md-ellipsis">
+      Condition
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#criteria" class="md-nav__link">
+    <span class="md-ellipsis">
+      Criteria
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pairwiseconfig" class="md-nav__link">
+    <span class="md-ellipsis">
+      PairwiseConfig
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#yaml-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      YAML Example
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#providing-prompts-file-or-text" class="md-nav__link">
+    <span class="md-ellipsis">
+      Providing Prompts: File or Text
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Providing Prompts: File or Text">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-file-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example (File Path)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-direct-text" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example (Direct Text)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reference-based-scoring-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Reference-Based Scoring Configuration
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Reference-Based Scoring Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#classes-and-fields_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Classes and Fields
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Classes and Fields">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#condition_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Condition
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#criteria_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Criteria
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#referenceconfig" class="md-nav__link">
+    <span class="md-ellipsis">
+      ReferenceConfig
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#yaml-example_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      YAML Example
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#assertion-based-scoring-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Assertion-Based Scoring Configuration
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Assertion-Based Scoring Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cli-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      CLI Usage
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#single-rag-configuration-legacy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Single-RAG Configuration (Legacy)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Single-RAG Configuration (Legacy)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#classes-and-fields_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Classes and Fields
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#condition_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Condition
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#assertions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Assertions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#assertionconfig" class="md-nav__link">
+    <span class="md-ellipsis">
+      AssertionConfig
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#yaml-example_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      YAML Example
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multi-rag-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Multi-RAG Configuration
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Multi-RAG Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#multiragassertionconfig" class="md-nav__link">
+    <span class="md-ellipsis">
+      MultiRAGAssertionConfig
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#yaml-example_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      YAML Example
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#expected-directory-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Expected Directory Structure
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#output-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Output Structure
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hierarchical-assertion-scoring-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Hierarchical Assertion Scoring Configuration
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Hierarchical Assertion Scoring Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cli-usage_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      CLI Usage
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#single-rag-configuration-legacy_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Single-RAG Configuration (Legacy)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Single-RAG Configuration (Legacy)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#hierarchicalassertionconfig" class="md-nav__link">
+    <span class="md-ellipsis">
+      HierarchicalAssertionConfig
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#evaluation-modes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Evaluation Modes
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#yaml-example-single-rag" class="md-nav__link">
+    <span class="md-ellipsis">
+      YAML Example (Single-RAG)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multi-rag-configuration_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Multi-RAG Configuration
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Multi-RAG Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#multiraghierarchicalassertionconfig" class="md-nav__link">
+    <span class="md-ellipsis">
+      MultiRAGHierarchicalAssertionConfig
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#yaml-example-multi-rag" class="md-nav__link">
+    <span class="md-ellipsis">
+      YAML Example (Multi-RAG)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#expected-directory-structure-multi-rag" class="md-nav__link">
+    <span class="md-ellipsis">
+      Expected Directory Structure (Multi-RAG)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#output-structure-multi-rag" class="md-nav__link">
+    <span class="md-ellipsis">
+      Output Structure (Multi-RAG)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#output-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      Output Metrics
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#assertion-significance-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Assertion Significance Testing
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Assertion Significance Testing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#standard-assertion-significance-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Standard Assertion Significance Testing
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Standard Assertion Significance Testing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#configuration-schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration Schema
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#yaml-example_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      YAML Example
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#expected-directory-structure_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Expected Directory Structure
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hierarchical-assertion-significance-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Hierarchical Assertion Significance Testing
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Hierarchical Assertion Significance Testing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#configuration-schema_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration Schema
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#yaml-example_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      YAML Example
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#output-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      Output Files
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#statistical-tests-used" class="md-nav__link">
+    <span class="md-ellipsis">
+      Statistical Tests Used
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cli-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      CLI Reference
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#autoe" class="md-nav__link">
+    <span class="md-ellipsis">
+      autoe
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="autoe">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Usage
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arguments" class="md-nav__link">
+    <span class="md-ellipsis">
+      Arguments
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Options
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      Commands
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sub-commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      Sub Commands
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Sub Commands">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#autoe-pairwise-scores" class="md-nav__link">
+    <span class="md-ellipsis">
+      autoe pairwise-scores
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="autoe pairwise-scores">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#usage_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Usage
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arguments_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Arguments
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Options
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#autoe-reference-scores" class="md-nav__link">
+    <span class="md-ellipsis">
+      autoe reference-scores
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="autoe reference-scores">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#usage_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Usage
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arguments_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Arguments
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Options
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#autoe-assertion-scores" class="md-nav__link">
+    <span class="md-ellipsis">
+      autoe assertion-scores
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="autoe assertion-scores">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#usage_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Usage
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arguments_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Arguments
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Options
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#autoe-hierarchical-assertion-scores" class="md-nav__link">
+    <span class="md-ellipsis">
+      autoe hierarchical-assertion-scores
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="autoe hierarchical-assertion-scores">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#usage_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      Usage
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arguments_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      Arguments
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      Options
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#autoe-assertion-significance" class="md-nav__link">
+    <span class="md-ellipsis">
+      autoe assertion-significance
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="autoe assertion-significance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#usage_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      Usage
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arguments_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      Arguments
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      Options
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#autoe-hierarchical-assertion-significance" class="md-nav__link">
+    <span class="md-ellipsis">
+      autoe hierarchical-assertion-significance
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="autoe hierarchical-assertion-significance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#usage_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      Usage
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arguments_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      Arguments
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      Options
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#autoe-generate-retrieval-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      autoe generate-retrieval-reference
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="autoe generate-retrieval-reference">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#usage_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      Usage
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arguments_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      Arguments
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      Options
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#autoe-retrieval-scores" class="md-nav__link">
+    <span class="md-ellipsis">
+      autoe retrieval-scores
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="autoe retrieval-scores">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#usage_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      Usage
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arguments_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      Arguments
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      Options
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h2 id="pairwise-scoring-configuration">Pairwise Scoring Configuration</h2>
+<p>This section describes the configuration schema for performing relative comparisons of RAG methods using the LLM-as-a-Judge approach. It includes definitions for conditions, evaluation criteria, and model configuration. For more information about how to configure the LLM, please refer to: <a href="../llm_config/">LLM Configuration</a></p>
+<p>To create a template configuration file, run:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>benchmark-qed<span class="w"> </span>config<span class="w"> </span>init<span class="w"> </span>autoe_pairwise<span class="w"> </span>./local/pairwise_test
+</code></pre></div>
+<p>To create a template with active Azure Blob Storage configuration:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>benchmark-qed<span class="w"> </span>config<span class="w"> </span>init<span class="w"> </span>autoe_pairwise<span class="w"> </span>./local/pairwise_test<span class="w"> </span>--storage-type<span class="w"> </span>blob<span class="w"> </span>--base-dir<span class="w"> </span>pairwise_test
+</code></pre></div>
+<p>To perform pairwise scoring with your configuration file, use:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>benchmark-qed<span class="w"> </span>autoe<span class="w"> </span>pairwise-scores<span class="w"> </span>./local/pairwise_test/settings.yaml<span class="w"> </span>./local/pairwise_test/output
+</code></pre></div>
+<p>If your config lives in Azure Blob Storage, pass a <code>blob://</code> URI and supply credentials inline with <code>--account-url</code> (managed identity) or <code>--connection-string</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>benchmark-qed<span class="w"> </span>autoe<span class="w"> </span>pairwise-scores<span class="w"> </span>blob://my-container/pairwise_test/settings.yaml<span class="w"> </span>./local/output<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span>--account-url<span class="w"> </span>https://&lt;account&gt;.blob.core.windows.net
+</code></pre></div>
+<p>The same <code>--account-url</code> / <code>--connection-string</code> options are available on every <code>autoe</code> subcommand: <code>pairwise-scores</code>, <code>reference-scores</code>, <code>assertion-scores</code>, <code>hierarchical-assertion-scores</code>, <code>assertion-significance</code>, <code>hierarchical-assertion-significance</code>, <code>generate-retrieval-reference</code>, and <code>retrieval-scores</code>. If neither is supplied, auth falls back to <code>$AZURE_STORAGE_ACCOUNT_URL</code> / <code>$AZURE_STORAGE_CONNECTION_STRING</code>.</p>
+<p>For information about the <code>config init</code> command, refer to: <a href="../config_init/">Config Init CLI</a></p>
+<hr />
+<h3 id="storage-configuration">Storage Configuration</h3>
+<p>AutoE supports reading input answers from and writing output scores to Azure Blob Storage. When using <code>--storage-type blob</code> during <code>config init</code> (optionally with <code>--base-dir</code>), the generated settings file includes active storage sections.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1">## Storage Configuration</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="nt">input_storage</span><span class="p">:</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">blob</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">  </span><span class="nt">container_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-datasets</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">  </span><span class="nt">account_url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://&lt;account&gt;.blob.core.windows.net</span><span class="w">  </span><span class="c1"># Managed identity</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">  </span><span class="c1"># connection_string: ${AZURE_STORAGE_CONNECTION_STRING}  # Alternative: connection string</span>
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="nt">output_storage</span><span class="p">:</span>
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">blob</span>
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="w">  </span><span class="nt">container_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-output</span>
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="w">  </span><span class="nt">account_url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://&lt;account&gt;.blob.core.windows.net</span>
+</code></pre></div>
+<p>When storage is configured, all <code>answer_base_path</code> values are resolved relative to the blob container (and optional <code>base_dir</code>). Without storage configuration, paths are resolved from the local filesystem.</p>
+<hr />
+<h3 id="classes-and-fields">Classes and Fields</h3>
+<h4 id="condition"><code>Condition</code></h4>
+<p>Represents a condition to be evaluated.</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>name</code></td>
+<td><code>str</code></td>
+<td>Name of the condition.</td>
+</tr>
+<tr>
+<td><code>answer_base_path</code></td>
+<td><code>Path</code></td>
+<td>Path to the JSON file containing the answers for this condition.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h4 id="criteria"><code>Criteria</code></h4>
+<p>Defines a scoring criterion used to evaluate conditions.</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>name</code></td>
+<td><code>str</code></td>
+<td>Name of the criterion.</td>
+</tr>
+<tr>
+<td><code>description</code></td>
+<td><code>str</code></td>
+<td>Detailed explanation of what the criterion means and how to apply it.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h4 id="pairwiseconfig"><code>PairwiseConfig</code></h4>
+<p>Top-level configuration for scoring a set of conditions.</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>base</code></td>
+<td><code>Condition \| None</code></td>
+<td><code>None</code></td>
+<td>The base condition to compare others against.</td>
+</tr>
+<tr>
+<td><code>others</code></td>
+<td><code>list[Condition]</code></td>
+<td><code>[]</code></td>
+<td>List of other conditions to compare.</td>
+</tr>
+<tr>
+<td><code>question_sets</code></td>
+<td><code>list[str]</code></td>
+<td><code>[]</code></td>
+<td>List of question sets to use for scoring.</td>
+</tr>
+<tr>
+<td><code>criteria</code></td>
+<td><code>list[Criteria]</code></td>
+<td><code>pairwise_scores_criteria()</code></td>
+<td>List of criteria to use for scoring.</td>
+</tr>
+<tr>
+<td><code>llm_config</code></td>
+<td><code>LLMConfig</code></td>
+<td><code>LLMConfig()</code></td>
+<td>Configuration for the LLM used in scoring.</td>
+</tr>
+<tr>
+<td><code>trials</code></td>
+<td><code>int</code></td>
+<td><code>4</code></td>
+<td>Number of trials to run for each condition.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="yaml-example">YAML Example</h3>
+<p>Below is an example showing how this configuration might be represented in a YAML file. The API key is referenced using an environment variable.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nt">base</span><span class="p">:</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vector_rag</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">  </span><span class="nt">answer_base_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">input/vector_rag</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="nt">others</span><span class="p">:</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lazygraphrag</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="w">    </span><span class="nt">answer_base_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">input/lazygraphrag</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">graphrag_global</span>
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="w">    </span><span class="nt">answer_base_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">input/graphrag_global</span>
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>
+<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="nt">question_sets</span><span class="p">:</span>
+<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">activity_global</span>
+<a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">activity_local</span>
+<a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a>
+<a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a><span class="c1"># Optional: Custom Evaluation Criteria</span>
+<a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a><span class="c1"># You may define your own list of evaluation criteria here. If this section is omitted, the default criteria will be used.</span>
+<a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a><span class="c1"># criteria: </span>
+<a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a><span class="c1">#   - name: &quot;criteria name&quot;</span>
+<a id="__codelineno-5-19" name="__codelineno-5-19" href="#__codelineno-5-19"></a><span class="c1">#     description: &quot;criteria description&quot;</span>
+<a id="__codelineno-5-20" name="__codelineno-5-20" href="#__codelineno-5-20"></a>
+<a id="__codelineno-5-21" name="__codelineno-5-21" href="#__codelineno-5-21"></a><span class="nt">trials</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
+<a id="__codelineno-5-22" name="__codelineno-5-22" href="#__codelineno-5-22"></a>
+<a id="__codelineno-5-23" name="__codelineno-5-23" href="#__codelineno-5-23"></a><span class="nt">llm_config</span><span class="p">:</span>
+<a id="__codelineno-5-24" name="__codelineno-5-24" href="#__codelineno-5-24"></a><span class="w">  </span><span class="nt">auth_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">api_key</span>
+<a id="__codelineno-5-25" name="__codelineno-5-25" href="#__codelineno-5-25"></a><span class="w">  </span><span class="nt">model</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gpt-4.1</span>
+<a id="__codelineno-5-26" name="__codelineno-5-26" href="#__codelineno-5-26"></a><span class="w">  </span><span class="nt">api_key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${OPENAI_API_KEY}</span>
+<a id="__codelineno-5-27" name="__codelineno-5-27" href="#__codelineno-5-27"></a><span class="w">  </span><span class="nt">llm_provider</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">openai.chat</span>
+<a id="__codelineno-5-28" name="__codelineno-5-28" href="#__codelineno-5-28"></a><span class="w">  </span><span class="nt">concurrent_requests</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a># .env file
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>OPENAI_API_KEY=your-secret-api-key-here
+</code></pre></div>
+<blockquote>
+<p>💡 Note: The api_key field uses an environment variable reference <code>${OPENAI_API_KEY}</code>. Make sure to define this variable in a .env file or your environment before running the application.</p>
+</blockquote>
+<hr />
+<h2 id="providing-prompts-file-or-text">Providing Prompts: File or Text</h2>
+<p>Prompts for pairwise and reference-based scoring can be provided in two ways, as defined by the <code>PromptConfig</code> class:</p>
+<ul>
+<li><strong>As a file path</strong>: Specify the path to a <code>.txt</code> file containing the prompt (recommended for most use cases).</li>
+<li><strong>As direct text</strong>: Provide the prompt text directly in the configuration.</li>
+</ul>
+<p>Only one of these options should be set for each prompt. If both are set, or neither is set, an error will be raised.</p>
+<h3 id="example-file-path">Example (File Path)</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="nt">prompt_config</span><span class="p">:</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">  </span><span class="nt">user_prompt</span><span class="p">:</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">    </span><span class="nt">prompt</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">prompts/pairwise_user_prompt.txt</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">  </span><span class="nt">system_prompt</span><span class="p">:</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">    </span><span class="nt">prompt</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">prompts/pairwise_system_prompt.txt</span>
+</code></pre></div>
+<h3 id="example-direct-text">Example (Direct Text)</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="nt">prompt_config</span><span class="p">:</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">  </span><span class="nt">user_prompt</span><span class="p">:</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">    </span><span class="nt">prompt_text</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="w">      </span><span class="no">Please compare the following answers and select the better one.</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="w">  </span><span class="nt">system_prompt</span><span class="p">:</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="w">    </span><span class="nt">prompt_text</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="w">      </span><span class="no">You are an expert judge for answer quality.</span>
+</code></pre></div>
+<p>This applies to both <code>PairwiseConfig</code> and <code>ReferenceConfig</code>.</p>
+<p>See the <a href="https://github.com/microsoft/benchmark-qed/tree/main/benchmark_qed/config/prompt_config.py">PromptConfig</a> class for details.</p>
+<hr />
+<h2 id="reference-based-scoring-configuration">Reference-Based Scoring Configuration</h2>
+<p>This section explains how to configure reference-based scoring, where generated answers are evaluated against a reference set using the LLM-as-a-Judge approach. It covers the definitions for reference and generated conditions, scoring criteria, and model configuration. For details on LLM configuration, see: <a href="../llm_config/">LLM Configuration</a></p>
+<p>To create a template configuration file, run:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>benchmark-qed<span class="w"> </span>config<span class="w"> </span>init<span class="w"> </span>autoe_reference<span class="w"> </span>./local/reference_test
+</code></pre></div>
+<p>To create a template with active Azure Blob Storage configuration:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>benchmark-qed<span class="w"> </span>config<span class="w"> </span>init<span class="w"> </span>autoe_reference<span class="w"> </span>./local/reference_test<span class="w"> </span>--storage-type<span class="w"> </span>blob<span class="w"> </span>--base-dir<span class="w"> </span>reference_test
+</code></pre></div>
+<p>To perform reference-based scoring with your configuration file, run:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>benchmark-qed<span class="w"> </span>autoe<span class="w"> </span>reference-scores<span class="w"> </span>./local/reference_test/settings.yaml<span class="w"> </span>./local/reference_test/output
+</code></pre></div>
+<p>For information about the <code>config init</code> command, see: <a href="../config_init/">Config Init CLI</a></p>
+<hr />
+<h3 id="classes-and-fields_1">Classes and Fields</h3>
+<h4 id="condition_1"><code>Condition</code></h4>
+<p>Represents a condition to be evaluated.</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>name</code></td>
+<td><code>str</code></td>
+<td>Name of the condition.</td>
+</tr>
+<tr>
+<td><code>answer_base_path</code></td>
+<td><code>Path</code></td>
+<td>Path to the JSON file containing the answers for this condition.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h4 id="criteria_1"><code>Criteria</code></h4>
+<p>Defines a scoring criterion used to evaluate conditions.</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>name</code></td>
+<td><code>str</code></td>
+<td>Name of the criterion.</td>
+</tr>
+<tr>
+<td><code>description</code></td>
+<td><code>str</code></td>
+<td>Detailed explanation of what the criterion means and how to apply it.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h4 id="referenceconfig"><code>ReferenceConfig</code></h4>
+<p>Top-level configuration for scoring generated answers against a reference.</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>reference</code></td>
+<td><code>Condition</code></td>
+<td><em>required</em></td>
+<td>The condition containing the reference answers.</td>
+</tr>
+<tr>
+<td><code>generated</code></td>
+<td><code>list[Condition]</code></td>
+<td><code>[]</code></td>
+<td>List of conditions with generated answers to be scored.</td>
+</tr>
+<tr>
+<td><code>criteria</code></td>
+<td><code>list[Criteria]</code></td>
+<td><code>reference_scores_criteria()</code></td>
+<td>List of criteria to use for scoring.</td>
+</tr>
+<tr>
+<td><code>score_min</code></td>
+<td><code>int</code></td>
+<td><code>1</code></td>
+<td>Minimum score for each criterion.</td>
+</tr>
+<tr>
+<td><code>score_max</code></td>
+<td><code>int</code></td>
+<td><code>10</code></td>
+<td>Maximum score for each criterion.</td>
+</tr>
+<tr>
+<td><code>llm_config</code></td>
+<td><code>LLMConfig</code></td>
+<td><code>LLMConfig()</code></td>
+<td>Configuration for the LLM used in scoring.</td>
+</tr>
+<tr>
+<td><code>trials</code></td>
+<td><code>int</code></td>
+<td><code>4</code></td>
+<td>Number of trials to run for each condition.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="yaml-example_1">YAML Example</h3>
+<p>Below is an example of how this configuration might be represented in a YAML file. The API key is referenced using an environment variable.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="nt">reference</span><span class="p">:</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lazygraphrag</span>
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="w">  </span><span class="nt">answer_base_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">input/lazygraphrag/activity_global.json</span>
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="nt">generated</span><span class="p">:</span>
+<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vector_rag</span>
+<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a><span class="w">    </span><span class="nt">answer_base_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">input/vector_rag/activity_global.json</span>
+<a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a>
+<a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a><span class="c1"># Scoring scale</span>
+<a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a><span class="nt">score_min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<a id="__codelineno-12-11" name="__codelineno-12-11" href="#__codelineno-12-11"></a><span class="nt">score_max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
+<a id="__codelineno-12-12" name="__codelineno-12-12" href="#__codelineno-12-12"></a>
+<a id="__codelineno-12-13" name="__codelineno-12-13" href="#__codelineno-12-13"></a><span class="c1"># Optional: Custom Evaluation Criteria</span>
+<a id="__codelineno-12-14" name="__codelineno-12-14" href="#__codelineno-12-14"></a><span class="c1"># You may define your own list of evaluation criteria here. If this section is omitted, the default criteria will be used.</span>
+<a id="__codelineno-12-15" name="__codelineno-12-15" href="#__codelineno-12-15"></a><span class="c1"># criteria: </span>
+<a id="__codelineno-12-16" name="__codelineno-12-16" href="#__codelineno-12-16"></a><span class="c1">#   - name: &quot;criteria name&quot;</span>
+<a id="__codelineno-12-17" name="__codelineno-12-17" href="#__codelineno-12-17"></a><span class="c1">#     description: &quot;criteria description&quot;</span>
+<a id="__codelineno-12-18" name="__codelineno-12-18" href="#__codelineno-12-18"></a>
+<a id="__codelineno-12-19" name="__codelineno-12-19" href="#__codelineno-12-19"></a><span class="nt">trials</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
+<a id="__codelineno-12-20" name="__codelineno-12-20" href="#__codelineno-12-20"></a>
+<a id="__codelineno-12-21" name="__codelineno-12-21" href="#__codelineno-12-21"></a><span class="nt">llm_config</span><span class="p">:</span>
+<a id="__codelineno-12-22" name="__codelineno-12-22" href="#__codelineno-12-22"></a><span class="w">  </span><span class="nt">model</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;gpt-4.1&quot;</span>
+<a id="__codelineno-12-23" name="__codelineno-12-23" href="#__codelineno-12-23"></a><span class="w">  </span><span class="nt">auth_type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;api_key&quot;</span>
+<a id="__codelineno-12-24" name="__codelineno-12-24" href="#__codelineno-12-24"></a><span class="w">  </span><span class="nt">api_key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${OPENAI_API_KEY}</span>
+<a id="__codelineno-12-25" name="__codelineno-12-25" href="#__codelineno-12-25"></a><span class="w">  </span><span class="nt">concurrent_requests</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
+<a id="__codelineno-12-26" name="__codelineno-12-26" href="#__codelineno-12-26"></a><span class="w">  </span><span class="nt">llm_provider</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;openai.chat&quot;</span>
+<a id="__codelineno-12-27" name="__codelineno-12-27" href="#__codelineno-12-27"></a><span class="w">  </span><span class="nt">init_args</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{}</span>
+<a id="__codelineno-12-28" name="__codelineno-12-28" href="#__codelineno-12-28"></a><span class="w">  </span><span class="nt">call_args</span><span class="p">:</span>
+<a id="__codelineno-12-29" name="__codelineno-12-29" href="#__codelineno-12-29"></a><span class="w">    </span><span class="nt">temperature</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0</span>
+<a id="__codelineno-12-30" name="__codelineno-12-30" href="#__codelineno-12-30"></a><span class="w">    </span><span class="nt">seed</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">42</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a># .env file
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>OPENAI_API_KEY=your-secret-api-key-here
+</code></pre></div>
+<blockquote>
+<p>💡 Note: The api_key field uses an environment variable reference <code>${OPENAI_API_KEY}</code>. Make sure to define this variable in a .env file or your environment before running the application.</p>
+</blockquote>
+<hr />
+<h2 id="assertion-based-scoring-configuration">Assertion-Based Scoring Configuration</h2>
+<p>This section describes the configuration schema for evaluating generated answers against predefined assertions using the LLM-as-a-Judge approach. The <code>assertion-scores</code> command <strong>auto-detects</strong> the config format and supports both single-RAG and multi-RAG evaluation.</p>
+<p>For more information about how to configure the LLM, please refer to: <a href="../llm_config/">LLM Configuration</a></p>
+<h3 id="cli-usage">CLI Usage</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="c1"># Single-RAG mode (output directory required)</span>
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>benchmark-qed<span class="w"> </span>autoe<span class="w"> </span>assertion-scores<span class="w"> </span>config.yaml<span class="w"> </span>output_dir
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="c1"># Multi-RAG mode (output in config, includes significance testing)</span>
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>benchmark-qed<span class="w"> </span>autoe<span class="w"> </span>assertion-scores<span class="w"> </span>config.yaml
+</code></pre></div>
+<p>The command auto-detects the config format:
+- <strong>Single-RAG</strong>: Config has <code>generated</code> key → requires output argument
+- <strong>Multi-RAG</strong>: Config has <code>rag_methods</code> key → output in config, includes significance testing</p>
+<p>To create a template configuration file, run:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>benchmark-qed<span class="w"> </span>config<span class="w"> </span>init<span class="w"> </span>autoe_assertion<span class="w"> </span>./local/assertion_test
+</code></pre></div>
+<p>To create a template with active Azure Blob Storage configuration:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>benchmark-qed<span class="w"> </span>config<span class="w"> </span>init<span class="w"> </span>autoe_assertion<span class="w"> </span>./local/assertion_test<span class="w"> </span>--storage-type<span class="w"> </span>blob<span class="w"> </span>--base-dir<span class="w"> </span>assertion_test
+</code></pre></div>
+<p>For information about the <code>config init</code> command, refer to: <a href="../config_init/">Config Init CLI</a></p>
+<hr />
+<h3 id="single-rag-configuration-legacy">Single-RAG Configuration (Legacy)</h3>
+<h4 id="classes-and-fields_2">Classes and Fields</h4>
+<h4 id="condition_2"><code>Condition</code></h4>
+<p>Represents a condition to be evaluated.</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>name</code></td>
+<td><code>str</code></td>
+<td>Name of the condition.</td>
+</tr>
+<tr>
+<td><code>answer_base_path</code></td>
+<td><code>Path</code></td>
+<td>Path to the JSON file containing the answers for this condition.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h4 id="assertions"><code>Assertions</code></h4>
+<p>Defines the assertions to be evaluated.</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>assertions_path</code></td>
+<td><code>Path</code></td>
+<td>Path to the JSON file containing the assertions to evaluate.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h4 id="assertionconfig"><code>AssertionConfig</code></h4>
+<p>Top-level configuration for scoring generated answers against assertions.</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>generated</code></td>
+<td><code>Condition</code></td>
+<td><em>required</em></td>
+<td>The condition containing the generated answers to be evaluated.</td>
+</tr>
+<tr>
+<td><code>assertions</code></td>
+<td><code>Assertions</code></td>
+<td><em>required</em></td>
+<td>The assertions to use for evaluation.</td>
+</tr>
+<tr>
+<td><code>pass_threshold</code></td>
+<td><code>float</code></td>
+<td><code>0.5</code></td>
+<td>Threshold for passing the assertion score.</td>
+</tr>
+<tr>
+<td><code>llm_config</code></td>
+<td><code>LLMConfig</code></td>
+<td><code>LLMConfig()</code></td>
+<td>Configuration for the LLM used in scoring.</td>
+</tr>
+<tr>
+<td><code>trials</code></td>
+<td><code>int</code></td>
+<td><code>4</code></td>
+<td>Number of trials to run for each assertion.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="yaml-example_2">YAML Example</h3>
+<p>Below is an example showing how this configuration might be represented in a YAML file. The API key is referenced using an environment variable.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="nt">generated</span><span class="p">:</span>
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vector_rag</span>
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="w">  </span><span class="nt">answer_base_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">input/vector_rag/activity_global.json</span>
+<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a>
+<a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a><span class="nt">assertions</span><span class="p">:</span>
+<a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a><span class="w">  </span><span class="nt">assertions_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">input/assertions.json</span>
+<a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a>
+<a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a><span class="c1"># Pass threshold for assertions</span>
+<a id="__codelineno-17-9" name="__codelineno-17-9" href="#__codelineno-17-9"></a><span class="nt">pass_threshold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.5</span>
+<a id="__codelineno-17-10" name="__codelineno-17-10" href="#__codelineno-17-10"></a>
+<a id="__codelineno-17-11" name="__codelineno-17-11" href="#__codelineno-17-11"></a><span class="nt">trials</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
+<a id="__codelineno-17-12" name="__codelineno-17-12" href="#__codelineno-17-12"></a>
+<a id="__codelineno-17-13" name="__codelineno-17-13" href="#__codelineno-17-13"></a><span class="nt">llm_config</span><span class="p">:</span>
+<a id="__codelineno-17-14" name="__codelineno-17-14" href="#__codelineno-17-14"></a><span class="w">  </span><span class="nt">auth_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">api_key</span>
+<a id="__codelineno-17-15" name="__codelineno-17-15" href="#__codelineno-17-15"></a><span class="w">  </span><span class="nt">model</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gpt-4.1</span>
+<a id="__codelineno-17-16" name="__codelineno-17-16" href="#__codelineno-17-16"></a><span class="w">  </span><span class="nt">api_key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${OPENAI_API_KEY}</span>
+<a id="__codelineno-17-17" name="__codelineno-17-17" href="#__codelineno-17-17"></a><span class="w">  </span><span class="nt">llm_provider</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">openai.chat</span>
+<a id="__codelineno-17-18" name="__codelineno-17-18" href="#__codelineno-17-18"></a><span class="w">  </span><span class="nt">concurrent_requests</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a># .env file
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>OPENAI_API_KEY=your-secret-api-key-here
+</code></pre></div>
+<blockquote>
+<p>💡 Note: The api_key field uses an environment variable reference <code>${OPENAI_API_KEY}</code>. Make sure to define this variable in a .env file or your environment before running the application.</p>
+<p>📋 Assertions json example:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="p">[</span>
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a><span class="w">  </span><span class="p">{</span>
+<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a><span class="w">    </span><span class="nt">&quot;question_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;abc123&quot;</span><span class="p">,</span>
+<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a><span class="w">    </span><span class="nt">&quot;question_text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;What is the capital of France?&quot;</span><span class="p">,</span>
+<a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a><span class="w">    </span><span class="nt">&quot;assertions&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a><span class="w">        </span><span class="s2">&quot;The response should align with the following ground truth text: Paris is the capital of France.&quot;</span><span class="p">,</span>
+<a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a><span class="w">        </span><span class="s2">&quot;The response should be concise and directly answer the question and do not add any additional information.&quot;</span>
+<a id="__codelineno-19-8" name="__codelineno-19-8" href="#__codelineno-19-8"></a><span class="w">    </span><span class="p">]</span>
+<a id="__codelineno-19-9" name="__codelineno-19-9" href="#__codelineno-19-9"></a><span class="w">  </span><span class="p">}</span>
+<a id="__codelineno-19-10" name="__codelineno-19-10" href="#__codelineno-19-10"></a><span class="p">]</span>
+</code></pre></div></p>
+</blockquote>
+<hr />
+<h3 id="multi-rag-configuration">Multi-RAG Configuration</h3>
+<p>This format evaluates multiple RAG methods against the same assertions in a single command, with optional statistical significance testing at the end.</p>
+<h4 id="multiragassertionconfig"><code>MultiRAGAssertionConfig</code></h4>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>input_dir</code></td>
+<td><code>Path</code></td>
+<td><em>required</em></td>
+<td>Base directory containing RAG method answer files.</td>
+</tr>
+<tr>
+<td><code>output_dir</code></td>
+<td><code>Path</code></td>
+<td><em>required</em></td>
+<td>Directory to save evaluation results.</td>
+</tr>
+<tr>
+<td><code>rag_methods</code></td>
+<td><code>list[str]</code></td>
+<td><em>required</em></td>
+<td>List of RAG method names to evaluate.</td>
+</tr>
+<tr>
+<td><code>question_sets</code></td>
+<td><code>list[str]</code></td>
+<td><em>required</em></td>
+<td>List of question set names to evaluate.</td>
+</tr>
+<tr>
+<td><code>assertions_filename_template</code></td>
+<td><code>str</code></td>
+<td><code>"{question_set}_assertions.json"</code></td>
+<td>Template for assertion filenames.</td>
+</tr>
+<tr>
+<td><code>answers_path_template</code></td>
+<td><code>str</code></td>
+<td><code>"{input_dir}/{rag_method}/{question_set}.json"</code></td>
+<td>Template for answer file paths.</td>
+</tr>
+<tr>
+<td><code>pass_threshold</code></td>
+<td><code>float</code></td>
+<td><code>0.5</code></td>
+<td>Threshold for passing the assertion score.</td>
+</tr>
+<tr>
+<td><code>top_k_assertions</code></td>
+<td><code>int \| None</code></td>
+<td><code>None</code></td>
+<td>Number of top-ranked assertions to evaluate (None = all).</td>
+</tr>
+<tr>
+<td><code>run_significance_test</code></td>
+<td><code>bool</code></td>
+<td><code>True</code></td>
+<td>Whether to run significance tests after scoring.</td>
+</tr>
+<tr>
+<td><code>significance_alpha</code></td>
+<td><code>float</code></td>
+<td><code>0.05</code></td>
+<td>Alpha level for significance tests.</td>
+</tr>
+<tr>
+<td><code>significance_correction</code></td>
+<td><code>str</code></td>
+<td><code>"holm"</code></td>
+<td>P-value correction method.</td>
+</tr>
+<tr>
+<td><code>run_clustered_permutation</code></td>
+<td><code>bool</code></td>
+<td><code>False</code></td>
+<td>Whether to run assertion-level clustered permutation tests as secondary analysis.</td>
+</tr>
+<tr>
+<td><code>n_permutations</code></td>
+<td><code>int</code></td>
+<td><code>10000</code></td>
+<td>Number of permutations for the clustered permutation test.</td>
+</tr>
+<tr>
+<td><code>permutation_seed</code></td>
+<td><code>int \| None</code></td>
+<td><code>None</code></td>
+<td>Random seed for reproducibility of permutation tests.</td>
+</tr>
+<tr>
+<td><code>trials</code></td>
+<td><code>int</code></td>
+<td><code>4</code></td>
+<td>Number of evaluation trials.</td>
+</tr>
+<tr>
+<td><code>llm_config</code></td>
+<td><code>LLMConfig</code></td>
+<td><code>LLMConfig()</code></td>
+<td>LLM configuration.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="yaml-example_3">YAML Example</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="c1"># Multi-RAG assertion scoring configuration</span>
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a><span class="nt">input_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./input</span>
+<a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a><span class="nt">output_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./output/assertion_scoring</span>
+<a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a>
+<a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a><span class="nt">rag_methods</span><span class="p">:</span>
+<a id="__codelineno-20-6" name="__codelineno-20-6" href="#__codelineno-20-6"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">graphrag_global</span>
+<a id="__codelineno-20-7" name="__codelineno-20-7" href="#__codelineno-20-7"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vectorrag</span>
+<a id="__codelineno-20-8" name="__codelineno-20-8" href="#__codelineno-20-8"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lazygraphrag</span>
+<a id="__codelineno-20-9" name="__codelineno-20-9" href="#__codelineno-20-9"></a>
+<a id="__codelineno-20-10" name="__codelineno-20-10" href="#__codelineno-20-10"></a><span class="nt">question_sets</span><span class="p">:</span>
+<a id="__codelineno-20-11" name="__codelineno-20-11" href="#__codelineno-20-11"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">data_global_questions</span>
+<a id="__codelineno-20-12" name="__codelineno-20-12" href="#__codelineno-20-12"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">data_local_questions</span>
+<a id="__codelineno-20-13" name="__codelineno-20-13" href="#__codelineno-20-13"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">data_linked_questions</span>
+<a id="__codelineno-20-14" name="__codelineno-20-14" href="#__codelineno-20-14"></a>
+<a id="__codelineno-20-15" name="__codelineno-20-15" href="#__codelineno-20-15"></a><span class="c1"># Assertion file template: {input_dir}/{question_set}_assertions.json</span>
+<a id="__codelineno-20-16" name="__codelineno-20-16" href="#__codelineno-20-16"></a><span class="nt">assertions_filename_template</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{question_set}_assertions.json&quot;</span>
+<a id="__codelineno-20-17" name="__codelineno-20-17" href="#__codelineno-20-17"></a>
+<a id="__codelineno-20-18" name="__codelineno-20-18" href="#__codelineno-20-18"></a><span class="c1"># Answer file template: {input_dir}/{rag_method}/{question_set}.json</span>
+<a id="__codelineno-20-19" name="__codelineno-20-19" href="#__codelineno-20-19"></a><span class="nt">answers_path_template</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{input_dir}/{rag_method}/{question_set}.json&quot;</span>
+<a id="__codelineno-20-20" name="__codelineno-20-20" href="#__codelineno-20-20"></a>
+<a id="__codelineno-20-21" name="__codelineno-20-21" href="#__codelineno-20-21"></a><span class="nt">pass_threshold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.5</span>
+<a id="__codelineno-20-22" name="__codelineno-20-22" href="#__codelineno-20-22"></a><span class="nt">top_k_assertions</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span><span class="w">  </span><span class="c1"># Use all assertions, or set to e.g. 5 for top-5</span>
+<a id="__codelineno-20-23" name="__codelineno-20-23" href="#__codelineno-20-23"></a>
+<a id="__codelineno-20-24" name="__codelineno-20-24" href="#__codelineno-20-24"></a><span class="c1"># Significance testing (runs automatically after scoring)</span>
+<a id="__codelineno-20-25" name="__codelineno-20-25" href="#__codelineno-20-25"></a><span class="nt">run_significance_test</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<a id="__codelineno-20-26" name="__codelineno-20-26" href="#__codelineno-20-26"></a><span class="nt">significance_alpha</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.05</span>
+<a id="__codelineno-20-27" name="__codelineno-20-27" href="#__codelineno-20-27"></a><span class="nt">significance_correction</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">holm</span>
+<a id="__codelineno-20-28" name="__codelineno-20-28" href="#__codelineno-20-28"></a>
+<a id="__codelineno-20-29" name="__codelineno-20-29" href="#__codelineno-20-29"></a><span class="c1"># Optional secondary analysis: assertion-level clustered permutation test</span>
+<a id="__codelineno-20-30" name="__codelineno-20-30" href="#__codelineno-20-30"></a><span class="c1"># (accounts for within-question correlation among assertions)</span>
+<a id="__codelineno-20-31" name="__codelineno-20-31" href="#__codelineno-20-31"></a><span class="nt">run_clustered_permutation</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<a id="__codelineno-20-32" name="__codelineno-20-32" href="#__codelineno-20-32"></a><span class="nt">n_permutations</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10000</span>
+<a id="__codelineno-20-33" name="__codelineno-20-33" href="#__codelineno-20-33"></a><span class="nt">permutation_seed</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">42</span>
+<a id="__codelineno-20-34" name="__codelineno-20-34" href="#__codelineno-20-34"></a>
+<a id="__codelineno-20-35" name="__codelineno-20-35" href="#__codelineno-20-35"></a><span class="nt">trials</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
+<a id="__codelineno-20-36" name="__codelineno-20-36" href="#__codelineno-20-36"></a>
+<a id="__codelineno-20-37" name="__codelineno-20-37" href="#__codelineno-20-37"></a><span class="nt">llm_config</span><span class="p">:</span>
+<a id="__codelineno-20-38" name="__codelineno-20-38" href="#__codelineno-20-38"></a><span class="w">  </span><span class="nt">auth_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">api_key</span>
+<a id="__codelineno-20-39" name="__codelineno-20-39" href="#__codelineno-20-39"></a><span class="w">  </span><span class="nt">model</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gpt-4.1</span>
+<a id="__codelineno-20-40" name="__codelineno-20-40" href="#__codelineno-20-40"></a><span class="w">  </span><span class="nt">api_key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${OPENAI_API_KEY}</span>
+<a id="__codelineno-20-41" name="__codelineno-20-41" href="#__codelineno-20-41"></a><span class="w">  </span><span class="nt">llm_provider</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">openai.chat</span>
+<a id="__codelineno-20-42" name="__codelineno-20-42" href="#__codelineno-20-42"></a><span class="w">  </span><span class="nt">concurrent_requests</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20</span>
+</code></pre></div>
+<h3 id="expected-directory-structure">Expected Directory Structure</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>input_dir/
+<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>  data_global_questions_assertions.json
+<a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a>  data_local_questions_assertions.json
+<a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a>  data_linked_questions_assertions.json
+<a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a>  graphrag_global/
+<a id="__codelineno-21-6" name="__codelineno-21-6" href="#__codelineno-21-6"></a>    data_global_questions.json
+<a id="__codelineno-21-7" name="__codelineno-21-7" href="#__codelineno-21-7"></a>    data_local_questions.json
+<a id="__codelineno-21-8" name="__codelineno-21-8" href="#__codelineno-21-8"></a>    data_linked_questions.json
+<a id="__codelineno-21-9" name="__codelineno-21-9" href="#__codelineno-21-9"></a>  vectorrag/
+<a id="__codelineno-21-10" name="__codelineno-21-10" href="#__codelineno-21-10"></a>    data_global_questions.json
+<a id="__codelineno-21-11" name="__codelineno-21-11" href="#__codelineno-21-11"></a>    data_local_questions.json
+<a id="__codelineno-21-12" name="__codelineno-21-12" href="#__codelineno-21-12"></a>    data_linked_questions.json
+<a id="__codelineno-21-13" name="__codelineno-21-13" href="#__codelineno-21-13"></a>  lazygraphrag/
+<a id="__codelineno-21-14" name="__codelineno-21-14" href="#__codelineno-21-14"></a>    data_global_questions.json
+<a id="__codelineno-21-15" name="__codelineno-21-15" href="#__codelineno-21-15"></a>    data_local_questions.json
+<a id="__codelineno-21-16" name="__codelineno-21-16" href="#__codelineno-21-16"></a>    data_linked_questions.json
+</code></pre></div>
+<h3 id="output-structure">Output Structure</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>output_dir/
+<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>  data_global_questions/
+<a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a>    graphrag_global_assertion_scores.csv
+<a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a>    graphrag_global_summary_by_question.csv
+<a id="__codelineno-22-5" name="__codelineno-22-5" href="#__codelineno-22-5"></a>    graphrag_global_summary_by_assertion.csv
+<a id="__codelineno-22-6" name="__codelineno-22-6" href="#__codelineno-22-6"></a>    vectorrag_assertion_scores.csv
+<a id="__codelineno-22-7" name="__codelineno-22-7" href="#__codelineno-22-7"></a>    ...
+<a id="__codelineno-22-8" name="__codelineno-22-8" href="#__codelineno-22-8"></a>    significance_per_question.csv
+<a id="__codelineno-22-9" name="__codelineno-22-9" href="#__codelineno-22-9"></a>  data_local_questions/
+<a id="__codelineno-22-10" name="__codelineno-22-10" href="#__codelineno-22-10"></a>    ...
+<a id="__codelineno-22-11" name="__codelineno-22-11" href="#__codelineno-22-11"></a>  assertion_scores_summary.csv
+<a id="__codelineno-22-12" name="__codelineno-22-12" href="#__codelineno-22-12"></a>  assertion_scores_pivot_summary.csv
+<a id="__codelineno-22-13" name="__codelineno-22-13" href="#__codelineno-22-13"></a>  model_usage.json
+</code></pre></div>
+<hr />
+<h2 id="hierarchical-assertion-scoring-configuration">Hierarchical Assertion Scoring Configuration</h2>
+<p>This section describes the configuration schema for evaluating generated answers against hierarchical assertions (global assertions with supporting assertions) using the LLM-as-a-Judge approach. This is useful when you have multi-level assertions where a global claim is supported by more specific sub-claims.</p>
+<p>The <code>hierarchical-assertion-scores</code> command <strong>auto-detects</strong> the config format and supports both single-RAG and multi-RAG evaluation.</p>
+<h3 id="cli-usage_1">CLI Usage</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="c1"># Single-RAG mode (output directory required)</span>
+<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>benchmark-qed<span class="w"> </span>autoe<span class="w"> </span>hierarchical-assertion-scores<span class="w"> </span>config.yaml<span class="w"> </span>output_dir
+<a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a>
+<a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a><span class="c1"># Multi-RAG mode (output in config, includes significance testing)</span>
+<a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a>benchmark-qed<span class="w"> </span>autoe<span class="w"> </span>hierarchical-assertion-scores<span class="w"> </span>config.yaml
+</code></pre></div>
+<p>The command auto-detects the config format:
+- <strong>Single-RAG</strong>: Config has <code>generated</code> key → requires output argument
+- <strong>Multi-RAG</strong>: Config has <code>rag_methods</code> key → output in config, includes significance testing</p>
+<hr />
+<h3 id="single-rag-configuration-legacy_1">Single-RAG Configuration (Legacy)</h3>
+<h4 id="hierarchicalassertionconfig"><code>HierarchicalAssertionConfig</code></h4>
+<p>Top-level configuration for scoring generated answers against hierarchical assertions.</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>generated</code></td>
+<td><code>Condition</code></td>
+<td><em>required</em></td>
+<td>The condition containing the generated answers to be evaluated.</td>
+</tr>
+<tr>
+<td><code>assertions</code></td>
+<td><code>Assertions</code></td>
+<td><em>required</em></td>
+<td>The assertions with supporting_assertions field for hierarchical scoring.</td>
+</tr>
+<tr>
+<td><code>mode</code></td>
+<td><code>str</code></td>
+<td><code>"staged"</code></td>
+<td>Evaluation mode: <code>"staged"</code> (default) evaluates global assertions first, then supporting assertions only for passed globals. <code>"joint"</code> evaluates both together (cheaper but may have anchoring bias).</td>
+</tr>
+<tr>
+<td><code>pass_threshold</code></td>
+<td><code>float</code></td>
+<td><code>0.5</code></td>
+<td>Threshold for passing the assertion score.</td>
+</tr>
+<tr>
+<td><code>detect_discovery</code></td>
+<td><code>bool</code></td>
+<td><code>true</code></td>
+<td>Whether to detect information in answers beyond supporting assertions.</td>
+</tr>
+<tr>
+<td><code>llm_config</code></td>
+<td><code>LLMConfig</code></td>
+<td><code>LLMConfig()</code></td>
+<td>Configuration for the LLM used in scoring.</td>
+</tr>
+<tr>
+<td><code>trials</code></td>
+<td><code>int</code></td>
+<td><code>4</code></td>
+<td>Number of trials to run for each assertion.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="evaluation-modes">Evaluation Modes</h3>
+<ul>
+<li>
+<p><strong><code>staged</code></strong> (default): Evaluates global assertions first using standard scoring, then evaluates supporting assertions only for globals that passed. This ensures the global pass rate matches what you'd get from standard assertion scoring. More expensive but avoids anchoring bias.</p>
+</li>
+<li>
+<p><strong><code>joint</code></strong>: Evaluates global and supporting assertions together in a single LLM call. Cheaper but may have anchoring bias where supporting assertion results influence the global evaluation.</p>
+</li>
+</ul>
+<hr />
+<h3 id="yaml-example-single-rag">YAML Example (Single-RAG)</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="nt">generated</span><span class="p">:</span>
+<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">graphrag_global</span>
+<a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a><span class="w">  </span><span class="nt">answer_base_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">input/graphrag_global/activity_global.json</span>
+<a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a>
+<a id="__codelineno-24-5" name="__codelineno-24-5" href="#__codelineno-24-5"></a><span class="nt">assertions</span><span class="p">:</span>
+<a id="__codelineno-24-6" name="__codelineno-24-6" href="#__codelineno-24-6"></a><span class="w">  </span><span class="nt">assertions_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">input/hierarchical_assertions.json</span>
+<a id="__codelineno-24-7" name="__codelineno-24-7" href="#__codelineno-24-7"></a>
+<a id="__codelineno-24-8" name="__codelineno-24-8" href="#__codelineno-24-8"></a><span class="c1"># Evaluation mode: &quot;staged&quot; (default) or &quot;joint&quot;</span>
+<a id="__codelineno-24-9" name="__codelineno-24-9" href="#__codelineno-24-9"></a><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">staged</span>
+<a id="__codelineno-24-10" name="__codelineno-24-10" href="#__codelineno-24-10"></a>
+<a id="__codelineno-24-11" name="__codelineno-24-11" href="#__codelineno-24-11"></a><span class="c1"># Pass threshold for assertions</span>
+<a id="__codelineno-24-12" name="__codelineno-24-12" href="#__codelineno-24-12"></a><span class="nt">pass_threshold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.5</span>
+<a id="__codelineno-24-13" name="__codelineno-24-13" href="#__codelineno-24-13"></a>
+<a id="__codelineno-24-14" name="__codelineno-24-14" href="#__codelineno-24-14"></a><span class="c1"># Whether to detect discovery (info beyond supporting assertions)</span>
+<a id="__codelineno-24-15" name="__codelineno-24-15" href="#__codelineno-24-15"></a><span class="nt">detect_discovery</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<a id="__codelineno-24-16" name="__codelineno-24-16" href="#__codelineno-24-16"></a>
+<a id="__codelineno-24-17" name="__codelineno-24-17" href="#__codelineno-24-17"></a><span class="nt">trials</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
+<a id="__codelineno-24-18" name="__codelineno-24-18" href="#__codelineno-24-18"></a>
+<a id="__codelineno-24-19" name="__codelineno-24-19" href="#__codelineno-24-19"></a><span class="nt">llm_config</span><span class="p">:</span>
+<a id="__codelineno-24-20" name="__codelineno-24-20" href="#__codelineno-24-20"></a><span class="w">  </span><span class="nt">auth_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">api_key</span>
+<a id="__codelineno-24-21" name="__codelineno-24-21" href="#__codelineno-24-21"></a><span class="w">  </span><span class="nt">model</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gpt-4.1</span>
+<a id="__codelineno-24-22" name="__codelineno-24-22" href="#__codelineno-24-22"></a><span class="w">  </span><span class="nt">api_key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${OPENAI_API_KEY}</span>
+<a id="__codelineno-24-23" name="__codelineno-24-23" href="#__codelineno-24-23"></a><span class="w">  </span><span class="nt">llm_provider</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">openai.chat</span>
+<a id="__codelineno-24-24" name="__codelineno-24-24" href="#__codelineno-24-24"></a><span class="w">  </span><span class="nt">concurrent_requests</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20</span>
+</code></pre></div>
+<hr />
+<h3 id="multi-rag-configuration_1">Multi-RAG Configuration</h3>
+<p>This format evaluates multiple RAG methods against the same hierarchical assertions in a single command, with optional statistical significance testing at the end.</p>
+<h4 id="multiraghierarchicalassertionconfig"><code>MultiRAGHierarchicalAssertionConfig</code></h4>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>input_dir</code></td>
+<td><code>Path</code></td>
+<td><em>required</em></td>
+<td>Base directory containing RAG method answer files and assertions.</td>
+</tr>
+<tr>
+<td><code>output_dir</code></td>
+<td><code>Path</code></td>
+<td><em>required</em></td>
+<td>Directory to save evaluation results.</td>
+</tr>
+<tr>
+<td><code>rag_methods</code></td>
+<td><code>list[str]</code></td>
+<td><em>required</em></td>
+<td>List of RAG method names to evaluate.</td>
+</tr>
+<tr>
+<td><code>assertions_file</code></td>
+<td><code>str</code></td>
+<td><em>required</em></td>
+<td>Path to hierarchical assertions file (relative to input_dir or absolute).</td>
+</tr>
+<tr>
+<td><code>answers_path_template</code></td>
+<td><code>str</code></td>
+<td><code>"{input_dir}/{rag_method}/data_global.json"</code></td>
+<td>Template for answer file paths.</td>
+</tr>
+<tr>
+<td><code>question_id_key</code></td>
+<td><code>str</code></td>
+<td><code>"question_id"</code></td>
+<td>Column name for question ID.</td>
+</tr>
+<tr>
+<td><code>question_text_key</code></td>
+<td><code>str</code></td>
+<td><code>"question_text"</code></td>
+<td>Column name for question text.</td>
+</tr>
+<tr>
+<td><code>answer_text_key</code></td>
+<td><code>str</code></td>
+<td><code>"answer"</code></td>
+<td>Column name for answer text.</td>
+</tr>
+<tr>
+<td><code>supporting_assertions_key</code></td>
+<td><code>str</code></td>
+<td><code>"supporting_assertions"</code></td>
+<td>Column name for supporting assertions.</td>
+</tr>
+<tr>
+<td><code>pass_threshold</code></td>
+<td><code>float</code></td>
+<td><code>0.5</code></td>
+<td>Threshold for passing the assertion score.</td>
+</tr>
+<tr>
+<td><code>mode</code></td>
+<td><code>str</code></td>
+<td><code>"staged"</code></td>
+<td>Evaluation mode: <code>"staged"</code> or <code>"joint"</code>.</td>
+</tr>
+<tr>
+<td><code>run_significance_test</code></td>
+<td><code>bool</code></td>
+<td><code>True</code></td>
+<td>Whether to run significance tests after scoring.</td>
+</tr>
+<tr>
+<td><code>significance_alpha</code></td>
+<td><code>float</code></td>
+<td><code>0.05</code></td>
+<td>Alpha level for significance tests.</td>
+</tr>
+<tr>
+<td><code>significance_correction</code></td>
+<td><code>str</code></td>
+<td><code>"holm"</code></td>
+<td>P-value correction method.</td>
+</tr>
+<tr>
+<td><code>run_clustered_permutation</code></td>
+<td><code>bool</code></td>
+<td><code>False</code></td>
+<td>Whether to run assertion-level clustered permutation tests as secondary analysis.</td>
+</tr>
+<tr>
+<td><code>n_permutations</code></td>
+<td><code>int</code></td>
+<td><code>10000</code></td>
+<td>Number of permutations for clustered permutation tests.</td>
+</tr>
+<tr>
+<td><code>permutation_seed</code></td>
+<td><code>int \| None</code></td>
+<td><code>None</code></td>
+<td>Random seed for reproducibility of permutation tests.</td>
+</tr>
+<tr>
+<td><code>trials</code></td>
+<td><code>int</code></td>
+<td><code>4</code></td>
+<td>Number of evaluation trials.</td>
+</tr>
+<tr>
+<td><code>llm_config</code></td>
+<td><code>LLMConfig</code></td>
+<td><code>LLMConfig()</code></td>
+<td>LLM configuration.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="yaml-example-multi-rag">YAML Example (Multi-RAG)</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="c1"># Multi-RAG hierarchical assertion scoring configuration</span>
+<a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a><span class="nt">input_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./input</span>
+<a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a><span class="nt">output_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./output/hierarchical_assertion_scoring</span>
+<a id="__codelineno-25-4" name="__codelineno-25-4" href="#__codelineno-25-4"></a>
+<a id="__codelineno-25-5" name="__codelineno-25-5" href="#__codelineno-25-5"></a><span class="nt">rag_methods</span><span class="p">:</span>
+<a id="__codelineno-25-6" name="__codelineno-25-6" href="#__codelineno-25-6"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">graphrag_global</span>
+<a id="__codelineno-25-7" name="__codelineno-25-7" href="#__codelineno-25-7"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vectorrag</span>
+<a id="__codelineno-25-8" name="__codelineno-25-8" href="#__codelineno-25-8"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lazygraphrag</span>
+<a id="__codelineno-25-9" name="__codelineno-25-9" href="#__codelineno-25-9"></a>
+<a id="__codelineno-25-10" name="__codelineno-25-10" href="#__codelineno-25-10"></a><span class="c1"># Path to hierarchical assertions file (relative to input_dir)</span>
+<a id="__codelineno-25-11" name="__codelineno-25-11" href="#__codelineno-25-11"></a><span class="nt">assertions_file</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">data_global_assertions.json</span>
+<a id="__codelineno-25-12" name="__codelineno-25-12" href="#__codelineno-25-12"></a>
+<a id="__codelineno-25-13" name="__codelineno-25-13" href="#__codelineno-25-13"></a><span class="c1"># Answer file template</span>
+<a id="__codelineno-25-14" name="__codelineno-25-14" href="#__codelineno-25-14"></a><span class="nt">answers_path_template</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{input_dir}/{rag_method}/data_global.json&quot;</span>
+<a id="__codelineno-25-15" name="__codelineno-25-15" href="#__codelineno-25-15"></a>
+<a id="__codelineno-25-16" name="__codelineno-25-16" href="#__codelineno-25-16"></a><span class="c1"># Column names in the data files</span>
+<a id="__codelineno-25-17" name="__codelineno-25-17" href="#__codelineno-25-17"></a><span class="nt">question_id_key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">question_id</span>
+<a id="__codelineno-25-18" name="__codelineno-25-18" href="#__codelineno-25-18"></a><span class="nt">question_text_key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">question</span><span class="w">  </span><span class="c1"># Use &quot;question&quot; if that&#39;s the column name in answers</span>
+<a id="__codelineno-25-19" name="__codelineno-25-19" href="#__codelineno-25-19"></a><span class="nt">answer_text_key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">answer</span>
+<a id="__codelineno-25-20" name="__codelineno-25-20" href="#__codelineno-25-20"></a><span class="nt">supporting_assertions_key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">supporting_assertions</span>
+<a id="__codelineno-25-21" name="__codelineno-25-21" href="#__codelineno-25-21"></a>
+<a id="__codelineno-25-22" name="__codelineno-25-22" href="#__codelineno-25-22"></a><span class="c1"># Evaluation mode: &quot;staged&quot; (default) or &quot;joint&quot;</span>
+<a id="__codelineno-25-23" name="__codelineno-25-23" href="#__codelineno-25-23"></a><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">staged</span>
+<a id="__codelineno-25-24" name="__codelineno-25-24" href="#__codelineno-25-24"></a>
+<a id="__codelineno-25-25" name="__codelineno-25-25" href="#__codelineno-25-25"></a><span class="nt">pass_threshold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.5</span>
+<a id="__codelineno-25-26" name="__codelineno-25-26" href="#__codelineno-25-26"></a>
+<a id="__codelineno-25-27" name="__codelineno-25-27" href="#__codelineno-25-27"></a><span class="c1"># Significance testing (runs automatically after scoring)</span>
+<a id="__codelineno-25-28" name="__codelineno-25-28" href="#__codelineno-25-28"></a><span class="nt">run_significance_test</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<a id="__codelineno-25-29" name="__codelineno-25-29" href="#__codelineno-25-29"></a><span class="nt">significance_alpha</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.05</span>
+<a id="__codelineno-25-30" name="__codelineno-25-30" href="#__codelineno-25-30"></a><span class="nt">significance_correction</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">holm</span>
+<a id="__codelineno-25-31" name="__codelineno-25-31" href="#__codelineno-25-31"></a>
+<a id="__codelineno-25-32" name="__codelineno-25-32" href="#__codelineno-25-32"></a><span class="c1"># Clustered permutation test (optional secondary analysis)</span>
+<a id="__codelineno-25-33" name="__codelineno-25-33" href="#__codelineno-25-33"></a><span class="c1"># Runs assertion-level tests that account for within-question correlation</span>
+<a id="__codelineno-25-34" name="__codelineno-25-34" href="#__codelineno-25-34"></a><span class="c1"># by permuting RAG method labels at the question level (Gail et al., 1996).</span>
+<a id="__codelineno-25-35" name="__codelineno-25-35" href="#__codelineno-25-35"></a><span class="nt">run_clustered_permutation</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w">  </span><span class="c1"># Set to true to enable</span>
+<a id="__codelineno-25-36" name="__codelineno-25-36" href="#__codelineno-25-36"></a><span class="nt">n_permutations</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10000</span>
+<a id="__codelineno-25-37" name="__codelineno-25-37" href="#__codelineno-25-37"></a><span class="nt">permutation_seed</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span><span class="w">  </span><span class="c1"># Set for reproducibility</span>
+<a id="__codelineno-25-38" name="__codelineno-25-38" href="#__codelineno-25-38"></a>
+<a id="__codelineno-25-39" name="__codelineno-25-39" href="#__codelineno-25-39"></a><span class="nt">trials</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
+<a id="__codelineno-25-40" name="__codelineno-25-40" href="#__codelineno-25-40"></a>
+<a id="__codelineno-25-41" name="__codelineno-25-41" href="#__codelineno-25-41"></a><span class="nt">llm_config</span><span class="p">:</span>
+<a id="__codelineno-25-42" name="__codelineno-25-42" href="#__codelineno-25-42"></a><span class="w">  </span><span class="nt">auth_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">api_key</span>
+<a id="__codelineno-25-43" name="__codelineno-25-43" href="#__codelineno-25-43"></a><span class="w">  </span><span class="nt">model</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gpt-4.1</span>
+<a id="__codelineno-25-44" name="__codelineno-25-44" href="#__codelineno-25-44"></a><span class="w">  </span><span class="nt">api_key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${OPENAI_API_KEY}</span>
+<a id="__codelineno-25-45" name="__codelineno-25-45" href="#__codelineno-25-45"></a><span class="w">  </span><span class="nt">llm_provider</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">openai.chat</span>
+<a id="__codelineno-25-46" name="__codelineno-25-46" href="#__codelineno-25-46"></a><span class="w">  </span><span class="nt">concurrent_requests</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20</span>
+</code></pre></div>
+<h3 id="expected-directory-structure-multi-rag">Expected Directory Structure (Multi-RAG)</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a>input_dir/
+<a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a>  data_global_assertions.json
+<a id="__codelineno-26-3" name="__codelineno-26-3" href="#__codelineno-26-3"></a>  graphrag_global/
+<a id="__codelineno-26-4" name="__codelineno-26-4" href="#__codelineno-26-4"></a>    data_global.json
+<a id="__codelineno-26-5" name="__codelineno-26-5" href="#__codelineno-26-5"></a>  vectorrag/
+<a id="__codelineno-26-6" name="__codelineno-26-6" href="#__codelineno-26-6"></a>    data_global.json
+<a id="__codelineno-26-7" name="__codelineno-26-7" href="#__codelineno-26-7"></a>  lazygraphrag/
+<a id="__codelineno-26-8" name="__codelineno-26-8" href="#__codelineno-26-8"></a>    data_global.json
+</code></pre></div>
+<h3 id="output-structure-multi-rag">Output Structure (Multi-RAG)</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a>output_dir/
+<a id="__codelineno-27-2" name="__codelineno-27-2" href="#__codelineno-27-2"></a>  graphrag_global/
+<a id="__codelineno-27-3" name="__codelineno-27-3" href="#__codelineno-27-3"></a>    hierarchical_scores_raw.csv
+<a id="__codelineno-27-4" name="__codelineno-27-4" href="#__codelineno-27-4"></a>    hierarchical_scores_aggregated.csv
+<a id="__codelineno-27-5" name="__codelineno-27-5" href="#__codelineno-27-5"></a>  vectorrag/
+<a id="__codelineno-27-6" name="__codelineno-27-6" href="#__codelineno-27-6"></a>    hierarchical_scores_raw.csv
+<a id="__codelineno-27-7" name="__codelineno-27-7" href="#__codelineno-27-7"></a>    hierarchical_scores_aggregated.csv
+<a id="__codelineno-27-8" name="__codelineno-27-8" href="#__codelineno-27-8"></a>  lazygraphrag/
+<a id="__codelineno-27-9" name="__codelineno-27-9" href="#__codelineno-27-9"></a>    hierarchical_scores_raw.csv
+<a id="__codelineno-27-10" name="__codelineno-27-10" href="#__codelineno-27-10"></a>    hierarchical_scores_aggregated.csv
+<a id="__codelineno-27-11" name="__codelineno-27-11" href="#__codelineno-27-11"></a>  all_hierarchical_scores.csv
+<a id="__codelineno-27-12" name="__codelineno-27-12" href="#__codelineno-27-12"></a>  hierarchical_comparison_summary.csv
+<a id="__codelineno-27-13" name="__codelineno-27-13" href="#__codelineno-27-13"></a>  significance_summary.csv                                  # If run_significance_test=true
+<a id="__codelineno-27-14" name="__codelineno-27-14" href="#__codelineno-27-14"></a>  significance_global_pass_rate_group_stats.csv              #   Per-metric detailed files
+<a id="__codelineno-27-15" name="__codelineno-27-15" href="#__codelineno-27-15"></a>  significance_global_pass_rate_omnibus.csv
+<a id="__codelineno-27-16" name="__codelineno-27-16" href="#__codelineno-27-16"></a>  significance_global_pass_rate_pairwise.csv
+<a id="__codelineno-27-17" name="__codelineno-27-17" href="#__codelineno-27-17"></a>  significance_support_level_group_stats.csv
+<a id="__codelineno-27-18" name="__codelineno-27-18" href="#__codelineno-27-18"></a>  significance_support_level_omnibus.csv
+<a id="__codelineno-27-19" name="__codelineno-27-19" href="#__codelineno-27-19"></a>  significance_support_level_pairwise.csv
+<a id="__codelineno-27-20" name="__codelineno-27-20" href="#__codelineno-27-20"></a>  significance_supporting_pass_rate_group_stats.csv
+<a id="__codelineno-27-21" name="__codelineno-27-21" href="#__codelineno-27-21"></a>  significance_supporting_pass_rate_omnibus.csv
+<a id="__codelineno-27-22" name="__codelineno-27-22" href="#__codelineno-27-22"></a>  significance_supporting_pass_rate_pairwise.csv
+<a id="__codelineno-27-23" name="__codelineno-27-23" href="#__codelineno-27-23"></a>  significance_discovery_rate_group_stats.csv
+<a id="__codelineno-27-24" name="__codelineno-27-24" href="#__codelineno-27-24"></a>  significance_discovery_rate_omnibus.csv
+<a id="__codelineno-27-25" name="__codelineno-27-25" href="#__codelineno-27-25"></a>  significance_discovery_rate_pairwise.csv
+<a id="__codelineno-27-26" name="__codelineno-27-26" href="#__codelineno-27-26"></a>  significance_global_pass_rate_clustered_group_stats.csv    # If run_clustered_permutation=true
+<a id="__codelineno-27-27" name="__codelineno-27-27" href="#__codelineno-27-27"></a>  significance_global_pass_rate_clustered_omnibus.csv
+<a id="__codelineno-27-28" name="__codelineno-27-28" href="#__codelineno-27-28"></a>  significance_global_pass_rate_clustered_pairwise.csv
+<a id="__codelineno-27-29" name="__codelineno-27-29" href="#__codelineno-27-29"></a>  significance_support_level_clustered_group_stats.csv
+<a id="__codelineno-27-30" name="__codelineno-27-30" href="#__codelineno-27-30"></a>  significance_support_level_clustered_omnibus.csv
+<a id="__codelineno-27-31" name="__codelineno-27-31" href="#__codelineno-27-31"></a>  significance_support_level_clustered_pairwise.csv
+<a id="__codelineno-27-32" name="__codelineno-27-32" href="#__codelineno-27-32"></a>  significance_supporting_pass_rate_clustered_group_stats.csv
+<a id="__codelineno-27-33" name="__codelineno-27-33" href="#__codelineno-27-33"></a>  significance_supporting_pass_rate_clustered_omnibus.csv
+<a id="__codelineno-27-34" name="__codelineno-27-34" href="#__codelineno-27-34"></a>  significance_supporting_pass_rate_clustered_pairwise.csv
+<a id="__codelineno-27-35" name="__codelineno-27-35" href="#__codelineno-27-35"></a>  significance_discovery_rate_clustered_group_stats.csv
+<a id="__codelineno-27-36" name="__codelineno-27-36" href="#__codelineno-27-36"></a>  significance_discovery_rate_clustered_omnibus.csv
+<a id="__codelineno-27-37" name="__codelineno-27-37" href="#__codelineno-27-37"></a>  significance_discovery_rate_clustered_pairwise.csv
+<a id="__codelineno-27-38" name="__codelineno-27-38" href="#__codelineno-27-38"></a>  model_usage.json
+</code></pre></div>
+<hr />
+<blockquote>
+<p>📋 Hierarchical assertions json example:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a><span class="p">[</span>
+<a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a><span class="w">  </span><span class="p">{</span>
+<a id="__codelineno-28-3" name="__codelineno-28-3" href="#__codelineno-28-3"></a><span class="w">    </span><span class="nt">&quot;question_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;abc123&quot;</span><span class="p">,</span>
+<a id="__codelineno-28-4" name="__codelineno-28-4" href="#__codelineno-28-4"></a><span class="w">    </span><span class="nt">&quot;question_text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;How did the company&#39;s strategy evolve over time?&quot;</span><span class="p">,</span>
+<a id="__codelineno-28-5" name="__codelineno-28-5" href="#__codelineno-28-5"></a><span class="w">    </span><span class="nt">&quot;assertions&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-28-6" name="__codelineno-28-6" href="#__codelineno-28-6"></a><span class="w">      </span><span class="p">{</span>
+<a id="__codelineno-28-7" name="__codelineno-28-7" href="#__codelineno-28-7"></a><span class="w">        </span><span class="nt">&quot;statement&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;The response describes the company&#39;s strategic evolution across multiple phases.&quot;</span><span class="p">,</span>
+<a id="__codelineno-28-8" name="__codelineno-28-8" href="#__codelineno-28-8"></a><span class="w">        </span><span class="nt">&quot;supporting_assertions&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-28-9" name="__codelineno-28-9" href="#__codelineno-28-9"></a><span class="w">          </span><span class="p">{</span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sa1&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;statement&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;The response mentions the initial focus on product development.&quot;</span><span class="p">},</span>
+<a id="__codelineno-28-10" name="__codelineno-28-10" href="#__codelineno-28-10"></a><span class="w">          </span><span class="p">{</span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sa2&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;statement&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;The response describes the expansion into new markets.&quot;</span><span class="p">},</span>
+<a id="__codelineno-28-11" name="__codelineno-28-11" href="#__codelineno-28-11"></a><span class="w">          </span><span class="p">{</span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sa3&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;statement&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;The response covers the pivot to subscription-based revenue.&quot;</span><span class="p">}</span>
+<a id="__codelineno-28-12" name="__codelineno-28-12" href="#__codelineno-28-12"></a><span class="w">        </span><span class="p">]</span>
+<a id="__codelineno-28-13" name="__codelineno-28-13" href="#__codelineno-28-13"></a><span class="w">      </span><span class="p">}</span>
+<a id="__codelineno-28-14" name="__codelineno-28-14" href="#__codelineno-28-14"></a><span class="w">    </span><span class="p">]</span>
+<a id="__codelineno-28-15" name="__codelineno-28-15" href="#__codelineno-28-15"></a><span class="w">  </span><span class="p">}</span>
+<a id="__codelineno-28-16" name="__codelineno-28-16" href="#__codelineno-28-16"></a><span class="p">]</span>
+</code></pre></div></p>
+</blockquote>
+<h3 id="output-metrics">Output Metrics</h3>
+<p>The hierarchical scoring produces additional metrics beyond standard assertion scoring:</p>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>global_score</code></td>
+<td>Binary (0/1) indicating if the global assertion passed.</td>
+</tr>
+<tr>
+<td><code>global_score_overridden</code></td>
+<td>True if the global score was forced to 0 due to having no supporting evidence and no discovery.</td>
+</tr>
+<tr>
+<td><code>support_level</code></td>
+<td>Ratio of supporting assertions that passed (0.0 to 1.0).</td>
+</tr>
+<tr>
+<td><code>n_supporting</code></td>
+<td>Total number of supporting assertions.</td>
+</tr>
+<tr>
+<td><code>n_supporting_passed</code></td>
+<td>Number of supporting assertions that passed.</td>
+</tr>
+<tr>
+<td><code>has_discovery</code></td>
+<td>Whether the answer contains information beyond the supporting assertions.</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>⚠️ <strong>Note</strong>: If a global assertion passes but has <code>support_level=0</code> and <code>has_discovery=False</code>, the <code>global_score</code> is automatically overridden to 0 (fail). This catches suspicious passes where the LLM said the global claim is satisfied but provided no evidence. The <code>global_score_overridden</code> field tracks when this occurs.</p>
+</blockquote>
+<hr />
+<h2 id="assertion-significance-testing">Assertion Significance Testing</h2>
+<p>After running assertion scoring for multiple RAG methods, you can perform statistical significance testing to determine if the observed differences in scores are statistically significant.</p>
+<blockquote>
+<p>⚠️ <strong>Prerequisites</strong>: The significance testing commands assume that assertion scoring has <strong>already been run</strong> and that score files exist in the output directory. Run <code>assertion-scores</code> or <code>hierarchical-assertion-scores</code> first to generate the required input files.</p>
+</blockquote>
+<h3 id="standard-assertion-significance-testing">Standard Assertion Significance Testing</h3>
+<p>To run significance tests on standard assertion scores, use the CLI command:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a>benchmark-qed<span class="w"> </span>autoe<span class="w"> </span>assertion-significance<span class="w"> </span>config.yaml
+</code></pre></div>
+<h4 id="configuration-schema">Configuration Schema</h4>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>output_dir</code></td>
+<td><code>Path</code></td>
+<td><em>required</em></td>
+<td>Directory containing assertion scoring results.</td>
+</tr>
+<tr>
+<td><code>rag_methods</code></td>
+<td><code>list[str]</code></td>
+<td><em>required</em></td>
+<td>List of RAG method names to compare (must match subdirectory names).</td>
+</tr>
+<tr>
+<td><code>question_sets</code></td>
+<td><code>list[str]</code></td>
+<td><em>required</em></td>
+<td>List of question set names to analyze.</td>
+</tr>
+<tr>
+<td><code>alpha</code></td>
+<td><code>float</code></td>
+<td><code>0.05</code></td>
+<td>Significance level for hypothesis tests.</td>
+</tr>
+<tr>
+<td><code>correction_method</code></td>
+<td><code>str</code></td>
+<td><code>"holm"</code></td>
+<td>P-value correction method: <code>"holm"</code>, <code>"bonferroni"</code>, or <code>"fdr_bh"</code>.</td>
+</tr>
+<tr>
+<td><code>run_clustered_permutation</code></td>
+<td><code>bool</code></td>
+<td><code>False</code></td>
+<td>Whether to run assertion-level clustered permutation tests as secondary analysis.</td>
+</tr>
+<tr>
+<td><code>n_permutations</code></td>
+<td><code>int</code></td>
+<td><code>10000</code></td>
+<td>Number of permutations for the clustered permutation test.</td>
+</tr>
+<tr>
+<td><code>permutation_seed</code></td>
+<td><code>int \| None</code></td>
+<td><code>None</code></td>
+<td>Random seed for reproducibility of permutation tests.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="yaml-example_4">YAML Example</h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a><span class="c1"># Standard assertion significance test configuration</span>
+<a id="__codelineno-30-2" name="__codelineno-30-2" href="#__codelineno-30-2"></a><span class="nt">output_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./output/assertion_scoring</span>
+<a id="__codelineno-30-3" name="__codelineno-30-3" href="#__codelineno-30-3"></a>
+<a id="__codelineno-30-4" name="__codelineno-30-4" href="#__codelineno-30-4"></a><span class="nt">rag_methods</span><span class="p">:</span>
+<a id="__codelineno-30-5" name="__codelineno-30-5" href="#__codelineno-30-5"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">graphrag_global</span>
+<a id="__codelineno-30-6" name="__codelineno-30-6" href="#__codelineno-30-6"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vectorrag</span>
+<a id="__codelineno-30-7" name="__codelineno-30-7" href="#__codelineno-30-7"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lazygraphrag</span>
+<a id="__codelineno-30-8" name="__codelineno-30-8" href="#__codelineno-30-8"></a>
+<a id="__codelineno-30-9" name="__codelineno-30-9" href="#__codelineno-30-9"></a><span class="nt">question_sets</span><span class="p">:</span>
+<a id="__codelineno-30-10" name="__codelineno-30-10" href="#__codelineno-30-10"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">data_global_questions</span>
+<a id="__codelineno-30-11" name="__codelineno-30-11" href="#__codelineno-30-11"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">data_local_questions</span>
+<a id="__codelineno-30-12" name="__codelineno-30-12" href="#__codelineno-30-12"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">data_linked_questions</span>
+<a id="__codelineno-30-13" name="__codelineno-30-13" href="#__codelineno-30-13"></a>
+<a id="__codelineno-30-14" name="__codelineno-30-14" href="#__codelineno-30-14"></a><span class="nt">alpha</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.05</span>
+<a id="__codelineno-30-15" name="__codelineno-30-15" href="#__codelineno-30-15"></a><span class="nt">correction_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">holm</span>
+<a id="__codelineno-30-16" name="__codelineno-30-16" href="#__codelineno-30-16"></a>
+<a id="__codelineno-30-17" name="__codelineno-30-17" href="#__codelineno-30-17"></a><span class="c1"># Optional secondary analysis</span>
+<a id="__codelineno-30-18" name="__codelineno-30-18" href="#__codelineno-30-18"></a><span class="nt">run_clustered_permutation</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<a id="__codelineno-30-19" name="__codelineno-30-19" href="#__codelineno-30-19"></a><span class="nt">n_permutations</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10000</span>
+<a id="__codelineno-30-20" name="__codelineno-30-20" href="#__codelineno-30-20"></a><span class="nt">permutation_seed</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">42</span>
+</code></pre></div>
+<h4 id="expected-directory-structure_1">Expected Directory Structure</h4>
+<p>The command expects assertion scoring results organized as:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a>output_dir/
+<a id="__codelineno-31-2" name="__codelineno-31-2" href="#__codelineno-31-2"></a>  data_global_questions/
+<a id="__codelineno-31-3" name="__codelineno-31-3" href="#__codelineno-31-3"></a>    graphrag_global_summary_by_question.csv
+<a id="__codelineno-31-4" name="__codelineno-31-4" href="#__codelineno-31-4"></a>    graphrag_global_summary_by_assertion.csv
+<a id="__codelineno-31-5" name="__codelineno-31-5" href="#__codelineno-31-5"></a>    vectorrag_summary_by_question.csv
+<a id="__codelineno-31-6" name="__codelineno-31-6" href="#__codelineno-31-6"></a>    vectorrag_summary_by_assertion.csv
+<a id="__codelineno-31-7" name="__codelineno-31-7" href="#__codelineno-31-7"></a>    lazygraphrag_summary_by_question.csv
+<a id="__codelineno-31-8" name="__codelineno-31-8" href="#__codelineno-31-8"></a>    lazygraphrag_summary_by_assertion.csv
+<a id="__codelineno-31-9" name="__codelineno-31-9" href="#__codelineno-31-9"></a>  data_local_questions/
+<a id="__codelineno-31-10" name="__codelineno-31-10" href="#__codelineno-31-10"></a>    graphrag_global_summary_by_question.csv
+<a id="__codelineno-31-11" name="__codelineno-31-11" href="#__codelineno-31-11"></a>    graphrag_global_summary_by_assertion.csv
+<a id="__codelineno-31-12" name="__codelineno-31-12" href="#__codelineno-31-12"></a>    vectorrag_summary_by_question.csv
+<a id="__codelineno-31-13" name="__codelineno-31-13" href="#__codelineno-31-13"></a>    vectorrag_summary_by_assertion.csv
+<a id="__codelineno-31-14" name="__codelineno-31-14" href="#__codelineno-31-14"></a>    lazygraphrag_summary_by_question.csv
+<a id="__codelineno-31-15" name="__codelineno-31-15" href="#__codelineno-31-15"></a>    lazygraphrag_summary_by_assertion.csv
+</code></pre></div>
+<p>Each summary file should contain <code>success</code> and <code>fail</code> columns for per-question accuracy calculation.</p>
+<p>If <code>run_clustered_permutation</code> is enabled, <code>*_summary_by_assertion.csv</code> files are also used, and additional outputs are saved per question set:</p>
+<ul>
+<li><code>significance_group_stats_clustered.csv</code></li>
+<li><code>significance_omnibus_clustered.csv</code></li>
+<li><code>significance_pairwise_clustered.csv</code> (only when pairwise post-hoc comparisons exist)</li>
+</ul>
+<hr />
+<h3 id="hierarchical-assertion-significance-testing">Hierarchical Assertion Significance Testing</h3>
+<blockquote>
+<p>💡 <strong>Note</strong>: If you use multi-RAG mode with <code>run_significance_test: true</code>, significance tests are run automatically. This standalone command is only needed when you want to run significance tests on previously generated scores, or when you ran single-RAG scoring for each method separately.</p>
+</blockquote>
+<p>To run significance tests on hierarchical assertion scores, use the CLI command:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a>benchmark-qed<span class="w"> </span>autoe<span class="w"> </span>hierarchical-assertion-significance<span class="w"> </span>config.yaml
+</code></pre></div>
+<p>This tests four metrics:</p>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>global_pass_rate</code></td>
+<td>Per-question global assertion pass rate</td>
+</tr>
+<tr>
+<td><code>support_level</code></td>
+<td>Per-question average support level</td>
+</tr>
+<tr>
+<td><code>supporting_pass_rate</code></td>
+<td>Per-question supporting assertion pass rate</td>
+</tr>
+<tr>
+<td><code>discovery_rate</code></td>
+<td>Per-question discovery rate</td>
+</tr>
+</tbody>
+</table>
+<h4 id="configuration-schema_1">Configuration Schema</h4>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>scores_dir</code></td>
+<td><code>Path</code></td>
+<td><em>required</em></td>
+<td>Directory containing aggregated hierarchical scores CSVs.</td>
+</tr>
+<tr>
+<td><code>rag_methods</code></td>
+<td><code>list[str]</code></td>
+<td><em>required</em></td>
+<td>List of RAG method names to compare.</td>
+</tr>
+<tr>
+<td><code>scores_filename_template</code></td>
+<td><code>str</code></td>
+<td><code>"{rag_method}_hierarchical_scores_aggregated.csv"</code></td>
+<td>Filename template for aggregated scores. Use <code>{rag_method}</code> placeholder.</td>
+</tr>
+<tr>
+<td><code>alpha</code></td>
+<td><code>float</code></td>
+<td><code>0.05</code></td>
+<td>Significance level for hypothesis tests.</td>
+</tr>
+<tr>
+<td><code>correction_method</code></td>
+<td><code>str</code></td>
+<td><code>"holm"</code></td>
+<td>P-value correction method: <code>"holm"</code>, <code>"bonferroni"</code>, or <code>"fdr_bh"</code>.</td>
+</tr>
+<tr>
+<td><code>output_dir</code></td>
+<td><code>Path \| None</code></td>
+<td><code>None</code></td>
+<td>Optional directory to save significance test results as CSV files.</td>
+</tr>
+<tr>
+<td><code>run_clustered_permutation</code></td>
+<td><code>bool</code></td>
+<td><code>False</code></td>
+<td>Whether to run assertion-level clustered permutation tests as secondary analysis.</td>
+</tr>
+<tr>
+<td><code>n_permutations</code></td>
+<td><code>int</code></td>
+<td><code>10000</code></td>
+<td>Number of permutations for the clustered permutation test.</td>
+</tr>
+<tr>
+<td><code>permutation_seed</code></td>
+<td><code>int \| None</code></td>
+<td><code>None</code></td>
+<td>Random seed for reproducibility of permutation tests.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="yaml-example_5">YAML Example</h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a><span class="c1"># Hierarchical assertion significance test configuration</span>
+<a id="__codelineno-33-2" name="__codelineno-33-2" href="#__codelineno-33-2"></a><span class="nt">scores_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./output/hierarchical_scoring</span>
+<a id="__codelineno-33-3" name="__codelineno-33-3" href="#__codelineno-33-3"></a>
+<a id="__codelineno-33-4" name="__codelineno-33-4" href="#__codelineno-33-4"></a><span class="nt">rag_methods</span><span class="p">:</span>
+<a id="__codelineno-33-5" name="__codelineno-33-5" href="#__codelineno-33-5"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">graphrag_global</span>
+<a id="__codelineno-33-6" name="__codelineno-33-6" href="#__codelineno-33-6"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vectorrag</span>
+<a id="__codelineno-33-7" name="__codelineno-33-7" href="#__codelineno-33-7"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lazygraphrag</span>
+<a id="__codelineno-33-8" name="__codelineno-33-8" href="#__codelineno-33-8"></a>
+<a id="__codelineno-33-9" name="__codelineno-33-9" href="#__codelineno-33-9"></a><span class="c1"># Template for finding aggregated score files</span>
+<a id="__codelineno-33-10" name="__codelineno-33-10" href="#__codelineno-33-10"></a><span class="nt">scores_filename_template</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{rag_method}_hierarchical_scores_aggregated.csv&quot;</span>
+<a id="__codelineno-33-11" name="__codelineno-33-11" href="#__codelineno-33-11"></a>
+<a id="__codelineno-33-12" name="__codelineno-33-12" href="#__codelineno-33-12"></a><span class="nt">alpha</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.05</span>
+<a id="__codelineno-33-13" name="__codelineno-33-13" href="#__codelineno-33-13"></a><span class="nt">correction_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">holm</span>
+<a id="__codelineno-33-14" name="__codelineno-33-14" href="#__codelineno-33-14"></a>
+<a id="__codelineno-33-15" name="__codelineno-33-15" href="#__codelineno-33-15"></a><span class="c1"># Optional: save detailed results to CSV</span>
+<a id="__codelineno-33-16" name="__codelineno-33-16" href="#__codelineno-33-16"></a><span class="nt">output_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./output/significance</span>
+<a id="__codelineno-33-17" name="__codelineno-33-17" href="#__codelineno-33-17"></a>
+<a id="__codelineno-33-18" name="__codelineno-33-18" href="#__codelineno-33-18"></a><span class="c1"># Clustered permutation test (optional secondary analysis)</span>
+<a id="__codelineno-33-19" name="__codelineno-33-19" href="#__codelineno-33-19"></a><span class="c1"># Runs assertion-level tests that account for within-question correlation.</span>
+<a id="__codelineno-33-20" name="__codelineno-33-20" href="#__codelineno-33-20"></a><span class="nt">run_clustered_permutation</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w">  </span><span class="c1"># Set to true to enable</span>
+<a id="__codelineno-33-21" name="__codelineno-33-21" href="#__codelineno-33-21"></a><span class="nt">n_permutations</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10000</span>
+<a id="__codelineno-33-22" name="__codelineno-33-22" href="#__codelineno-33-22"></a><span class="nt">permutation_seed</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span><span class="w">  </span><span class="c1"># Set for reproducibility</span>
+</code></pre></div>
+<h4 id="output-files">Output Files</h4>
+<p>When <code>output_dir</code> is provided, for each of the four metrics (<code>global_pass_rate</code>, <code>support_level</code>, <code>supporting_pass_rate</code>, <code>discovery_rate</code>) the following files are saved:</p>
+<ul>
+<li><code>significance_{metric}_group_stats.csv</code> - Per-method descriptive statistics (n, mean, std, median, min, max)</li>
+<li><code>significance_{metric}_omnibus.csv</code> - Omnibus test result (test name, statistic, p-value)</li>
+<li><code>significance_{metric}_pairwise.csv</code> - Pairwise post-hoc comparisons with corrected p-values</li>
+</ul>
+<p>If <code>run_clustered_permutation</code> is enabled, the same three files are also produced for the assertion-level clustered permutation tests, using the key <code>{metric}_clustered</code> (e.g., <code>significance_global_pass_rate_clustered_omnibus.csv</code>).</p>
+<hr />
+<h3 id="statistical-tests-used">Statistical Tests Used</h3>
+<p>The significance testing uses the following statistical tests:</p>
+<table>
+<thead>
+<tr>
+<th>Test Type</th>
+<th>Test Used</th>
+<th>When Applied</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Omnibus (paired)</td>
+<td>Friedman test</td>
+<td>When comparing same questions across methods</td>
+</tr>
+<tr>
+<td>Omnibus (unpaired)</td>
+<td>Kruskal-Wallis test</td>
+<td>When questions differ across methods</td>
+</tr>
+<tr>
+<td>Post-hoc (paired)</td>
+<td>Wilcoxon signed-rank</td>
+<td>Pairwise comparisons with paired data</td>
+</tr>
+<tr>
+<td>Post-hoc (unpaired)</td>
+<td>Mann-Whitney U</td>
+<td>Pairwise comparisons with unpaired data</td>
+</tr>
+<tr>
+<td>Assertion-level (clustered)</td>
+<td>Clustered permutation test</td>
+<td>When testing at assertion level with within-question correlation (optional secondary analysis)</td>
+</tr>
+</tbody>
+</table>
+<p>P-value correction is applied to post-hoc tests to control for multiple comparisons.</p>
+<blockquote>
+<p>💡 <strong>Clustered Permutation Test</strong>: This optional secondary analysis tests significance at the assertion level while accounting for the fact that assertions within the same question are correlated (they share the same RAG answer). It permutes RAG method labels at the question (cluster) level, preserving the within-question correlation structure. This is a well-established approach from cluster-randomized trial methodology (Gail et al., 1996; Ernst, 2004). Enable with <code>run_clustered_permutation: true</code>.</p>
+</blockquote>
+<hr />
+<h2 id="cli-reference">CLI Reference</h2>
+<p>This section documents the command-line interface of the BenchmarkQED's AutoE package.</p>
+<div class="typer-docs">
+<h1 id="autoe">autoe</h1>
+<p>Evaluate Retrieval-Augmented Generation (RAG) methods.</p>
+<h2 id="usage">Usage</h2>
+<p><code>autoe [OPTIONS] COMMAND [ARGS]...</code></p>
+<h2 id="arguments">Arguments</h2>
+<p><em>No arguments available</em></p>
+<h2 id="options">Options</h2>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+<th>Required</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--install-completion</code></td>
+<td>Install completion for the current shell.</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr>
+<td><code>--show-completion</code></td>
+<td>Show completion for the current shell, to copy it or customize the installation.</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr>
+<td><code>--help</code></td>
+<td>Show this message and exit.</td>
+<td>No</td>
+<td>-</td>
+</tr>
+</tbody>
+</table>
+<h2 id="commands">Commands</h2>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>pairwise-scores</code></td>
+<td>Generate scores for the different...</td>
+</tr>
+<tr>
+<td><code>reference-scores</code></td>
+<td>Generate scores for the generated answers...</td>
+</tr>
+<tr>
+<td><code>assertion-scores</code></td>
+<td>Score assertions for RAG method(s).</td>
+</tr>
+<tr>
+<td><code>hierarchical-assertion-scores</code></td>
+<td>Score hierarchical assertions with...</td>
+</tr>
+<tr>
+<td><code>assertion-significance</code></td>
+<td>Run statistical significance tests on...</td>
+</tr>
+<tr>
+<td><code>hierarchical-assertion-significance</code></td>
+<td>Run statistical significance tests on...</td>
+</tr>
+<tr>
+<td><code>generate-retrieval-reference</code></td>
+<td>Generate retrieval reference data (cluster...</td>
+</tr>
+<tr>
+<td><code>retrieval-scores</code></td>
+<td>Evaluate retrieval metrics (precision,...</td>
+</tr>
+</tbody>
+</table>
+<h2 id="sub-commands">Sub Commands</h2>
+<h3 id="autoe-pairwise-scores"><code>autoe pairwise-scores</code></h3>
+<p>Generate scores for the different conditions provided in the JSON file.</p>
+<h4 id="usage_1">Usage</h4>
+<p><code>autoe pairwise-scores [OPTIONS] COMPARISON_SPEC OUTPUT</code></p>
+<h4 id="arguments_1">Arguments</h4>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>COMPARISON_SPEC</code></td>
+<td>The path to the JSON file containing the conditions.</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>OUTPUT</code></td>
+<td>The path to the output file for the scores.</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table>
+<h4 id="options_1">Options</h4>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+<th>Required</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--alpha FLOAT</code></td>
+<td>The p-value threshold for the significance test.  [default: 0.05]</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr>
+<td><code>--exclude-criteria TEXT</code></td>
+<td>The criteria to exclude from the scoring.</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr>
+<td><code>--print-model-usage / --no-print-model-usage</code></td>
+<td>Whether to print the model usage statistics after scoring.  [default: no-print-model-usage]</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr>
+<td><code>--include-score-id-in-prompt / --no-include-score-id-in-prompt</code></td>
+<td>Whether to include the score ID in the evaluation prompt for the LLM (might be useful to avoid cached scores).  [default: include-score-id-in-prompt]</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr>
+<td><code>--question-id-key TEXT</code></td>
+<td>The key in the JSON file that contains the question ID. This is used to match questions across different conditions.  [default: question_id]</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr>
+<td><code>--account-url TEXT</code></td>
+<td>Azure Blob Storage account URL for managed-identity auth, used when the config path is a blob:// URI. Falls back to $AZURE_STORAGE_ACCOUNT_URL.</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr>
+<td><code>--connection-string TEXT</code></td>
+<td>Azure Blob Storage connection string, used when the config path is a blob:// URI. Falls back to $AZURE_STORAGE_CONNECTION_STRING.</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr>
+<td><code>--help</code></td>
+<td>Show this message and exit.</td>
+<td>No</td>
+<td>-</td>
+</tr>
+</tbody>
+</table>
+<h3 id="autoe-reference-scores"><code>autoe reference-scores</code></h3>
+<p>Generate scores for the generated answers provided in the JSON file.</p>
+<h4 id="usage_2">Usage</h4>
+<p><code>autoe reference-scores [OPTIONS] COMPARISON_SPEC OUTPUT</code></p>
+<h4 id="arguments_2">Arguments</h4>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>COMPARISON_SPEC</code></td>
+<td>The path to the JSON file containing the configuration.</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>OUTPUT</code></td>
+<td>The path to the output file for the scores.</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table>
+<h4 id="options_2">Options</h4>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+<th>Required</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--exclude-criteria TEXT</code></td>
+<td>The criteria to exclude from the scoring.</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr>
+<td><code>--print-model-usage / --no-print-model-usage</code></td>
+<td>Whether to print the model usage statistics after scoring.  [default: no-print-model-usage]</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr>
+<td><code>--include-score-id-in-prompt / --no-include-score-id-in-prompt</code></td>
+<td>Whether to include the score ID in the evaluation prompt for the LLM (might be useful to avoid cached scores).  [default: include-score-id-in-prompt]</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr>
+<td><code>--question-id-key TEXT</code></td>
+<td>The key in the JSON file that contains the question ID. This is used to match questions across different conditions.  [default: question_id]</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr>
+<td><code>--account-url TEXT</code></td>
+<td>Azure Blob Storage account URL for managed-identity auth, used when the config path is a blob:// URI. Falls back to $AZURE_STORAGE_ACCOUNT_URL.</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr>
+<td><code>--connection-string TEXT</code></td>
+<td>Azure Blob Storage connection string, used when the config path is a blob:// URI. Falls back to $AZURE_STORAGE_CONNECTION_STRING.</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr>
+<td><code>--help</code></td>
+<td>Show this message and exit.</td>
+<td>No</td>
+<td>-</td>
+</tr>
+</tbody>
+</table>
+<h3 id="autoe-assertion-scores"><code>autoe assertion-scores</code></h3>
+<p>Score assertions for RAG method(s).
+Supports two config formats (auto-detected):
+1. Single-RAG mode (legacy): requires 'generated' key and output argument
+2. Multi-RAG mode: requires 'rag_methods' key, includes significance testing
+Single-RAG config example:
+generated:
+name: vector_rag
+answer_base_path: input/vector_rag/answers.json
+assertions:
+assertions_path: input/assertions.json
+pass_threshold: 0.5
+trials: 4
+llm_config: ...
+Multi-RAG config example:
+input_dir: ./input
+output_dir: ./output
+rag_methods:
+question_sets:
+run_significance_test: true
+llm_config: ...</p>
+<h4 id="usage_3">Usage</h4>
+<p><code>autoe assertion-scores [OPTIONS] CONFIG_PATH [OUTPUT]</code></p>
+<h4 id="arguments_3">Arguments</h4>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CONFIG_PATH</code></td>
+<td>Path to the assertion scoring config YAML.</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>[OUTPUT]</code></td>
+<td>Output directory (required for single-RAG config, ignored for multi-RAG).</td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+<h4 id="options_3">Options</h4>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+<th>Required</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--print-model-usage / --no-print-model-usage</code></td>
+<td>Whether to print the model usage statistics.  [default: no-print-model-usage]</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr>
+<td><code>--include-score-id-in-prompt / --no-include-score-id-in-prompt</code></td>
+<td>Whether to include the score ID in the prompt (single-RAG mode only).  [default: include-score-id-in-prompt]</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr>
+<td><code>--question-id-key TEXT</code></td>
+<td>Question ID key in JSON (single-RAG mode only).  [default: question_id]</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr>
+<td><code>--question-text-key TEXT</code></td>
+<td>Question text key in JSON (single-RAG mode only).  [default: question_text]</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr>
+<td><code>--answer-text-key TEXT</code></td>
+<td>Answer text key in JSON (single-RAG mode only).  [default: answer]</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr>
+<td><code>--assertions-key TEXT</code></td>
+<td>Assertions key in JSON (single-RAG mode only).  [default: assertions]</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr>
+<td><code>--account-url TEXT</code></td>
+<td>Azure Blob Storage account URL for managed-identity auth, used when the config path is a blob:// URI. Falls back to $AZURE_STORAGE_ACCOUNT_URL.</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr>
+<td><code>--connection-string TEXT</code></td>
+<td>Azure Blob Storage connection string, used when the config path is a blob:// URI. Falls back to $AZURE_STORAGE_CONNECTION_STRING.</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr>
+<td><code>--help</code></td>
+<td>Show this message and exit.</td>
+<td>No</td>
+<td>-</td>
+</tr>
+</tbody>
+</table>
+<h3 id="autoe-hierarchical-assertion-scores"><code>autoe hierarchical-assertion-scores</code></h3>
+<p>Score hierarchical assertions with supporting assertions.
+Supports two config formats (auto-detected):
+1. Single-RAG mode (legacy): requires 'generated' key and output argument
+2. Multi-RAG mode: requires 'rag_methods' key, includes significance testing
+Single-RAG config example:
+generated:
+name: vector_rag
+answer_base_path: input/vector_rag/data_global.json
+assertions:
+assertions_path: input/data_global_assertions.json
+pass_threshold: 0.5
+trials: 4
+mode: staged
+llm_config: ...
+Multi-RAG config example:
+input_dir: ./input
+output_dir: ./output
+rag_methods:
+assertions_file: data_global_assertions.json
+run_significance_test: true
+mode: staged
+llm_config: ...
+This command evaluates global assertions along with their supporting (local)
+assertions. It computes:
+- Global assertion pass/fail
+- Support coverage (ratio of supporting assertions that passed)
+- Discovery detection (information beyond supporting assertions)</p>
+<h4 id="usage_4">Usage</h4>
+<p><code>autoe hierarchical-assertion-scores [OPTIONS] CONFIG_PATH [OUTPUT]</code></p>
+<h4 id="arguments_4">Arguments</h4>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CONFIG_PATH</code></td>
+<td>Path to the hierarchical assertion scoring config YAML.</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>[OUTPUT]</code></td>
+<td>Output directory (required for single-RAG config, ignored for multi-RAG).</td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+<h4 id="options_4">Options</h4>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+<th>Required</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--print-model-usage / --no-print-model-usage</code></td>
+<td>Whether to print the model usage statistics after scoring.  [default: no-print-model-usage]</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr>
+<td><code>--include-score-id-in-prompt / --no-include-score-id-in-prompt</code></td>
+<td>Whether to include the score ID in the evaluation prompt for the LLM.  [default: include-score-id-in-prompt]</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr>
+<td><code>--question-id-key TEXT</code></td>
+<td>The key in the JSON file that contains the question ID.  [default: question_id]</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr>
+<td><code>--question-text-key TEXT</code></td>
+<td>The key in the JSON file that contains the question text.  [default: question_text]</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr>
+<td><code>--answer-text-key TEXT</code></td>
+<td>The key in the JSON file that contains the answer text.  [default: answer]</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr>
+<td><code>--assertions-key TEXT</code></td>
+<td>The key in the JSON file that contains the assertions.  [default: assertions]</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr>
+<td><code>--supporting-assertions-key TEXT</code></td>
+<td>The key in assertions that contains the supporting assertions list.  [default: supporting_assertions]</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr>
+<td><code>--account-url TEXT</code></td>
+<td>Azure Blob Storage account URL for managed-identity auth, used when the config path is a blob:// URI. Falls back to $AZURE_STORAGE_ACCOUNT_URL.</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr>
+<td><code>--connection-string TEXT</code></td>
+<td>Azure Blob Storage connection string, used when the config path is a blob:// URI. Falls back to $AZURE_STORAGE_CONNECTION_STRING.</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr>
+<td><code>--help</code></td>
+<td>Show this message and exit.</td>
+<td>No</td>
+<td>-</td>
+</tr>
+</tbody>
+</table>
+<h3 id="autoe-assertion-significance"><code>autoe assertion-significance</code></h3>
+<p>Run statistical significance tests on standard assertion scores.
+Compares assertion scores across multiple RAG methods using statistical
+tests (Friedman/Kruskal-Wallis for omnibus, Wilcoxon/Mann-Whitney for
+post-hoc).
+Example config:
+output_dir: ./output/assertion_scoring
+rag_methods:
+- graphrag_global
+- vectorrag
+- lazygraphrag
+question_sets:
+- data_global_questions
+- data_local_questions
+alpha: 0.05
+correction_method: holm</p>
+<h4 id="usage_5">Usage</h4>
+<p><code>autoe assertion-significance [OPTIONS] CONFIG_PATH</code></p>
+<h4 id="arguments_5">Arguments</h4>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CONFIG_PATH</code></td>
+<td>Path to the assertion significance configuration YAML file.</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table>
+<h4 id="options_5">Options</h4>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+<th>Required</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--account-url TEXT</code></td>
+<td>Azure Blob Storage account URL for managed-identity auth, used when the config path is a blob:// URI. Falls back to $AZURE_STORAGE_ACCOUNT_URL.</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr>
+<td><code>--connection-string TEXT</code></td>
+<td>Azure Blob Storage connection string, used when the config path is a blob:// URI. Falls back to $AZURE_STORAGE_CONNECTION_STRING.</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr>
+<td><code>--help</code></td>
+<td>Show this message and exit.</td>
+<td>No</td>
+<td>-</td>
+</tr>
+</tbody>
+</table>
+<h3 id="autoe-hierarchical-assertion-significance"><code>autoe hierarchical-assertion-significance</code></h3>
+<p>Run statistical significance tests on hierarchical assertion scores.
+Compares hierarchical assertion scores across multiple RAG methods on
+four metrics: global_pass_rate, support_level, supporting_pass_rate,
+and discovery_rate.
+Example config:
+scores_dir: ./output/hierarchical_scoring
+rag_methods:
+- graphrag_global
+- vectorrag
+- lazygraphrag
+scores_filename_template: "{rag_method}_hierarchical_scores_aggregated.csv"
+alpha: 0.05
+correction_method: holm
+output_dir: ./output/significance  # Optional</p>
+<h4 id="usage_6">Usage</h4>
+<p><code>autoe hierarchical-assertion-significance [OPTIONS] CONFIG_PATH</code></p>
+<h4 id="arguments_6">Arguments</h4>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CONFIG_PATH</code></td>
+<td>Path to the hierarchical assertion significance config YAML.</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table>
+<h4 id="options_6">Options</h4>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+<th>Required</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--account-url TEXT</code></td>
+<td>Azure Blob Storage account URL for managed-identity auth, used when the config path is a blob:// URI. Falls back to $AZURE_STORAGE_ACCOUNT_URL.</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr>
+<td><code>--connection-string TEXT</code></td>
+<td>Azure Blob Storage connection string, used when the config path is a blob:// URI. Falls back to $AZURE_STORAGE_CONNECTION_STRING.</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr>
+<td><code>--help</code></td>
+<td>Show this message and exit.</td>
+<td>No</td>
+<td>-</td>
+</tr>
+</tbody>
+</table>
+<h3 id="autoe-generate-retrieval-reference"><code>autoe generate-retrieval-reference</code></h3>
+<p>Generate retrieval reference data (cluster relevance) for a question set.
+This is a one-off operation that creates reference data used by retrieval_scores.
+The reference data identifies which clusters are relevant to each question.
+Supports multiple question sets and cluster counts via config:
+- question_sets: List of {name, questions_path} for multiple question sets
+- num_clusters: Single int or list of ints for multiple cluster counts
+- save_clusters: Whether to save clustering results separately for debugging
+Output structure:
+output_dir/
+clusters/
+clusters_{num_clusters}.json
+{question_set_name}/
+clusters_{num_clusters}/
+reference.json
+model_usage.json
+If clusters_path is provided, pre-computed clusters will be loaded.
+Otherwise, text units will be loaded from text_units_path and clustered.</p>
+<h4 id="usage_7">Usage</h4>
+<p><code>autoe generate-retrieval-reference [OPTIONS] CONFIG_PATH</code></p>
+<h4 id="arguments_7">Arguments</h4>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CONFIG_PATH</code></td>
+<td>Path to the retrieval reference configuration JSON file.</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table>
+<h4 id="options_7">Options</h4>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+<th>Required</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--print-model-usage / --no-print-model-usage</code></td>
+<td>Whether to print the model usage statistics.  [default: no-print-model-usage]</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr>
+<td><code>--account-url TEXT</code></td>
+<td>Azure Blob Storage account URL for managed-identity auth, used when the config path is a blob:// URI. Falls back to $AZURE_STORAGE_ACCOUNT_URL.</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr>
+<td><code>--connection-string TEXT</code></td>
+<td>Azure Blob Storage connection string, used when the config path is a blob:// URI. Falls back to $AZURE_STORAGE_CONNECTION_STRING.</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr>
+<td><code>--help</code></td>
+<td>Show this message and exit.</td>
+<td>No</td>
+<td>-</td>
+</tr>
+</tbody>
+</table>
+<h3 id="autoe-retrieval-scores"><code>autoe retrieval-scores</code></h3>
+<p>Evaluate retrieval metrics (precision, recall, fidelity) for RAG methods.
+Compares multiple RAG methods on retrieval quality metrics and runs
+statistical significance tests.</p>
+<h4 id="usage_8">Usage</h4>
+<p><code>autoe retrieval-scores [OPTIONS] CONFIG_PATH</code></p>
+<h4 id="arguments_8">Arguments</h4>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CONFIG_PATH</code></td>
+<td>Path to the retrieval scores configuration JSON file.</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table>
+<h4 id="options_8">Options</h4>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+<th>Required</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--print-model-usage / --no-print-model-usage</code></td>
+<td>Whether to print the model usage statistics.  [default: no-print-model-usage]</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr>
+<td><code>--max-concurrent INTEGER</code></td>
+<td>Maximum concurrent relevance assessments.  [default: 8]</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr>
+<td><code>--account-url TEXT</code></td>
+<td>Azure Blob Storage account URL for managed-identity auth, used when the config path is a blob:// URI. Falls back to $AZURE_STORAGE_ACCOUNT_URL.</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr>
+<td><code>--connection-string TEXT</code></td>
+<td>Azure Blob Storage connection string, used when the config path is a blob:// URI. Falls back to $AZURE_STORAGE_CONNECTION_STRING.</td>
+<td>No</td>
+<td>-</td>
+</tr>
+<tr>
+<td><code>--help</code></td>
+<td>Show this message and exit.</td>
+<td>No</td>
+<td>-</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../autoq/" class="md-footer__link md-footer__link--prev" aria-label="Previous: AutoQ">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                AutoQ
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../retrieval_scores/" class="md-footer__link md-footer__link--next" aria-label="Next: Retrieval Metrics">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Retrieval Metrics
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      &copy; 2025 Microsoft&nbsp;|&nbsp; <a href="https://go.microsoft.com/fwlink/?LinkId=521839">Privacy</a>&nbsp;|&nbsp; <a href="https://go.microsoft.com/fwlink/?LinkId=2259814">Consumer Heath Privacy</a>&nbsp;|&nbsp; <a onclick="window.manageConsent();">Cookies</a>&nbsp;|&nbsp; <a href="https://go.microsoft.com/fwlink/?LinkID=206977">Terms of Use</a>&nbsp;|&nbsp; <a href="https://www.microsoft.com/trademarks">Trademarks</a>
+
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../..", "features": ["content.code.copy", "content.code.select", "navigation.footer", "navigation.tabs"], "search": "../../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.13a4f30d.min.js"></script>
+      
+        <script src="../../scripts/create_cookie_banner.js"></script>
+      
+    
+  </body>
+</html>

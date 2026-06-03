@@ -68,6 +68,7 @@ Ragas와 BenchmarkQED 둘 다 같은 방식으로 쓸 수 있습니다.
 - GREV_BENCHMARKQED_EMBEDDINGS_EXTRA_BODY
 
 이쪽도 Ragas 평가와 별개로 운영할 수 있습니다.
+`grev benchmark-qed smoke` 도 이 값들을 그대로 읽습니다. 명령어 자체는 Ollama나 vLLM 중 하나를 강제하지 않고, env에서 들어온 값으로만 동작합니다.
 마찬가지로 BASE_URL은 `http://<vllm-host>:8000/v1` 같은 OpenAI-compatible endpoint 전체를 넣습니다.
 embeddings를 같은 vLLM 서버에서 내보내면 embeddings BASE_URL을 생략하거나 같은 값으로 둘 수 있습니다.
 Qwen 계열 생각 끄기는 GREV_BENCHMARKQED_EXTRA_BODY={"chat_template_kwargs":{"enable_thinking":false}} 로 넣으면 됩니다.

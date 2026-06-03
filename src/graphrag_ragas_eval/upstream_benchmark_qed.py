@@ -53,7 +53,11 @@ def build_vendor_llm_config(
         api_key=runtime.api_key or "EMPTY",
         llm_provider=LLMProvider.OpenAIChat,
         init_args={"api_base": runtime.base_url},
-        call_args={"temperature": 0.0, "seed": 42},
+        call_args={
+            "temperature": 0.0,
+            "seed": 42,
+            **({"max_tokens": runtime.max_tokens} if runtime.max_tokens is not None else {}),
+        },
     )
 
 
