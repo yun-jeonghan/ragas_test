@@ -73,11 +73,13 @@ def test_render_smoke_report(tmp_path: Path) -> None:
 
     assert output.exists()
     assert "Smoke" in html
-    assert "BenchmarkQED Results" in html
+    assert "BenchmarkQED" in html
+    assert "RAGAS" in html
     assert "Metric Guide" in html
     assert "<details" in html
     assert "Interpretation" in html
     assert "Assertion Prep" in html
+    assert "Retrieval Prep" in html
     assert "context_precision" in html
     assert "검색된 컨텍스트 중 답변에 실제로 도움이 되는 비율" in html
     assert "Scrooge is a miser." in html

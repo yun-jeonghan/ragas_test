@@ -340,10 +340,10 @@
     <header class="hero">
       <h1>BenchmarkQED Smoke Report</h1>
       <p class="subtitle">
-        BenchmarkQED smoke in one place: AutoD prepares the corpus summary, AutoQ generates questions, and AutoE evaluates the saved answers with Ragas.
+        BenchmarkQED prepares the benchmark-side generation artifacts and RAGAS evaluates retrieval and answer quality.
       </p>
       <div class="chips">
-        <span class="chip"><span>generated</span><strong>2026-06-03 10:18 UTC</strong></span>
+        <span class="chip"><span>generated</span><strong>2026-06-03 13:35 UTC</strong></span>
         <span class="chip"><span>scores</span><strong>4</strong></span>
         <span class="chip"><span>results</span><strong>1</strong></span>
         <span class="chip"><span>aggregate metrics</span><strong>4</strong></span>
@@ -398,7 +398,7 @@
     
       <article class="metric-card">
         <div class="metric-title">assertions</div>
-        <div class="metric-value">0</div>
+        <div class="metric-value">1</div>
         <p class="metric-desc">평가 항목 설명이 아직 등록되지 않았습니다.</p>
       </article>
     
@@ -409,17 +409,15 @@
       </section>
 
       <section>
-        <h2>BenchmarkQED Results</h2>
+        <h2>BenchmarkQED</h2>
+        <p class="small">
+          Generation-side artifacts: AutoD summarizes the corpus, AutoQ creates questions, and Assertion Prep shows whether those questions produced usable assertions.
+        </p>
         <div class="wide-grid">
           
       <article class="artifact-card">
         <h3>AutoD</h3>
-        <ul class="bullet-list"><li>1 document(s) summarized.</li><li>2 theme(s) extracted.</li><li>Ebenezer Scrooge is a miserly businessman who loves money more than people. He keeps his workers cold and underpaid.</li><li>The dataset synthesizes summaries from multiple analysts focusing on different parts of the content. The main topics covered are:
-
-- **Economic and Business Developments**: This includes economic activities, business regulations, and challenges faced by rural economies.
-- **Personal Narratives**: These cover personal experiences or reflections about technology and its societal implications.
-
-The dataset is synthesized using a single summary format that captures the general flavor of the content without excessive detail.</li></ul>
+        <ul class="bullet-list"><li>1 document(s) summarized.</li><li>2 theme(s) extracted.</li><li>Ebenezer Scrooge is a miserly businessman who loves money more than people. He keeps his workers cold and underpaid.</li><li>The dataset synthesizes content from multiple analysts, focusing on the themes of &quot;technology safety&quot; and &quot;AI governance.&quot; The analysis reveals that both topics are interconnected, with a central theme of balancing technological advancements with ethical considerations.</li></ul>
         
       <details>
         <summary>Full JSON view</summary>
@@ -444,13 +442,13 @@ The dataset is synthesized using a single summary format that captures the gener
     &quot;He keeps his workers cold and underpaid&quot;
   ],
   &quot;benchmark_qed&quot;: {
-    &quot;summary&quot;: &quot;The dataset synthesizes summaries from multiple analysts focusing on different parts of the content. The main topics covered are:\n\n- **Economic and Business Developments**: This includes economic activities, business regulations, and challenges faced by rural economies.\n- **Personal Narratives**: These cover personal experiences or reflections about technology and its societal implications.\n\nThe dataset is synthesized using a single summary format that captures the general flavor of the content without excessive detail.&quot;,
+    &quot;summary&quot;: &quot;The dataset synthesizes content from multiple analysts, focusing on the themes of \&quot;technology safety\&quot; and \&quot;AI governance.\&quot; The analysis reveals that both topics are interconnected, with a central theme of balancing technological advancements with ethical considerations.&quot;,
     &quot;input_tokens&quot;: 822,
-    &quot;output_tokens&quot;: 129,
+    &quot;output_tokens&quot;: 86,
     &quot;llm_calls&quot;: 2,
     &quot;sample_texts&quot;: [
       {
-        &quot;id&quot;: &quot;858e3ac4-99a9-4998-ac3d-8dd22b53d41c&quot;,
+        &quot;id&quot;: &quot;474fac3d-dda5-4e63-b5ae-072c526e87c8&quot;,
         &quot;short_id&quot;: &quot;0&quot;,
         &quot;text&quot;: &quot;Ebenezer Scrooge is a miserly businessman who loves money more than people. He keeps his workers cold and underpaid. On Christmas Eve, he is visited by a ghostly warning.&quot;,
         &quot;document_id&quot;: &quot;762a0d77e57e616dad6d5eeeb1ef16b25e39ecc773debffe5578d61249c64826df2bdeea53845ea827f618a3dad0f82d8b2ac26836f21c2db0d6cb5b2952d31b&quot;,
@@ -1227,7 +1225,7 @@ The dataset is synthesized using a single summary format that captures the gener
         ],
         &quot;cluster_id&quot;: &quot;0&quot;,
         &quot;attributes&quot;: {
-          &quot;date_created&quot;: &quot;2026-06-03 10:16:57 +0000&quot;,
+          &quot;date_created&quot;: &quot;2026-06-03 13:33:53 +0000&quot;,
           &quot;is_representative&quot;: true
         }
       }
@@ -1241,7 +1239,7 @@ The dataset is synthesized using a single summary format that captures the gener
           
       <article class="artifact-card">
         <h3>AutoQ</h3>
-        <ul class="bullet-list"><li>1 question(s) generated.</li><li>Modes: local.</li><li>Claims: 1; assertions: 0.</li><li>Assertions were not populated for this run, so global coverage remains the next thing to tighten.</li><li>First question: What are some key themes in the story &#x27;The Ghost of Christmas Past, Present, and Yet to Come&#x27;?</li></ul>
+        <ul class="bullet-list"><li>1 question(s) generated.</li><li>Modes: local.</li><li>Claims: 1; assertions: 0.</li><li>Assertions were not populated for this run, so global coverage remains the next thing to tighten.</li><li>First question: What are some of the key themes and messages in the play &#x27;The Ghost of Christmas Past, Present, and Yet to Come&#x27;?</li></ul>
         
       <details>
         <summary>Full JSON view</summary>
@@ -1257,19 +1255,19 @@ The dataset is synthesized using a single summary format that captures the gener
   },
   &quot;questions&quot;: [
     {
-      &quot;id&quot;: &quot;afb1f5de-9361-4729-aa0f-1e1047c4eeef&quot;,
-      &quot;text&quot;: &quot;What are some key themes in the story &#x27;The Ghost of Christmas Past, Present, and Yet to Come&#x27;?&quot;,
+      &quot;id&quot;: &quot;6e68110d-d953-40be-8428-bade883c2467&quot;,
+      &quot;text&quot;: &quot;What are some of the key themes and messages in the play &#x27;The Ghost of Christmas Past, Present, and Yet to Come&#x27;?&quot;,
       &quot;question_type&quot;: &quot;data_local&quot;,
       &quot;references&quot;: [
         &quot;Input Text 2: The Ghost of Christmas Past, Present, and Yet to Come show Scrooge the consequences of his behavior. He learns to value kindness, generosity, and community over wealth.&quot;
       ],
       &quot;attributes&quot;: {
-        &quot;input_question&quot;: &quot;What are some key themes in the story &#x27;The Ghost of Christmas Past, Present, and Yet to Come&#x27;?&quot;,
-        &quot;period&quot;: &quot;summer 2024.&quot;,
-        &quot;location&quot;: &quot;Boston.&quot;,
+        &quot;input_question&quot;: &quot;The input question that the output question is based on.&quot;,
+        &quot;period&quot;: &quot;summer 2024&quot;,
+        &quot;location&quot;: &quot;Boston&quot;,
         &quot;named_entities&quot;: [
-          &quot;the story&quot;,
-          &quot;key themes&quot;
+          &quot;the Ghost of Christmas Past, Present, and Yet to Come&quot;,
+          &quot;Scrooge&quot;
         ],
         &quot;abstract_categories&quot;: [
           &quot;artificial intelligence&quot;,
@@ -1284,14 +1282,14 @@ The dataset is synthesized using a single summary format that captures the gener
           &quot;neuroscience&quot;,
           &quot;robotics&quot;
         ],
-        &quot;background_information&quot;: &quot;The Ghost of Christmas Past, Present, and Yet to Come show Scrooge the consequences of his behavior. He learns to value kindness, generosity, and community over wealth.&quot;,
+        &quot;background_information&quot;: &quot;The Ghost of Christmas Past, Present, and Yet to Come is a play about the fentanyl crisis in Washington and Oregon.&quot;,
         &quot;reference_coverage&quot;: 1.0,
         &quot;relevant_reference_count&quot;: 1,
         &quot;reference_count&quot;: 1,
-        &quot;min_reference_similarity&quot;: 0.72686276333944,
-        &quot;max_reference_similarity&quot;: 0.72686276333944,
-        &quot;mean_reference_similarity&quot;: 0.72686276333944,
-        &quot;intra_inter_similarity_ratio&quot;: 0.72686276333944,
+        &quot;min_reference_similarity&quot;: 0.719726715014384,
+        &quot;max_reference_similarity&quot;: 0.719726715014384,
+        &quot;mean_reference_similarity&quot;: 0.719726715014384,
+        &quot;intra_inter_similarity_ratio&quot;: 0.719726715014384,
         &quot;claim_count&quot;: 1,
         &quot;claims&quot;: [
           {
@@ -1302,7 +1300,7 @@ The dataset is synthesized using a single summary format that captures the gener
                 &quot;text&quot;: &quot;The Ghost of Christmas Past, Present, and Yet to Come show Scrooge the consequences of his behavior. He learns to value kindness, generosity, and community over wealth.&quot;
               }
             ],
-            &quot;score&quot;: 85,
+            &quot;score&quot;: 95,
             &quot;source_ids&quot;: [
               &quot;2&quot;
             ]
@@ -1311,7 +1309,7 @@ The dataset is synthesized using a single summary format that captures the gener
         &quot;assertions&quot;: [],
         &quot;assertion_count&quot;: 0
       },
-      &quot;question&quot;: &quot;What are some key themes in the story &#x27;The Ghost of Christmas Past, Present, and Yet to Come&#x27;?&quot;,
+      &quot;question&quot;: &quot;What are some of the key themes and messages in the play &#x27;The Ghost of Christmas Past, Present, and Yet to Come&#x27;?&quot;,
       &quot;source&quot;: &quot;candidate&quot;
     }
   ]
@@ -1323,7 +1321,7 @@ The dataset is synthesized using a single summary format that captures the gener
           
       <article class="artifact-card">
         <h3>Assertion Prep</h3>
-        <ul class="bullet-list"><li>0 question(s) with assertions.</li><li>0 total assertion(s).</li><li>Validation: off (min score 1/5)</li><li>No valid assertions were recorded.</li></ul>
+        <ul class="bullet-list"><li>1 question(s) with assertions.</li><li>2 total assertion(s).</li><li>Validation: off (min score 1/5)</li><li>0 valid assertion(s) recorded.</li></ul>
         
       <details>
         <summary>Full JSON view</summary>
@@ -1335,7 +1333,158 @@ The dataset is synthesized using a single summary format that captures the gener
     &quot;validation_enabled&quot;: false,
     &quot;min_validation_score&quot;: 1,
     &quot;settings_path&quot;: &quot;/tmp/grev-benchmark-qed-smoke/settings.raw.yaml&quot;
-  }
+  },
+  &quot;questions&quot;: [
+    {
+      &quot;question_id&quot;: &quot;6e68110d-d953-40be-8428-bade883c2467&quot;,
+      &quot;question_text&quot;: &quot;What are some of the key themes and messages in the play &#x27;The Ghost of Christmas Past, Present, and Yet to Come&#x27;?&quot;,
+      &quot;assertions&quot;: [
+        {
+          &quot;statement&quot;: &quot;The response should address the key themes and messages in &#x27;The Ghost of Christmas Past, Present, and Yet to Come&#x27;.&quot;,
+          &quot;source_count&quot;: 1,
+          &quot;score&quot;: 9,
+          &quot;reasoning&quot;: &quot;This assertion is relevant because it directly addresses the main topics and insights present in the play. It ensures that the answer covers the key themes and messages.&quot;,
+          &quot;rank&quot;: 1
+        },
+        {
+          &quot;statement&quot;: &quot;The response should mention the specific themes and messages of &#x27;The Ghost of Christmas Past, Present, and Yet to Come&#x27;.&quot;,
+          &quot;source_count&quot;: 1,
+          &quot;score&quot;: 9,
+          &quot;reasoning&quot;: &quot;This assertion is relevant because it focuses on the main themes and messages within the play. It ensures that the answer includes all key elements.&quot;,
+          &quot;rank&quot;: 2
+        }
+      ],
+      &quot;claims&quot;: [
+        {
+          &quot;statement&quot;: &quot;Statement of claim 1&quot;,
+          &quot;sources&quot;: [
+            {
+              &quot;source_id&quot;: &quot;2&quot;,
+              &quot;text&quot;: &quot;The Ghost of Christmas Past, Present, and Yet to Come show Scrooge the consequences of his behavior. He learns to value kindness, generosity, and community over wealth.&quot;
+            }
+          ],
+          &quot;score&quot;: 95,
+          &quot;source_ids&quot;: [
+            &quot;2&quot;
+          ]
+        }
+      ]
+    }
+  ],
+  &quot;stats&quot;: {
+    &quot;file_path&quot;: &quot;assertions.json&quot;,
+    &quot;assertion_type&quot;: &quot;global&quot;,
+    &quot;total_questions&quot;: 1,
+    &quot;total_assertions&quot;: 2,
+    &quot;assertions_per_question&quot;: {
+      &quot;count&quot;: 1,
+      &quot;total&quot;: 2,
+      &quot;mean&quot;: 2.0,
+      &quot;std&quot;: 0.0,
+      &quot;min&quot;: 2.0,
+      &quot;max&quot;: 2.0,
+      &quot;median&quot;: 2.0
+    },
+    &quot;sources_per_assertion&quot;: {
+      &quot;count&quot;: 2,
+      &quot;total&quot;: 2,
+      &quot;mean&quot;: 1.0,
+      &quot;std&quot;: 0.0,
+      &quot;min&quot;: 1.0,
+      &quot;max&quot;: 1.0,
+      &quot;median&quot;: 1.0
+    },
+    &quot;unique_sources_per_question&quot;: {
+      &quot;count&quot;: 1,
+      &quot;total&quot;: 1,
+      &quot;mean&quot;: 1.0,
+      &quot;std&quot;: 0.0,
+      &quot;min&quot;: 1.0,
+      &quot;max&quot;: 1.0,
+      &quot;median&quot;: 1.0
+    },
+    &quot;unique_claim_sources_per_question&quot;: {
+      &quot;count&quot;: 1,
+      &quot;total&quot;: 1,
+      &quot;mean&quot;: 1.0,
+      &quot;std&quot;: 0.0,
+      &quot;min&quot;: 1.0,
+      &quot;max&quot;: 1.0,
+      &quot;median&quot;: 1.0
+    }
+  },
+  &quot;sources&quot;: [
+    {
+      &quot;question_id&quot;: &quot;6e68110d-d953-40be-8428-bade883c2467&quot;,
+      &quot;question_text&quot;: &quot;What are some of the key themes and messages in the play &#x27;The Ghost of Christmas Past, Present, and Yet to Come&#x27;?&quot;,
+      &quot;assertion_sources&quot;: [
+        {
+          &quot;rank&quot;: 1,
+          &quot;statement&quot;: &quot;The response should address the key themes and messages in &#x27;The Ghost of Christmas Past, Present, and Yet to Come&#x27;.&quot;,
+          &quot;sources&quot;: [
+            &quot;The Ghost of Christmas Past, Present, and Yet to Come show Scrooge the consequences of his behavior. He learns to value kindness, generosity, and community over wealth.&quot;
+          ]
+        },
+        {
+          &quot;rank&quot;: 2,
+          &quot;statement&quot;: &quot;The response should mention the specific themes and messages of &#x27;The Ghost of Christmas Past, Present, and Yet to Come&#x27;.&quot;,
+          &quot;sources&quot;: [
+            &quot;The Ghost of Christmas Past, Present, and Yet to Come show Scrooge the consequences of his behavior. He learns to value kindness, generosity, and community over wealth.&quot;
+          ]
+        }
+      ]
+    }
+  ]
+}</pre>
+      </details>
+    
+      </article>
+    
+        </div>
+        <div class="note warning" style="margin-top: 14px;">Assertions were generated, but none were validated as usable. Check the assertion scoring and filtering path.</div>
+      </section>
+
+      <section>
+        <h2>RAGAS</h2>
+        <p class="small">
+          Evaluation-side artifacts: Retrieval Prep normalizes search output into the retrieval-eval format, and AutoE reports metric scores on those rows.
+        </p>
+        <div class="wide-grid">
+          
+      <article class="artifact-card">
+        <h3>Retrieval Prep</h3>
+        <ul class="bullet-list"><li>1 retrieval row(s) prepared.</li><li>This normalizes current search results into the vendor retrieval-evaluation shape.</li></ul>
+        
+      <details>
+        <summary>Full JSON view</summary>
+        <pre>{
+  &quot;metadata&quot;: {
+    &quot;component&quot;: &quot;RetrievalPrep&quot;,
+    &quot;backend&quot;: &quot;benchmark-qed&quot;,
+    &quot;source&quot;: &quot;/home/openclaw/projects/graphrag-ragas-eval/data/results/sample_search_results.json&quot;,
+    &quot;context_id_key&quot;: &quot;chunk_id&quot;,
+    &quot;context_text_key&quot;: &quot;text&quot;,
+    &quot;smoke&quot;: true
+  },
+  &quot;results&quot;: [
+    {
+      &quot;question_id&quot;: &quot;scrooge-1&quot;,
+      &quot;question_text&quot;: &quot;Who is Scrooge?&quot;,
+      &quot;context&quot;: [
+        {
+          &quot;chunk_id&quot;: &quot;scrooge.txt&quot;,
+          &quot;text&quot;: &quot;Scrooge is a miser who loves money more than people.&quot;,
+          &quot;score&quot;: 1.0,
+          &quot;metadata&quot;: {}
+        }
+      ],
+      &quot;metadata&quot;: {
+        &quot;search_mode&quot;: &quot;local&quot;,
+        &quot;backend&quot;: &quot;sample&quot;,
+        &quot;smoke&quot;: true
+      }
+    }
+  ]
 }</pre>
       </details>
     
@@ -1354,7 +1503,7 @@ The dataset is synthesized using a single summary format that captures the gener
       &quot;sample_id&quot;: &quot;scrooge-1&quot;,
       &quot;metric_name&quot;: &quot;context_precision&quot;,
       &quot;value&quot;: 10.0,
-      &quot;reason&quot;: &quot;The generated answer is a direct repetition of the reference answer, which does not satisfy the context_precision criterion. The reference answer provides additional relevant details about Scrooge&#x27;s character and motivations.&quot;,
+      &quot;reason&quot;: &quot;The generated answer accurately reflects the information provided in the reference answer. It states that Scrooge is a miser who loves money more than people, which aligns with the context of the question.&quot;,
       &quot;metadata&quot;: {
         &quot;trial&quot;: 0,
         &quot;question_text&quot;: &quot;Who is Scrooge?&quot;,
@@ -1367,7 +1516,7 @@ The dataset is synthesized using a single summary format that captures the gener
       &quot;sample_id&quot;: &quot;scrooge-1&quot;,
       &quot;metric_name&quot;: &quot;context_recall&quot;,
       &quot;value&quot;: 10.0,
-      &quot;reason&quot;: &quot;The generated answer is a direct translation of the reference answer, which states that Scrooge is a miser who loves money more than people. The generated answer does not provide any additional context or information beyond what is present in the reference answer.&quot;,
+      &quot;reason&quot;: &quot;The generated answer is a direct quote from the reference answer, which provides context for Scrooge&#x27;s character. The answer accurately reflects that Scrooge is a miser who loves money more than people.&quot;,
       &quot;metadata&quot;: {
         &quot;trial&quot;: 0,
         &quot;question_text&quot;: &quot;Who is Scrooge?&quot;,
@@ -1393,7 +1542,7 @@ The dataset is synthesized using a single summary format that captures the gener
       &quot;sample_id&quot;: &quot;scrooge-1&quot;,
       &quot;metric_name&quot;: &quot;answer_relevancy&quot;,
       &quot;value&quot;: 10.0,
-      &quot;reason&quot;: &quot;The generated answer is a direct quote from the reference answer, which provides additional relevant details about Scrooge. The answer re-iterates the key information (miser, loves money more than people) and maintains the same tone as the reference answer.&quot;,
+      &quot;reason&quot;: &quot;The generated answer is a direct quote from the reference answer, which provides additional relevant details about Scrooge. The answer re-iterates and reinforces the key points made in the reference answer.&quot;,
       &quot;metadata&quot;: {
         &quot;trial&quot;: 0,
         &quot;question_text&quot;: &quot;Who is Scrooge?&quot;,
@@ -1426,6 +1575,7 @@ The dataset is synthesized using a single summary format that captures the gener
       </article>
     
         </div>
+        
       </section>
 
       <section>
@@ -1551,7 +1701,7 @@ The dataset is synthesized using a single summary format that captures the gener
         <td>10</td>
         <td></td>
         <td></td>
-        <td title="The generated answer is a direct repetition of the reference answer, which does not satisfy the context_precision criterion. The reference answer provides additional relevant details about Scrooge&#x27;s character and motivations.">The generated answer is a direct repetition of the reference answer, which does not satisfy the context_precision crite&hellip;</td>
+        <td title="The generated answer accurately reflects the information provided in the reference answer. It states that Scrooge is a miser who loves money more than people, which aligns with the context of the question.">The generated answer accurately reflects the information provided in the reference answer. It states that Scrooge is a&hellip;</td>
       </tr>
     
 
@@ -1561,7 +1711,7 @@ The dataset is synthesized using a single summary format that captures the gener
         <td>10</td>
         <td></td>
         <td></td>
-        <td title="The generated answer is a direct translation of the reference answer, which states that Scrooge is a miser who loves money more than people. The generated answer does not provide any additional context or information beyond what is present in the reference answer.">The generated answer is a direct translation of the reference answer, which states that Scrooge is a miser who loves mo&hellip;</td>
+        <td title="The generated answer is a direct quote from the reference answer, which provides context for Scrooge&#x27;s character. The answer accurately reflects that Scrooge is a miser who loves money more than people.">The generated answer is a direct quote from the reference answer, which provides context for Scrooge&#x27;s character. The a&hellip;</td>
       </tr>
     
 
@@ -1581,7 +1731,7 @@ The dataset is synthesized using a single summary format that captures the gener
         <td>10</td>
         <td></td>
         <td></td>
-        <td title="The generated answer is a direct quote from the reference answer, which provides additional relevant details about Scrooge. The answer re-iterates the key information (miser, loves money more than people) and maintains the same tone as the reference answer.">The generated answer is a direct quote from the reference answer, which provides additional relevant details about Scro&hellip;</td>
+        <td title="The generated answer is a direct quote from the reference answer, which provides additional relevant details about Scrooge. The answer re-iterates and reinforces the key points made in the reference answer.">The generated answer is a direct quote from the reference answer, which provides additional relevant details about Scro&hellip;</td>
       </tr>
     
             </tbody>
@@ -1604,7 +1754,7 @@ The dataset is synthesized using a single summary format that captures the gener
       <div class="stack">
         <div class="block">
           <h4>Reason</h4>
-          <pre>The generated answer is a direct repetition of the reference answer, which does not satisfy the context_precision criterion. The reference answer provides additional relevant details about Scrooge&#x27;s character and motivations.</pre>
+          <pre>The generated answer accurately reflects the information provided in the reference answer. It states that Scrooge is a miser who loves money more than people, which aligns with the context of the question.</pre>
         </div>
         <div class="block">
           <h4>Metadata</h4>
@@ -1636,7 +1786,7 @@ The dataset is synthesized using a single summary format that captures the gener
       <div class="stack">
         <div class="block">
           <h4>Reason</h4>
-          <pre>The generated answer is a direct translation of the reference answer, which states that Scrooge is a miser who loves money more than people. The generated answer does not provide any additional context or information beyond what is present in the reference answer.</pre>
+          <pre>The generated answer is a direct quote from the reference answer, which provides context for Scrooge&#x27;s character. The answer accurately reflects that Scrooge is a miser who loves money more than people.</pre>
         </div>
         <div class="block">
           <h4>Metadata</h4>
@@ -1700,7 +1850,7 @@ The dataset is synthesized using a single summary format that captures the gener
       <div class="stack">
         <div class="block">
           <h4>Reason</h4>
-          <pre>The generated answer is a direct quote from the reference answer, which provides additional relevant details about Scrooge. The answer re-iterates the key information (miser, loves money more than people) and maintains the same tone as the reference answer.</pre>
+          <pre>The generated answer is a direct quote from the reference answer, which provides additional relevant details about Scrooge. The answer re-iterates and reinforces the key points made in the reference answer.</pre>
         </div>
         <div class="block">
           <h4>Metadata</h4>
@@ -1762,14 +1912,23 @@ The dataset is synthesized using a single summary format that captures the gener
       <section>
         <h2>Interpretation</h2>
         <div class="note">
-          <div class="interpretation">- **Runtime Details**: The OLLAMA model is trained on the Qwen2.5:0.5b version, with embeddings from Nomic-embed-text.
-- **Autod Data**: The dataset contains 1 document and 3 themes:
-  - &quot;Ebenezer Scrooge&quot; (a miserly businessman who loves money more than people)
-  - &quot;He keeps his workers cold and underpaid&quot;
-- **Corpus Summary**: The corpus summary synthesizes summaries from multiple analysts focusing on different parts of the content. It covers topics such as economic and business developments, personal narratives, and technology societal implications.
-- **Benchmark QED Summary**: The dataset is synthesized using a single summary format that captures the general flavor of the content without excessive detail.
-- **AutoQ Answers**: The autoQ model answers questions about key themes in &quot;The Ghost of Christmas Past, Present, and Yet to Come.&quot;
-- **AutoE Scores**: The autoE model scores 4 out of 10 on context precision, recall, faithfulness, and answer relevancy.</div>
+          <div class="interpretation">- **Runtime Details**: The OLLAMA model is trained on the Qwen2.5:0.5b model, with a base URL of `http://127.0.0.1:11434/v1`. The embeddings model used is `nomic-embed-text`.
+  
+  - **Autod**: The dataset contains 1 document and 1 theme.
+  - **AutoQ**: The question count for the aggregate mode is 1, with a mean score of 2.0.
+
+- **Assertions**:
+  - **Questions**: 1
+  - **Stats**: Total questions: 1, Assertions per question: 2, Mean assertion score: 2.0.
+  
+  - **Sources and Unique Sources per Question**: 
+    - **Source Count**: 2
+    - **Mean Source Score**: 1.0
+    - **Unique Claim Sources Per Question**: 1
+
+- **Validation Scores**:
+  - **Min Validation Score**: 1
+  - **Validation Enabled**: False</div>
         </div>
       </section>
 
@@ -1779,12 +1938,7 @@ The dataset is synthesized using a single summary format that captures the gener
           
       <article class="artifact-card">
         <h3>AutoD Summary</h3>
-        <ul class="bullet-list"><li>1 document(s) summarized.</li><li>2 theme(s) extracted.</li><li>Ebenezer Scrooge is a miserly businessman who loves money more than people. He keeps his workers cold and underpaid.</li><li>The dataset synthesizes summaries from multiple analysts focusing on different parts of the content. The main topics covered are:
-
-- **Economic and Business Developments**: This includes economic activities, business regulations, and challenges faced by rural economies.
-- **Personal Narratives**: These cover personal experiences or reflections about technology and its societal implications.
-
-The dataset is synthesized using a single summary format that captures the general flavor of the content without excessive detail.</li></ul>
+        <ul class="bullet-list"><li>1 document(s) summarized.</li><li>2 theme(s) extracted.</li><li>Ebenezer Scrooge is a miserly businessman who loves money more than people. He keeps his workers cold and underpaid.</li><li>The dataset synthesizes content from multiple analysts, focusing on the themes of &quot;technology safety&quot; and &quot;AI governance.&quot; The analysis reveals that both topics are interconnected, with a central theme of balancing technological advancements with ethical considerations.</li></ul>
         
       <details>
         <summary>Full JSON view</summary>
@@ -1809,13 +1963,13 @@ The dataset is synthesized using a single summary format that captures the gener
     &quot;He keeps his workers cold and underpaid&quot;
   ],
   &quot;benchmark_qed&quot;: {
-    &quot;summary&quot;: &quot;The dataset synthesizes summaries from multiple analysts focusing on different parts of the content. The main topics covered are:\n\n- **Economic and Business Developments**: This includes economic activities, business regulations, and challenges faced by rural economies.\n- **Personal Narratives**: These cover personal experiences or reflections about technology and its societal implications.\n\nThe dataset is synthesized using a single summary format that captures the general flavor of the content without excessive detail.&quot;,
+    &quot;summary&quot;: &quot;The dataset synthesizes content from multiple analysts, focusing on the themes of \&quot;technology safety\&quot; and \&quot;AI governance.\&quot; The analysis reveals that both topics are interconnected, with a central theme of balancing technological advancements with ethical considerations.&quot;,
     &quot;input_tokens&quot;: 822,
-    &quot;output_tokens&quot;: 129,
+    &quot;output_tokens&quot;: 86,
     &quot;llm_calls&quot;: 2,
     &quot;sample_texts&quot;: [
       {
-        &quot;id&quot;: &quot;858e3ac4-99a9-4998-ac3d-8dd22b53d41c&quot;,
+        &quot;id&quot;: &quot;474fac3d-dda5-4e63-b5ae-072c526e87c8&quot;,
         &quot;short_id&quot;: &quot;0&quot;,
         &quot;text&quot;: &quot;Ebenezer Scrooge is a miserly businessman who loves money more than people. He keeps his workers cold and underpaid. On Christmas Eve, he is visited by a ghostly warning.&quot;,
         &quot;document_id&quot;: &quot;762a0d77e57e616dad6d5eeeb1ef16b25e39ecc773debffe5578d61249c64826df2bdeea53845ea827f618a3dad0f82d8b2ac26836f21c2db0d6cb5b2952d31b&quot;,
@@ -2592,7 +2746,7 @@ The dataset is synthesized using a single summary format that captures the gener
         ],
         &quot;cluster_id&quot;: &quot;0&quot;,
         &quot;attributes&quot;: {
-          &quot;date_created&quot;: &quot;2026-06-03 10:16:57 +0000&quot;,
+          &quot;date_created&quot;: &quot;2026-06-03 13:33:53 +0000&quot;,
           &quot;is_representative&quot;: true
         }
       }
@@ -2606,7 +2760,7 @@ The dataset is synthesized using a single summary format that captures the gener
           
       <article class="artifact-card">
         <h3>AutoQ Questions</h3>
-        <ul class="bullet-list"><li>1 question(s) generated.</li><li>Modes: local.</li><li>First question: What are some key themes in the story &#x27;The Ghost of Christmas Past, Present, and Yet to Come&#x27;?</li></ul>
+        <ul class="bullet-list"><li>1 question(s) generated.</li><li>Modes: local.</li><li>First question: What are some of the key themes and messages in the play &#x27;The Ghost of Christmas Past, Present, and Yet to Come&#x27;?</li></ul>
         
       <details>
         <summary>Full JSON view</summary>
@@ -2622,19 +2776,19 @@ The dataset is synthesized using a single summary format that captures the gener
   },
   &quot;questions&quot;: [
     {
-      &quot;id&quot;: &quot;afb1f5de-9361-4729-aa0f-1e1047c4eeef&quot;,
-      &quot;text&quot;: &quot;What are some key themes in the story &#x27;The Ghost of Christmas Past, Present, and Yet to Come&#x27;?&quot;,
+      &quot;id&quot;: &quot;6e68110d-d953-40be-8428-bade883c2467&quot;,
+      &quot;text&quot;: &quot;What are some of the key themes and messages in the play &#x27;The Ghost of Christmas Past, Present, and Yet to Come&#x27;?&quot;,
       &quot;question_type&quot;: &quot;data_local&quot;,
       &quot;references&quot;: [
         &quot;Input Text 2: The Ghost of Christmas Past, Present, and Yet to Come show Scrooge the consequences of his behavior. He learns to value kindness, generosity, and community over wealth.&quot;
       ],
       &quot;attributes&quot;: {
-        &quot;input_question&quot;: &quot;What are some key themes in the story &#x27;The Ghost of Christmas Past, Present, and Yet to Come&#x27;?&quot;,
-        &quot;period&quot;: &quot;summer 2024.&quot;,
-        &quot;location&quot;: &quot;Boston.&quot;,
+        &quot;input_question&quot;: &quot;The input question that the output question is based on.&quot;,
+        &quot;period&quot;: &quot;summer 2024&quot;,
+        &quot;location&quot;: &quot;Boston&quot;,
         &quot;named_entities&quot;: [
-          &quot;the story&quot;,
-          &quot;key themes&quot;
+          &quot;the Ghost of Christmas Past, Present, and Yet to Come&quot;,
+          &quot;Scrooge&quot;
         ],
         &quot;abstract_categories&quot;: [
           &quot;artificial intelligence&quot;,
@@ -2649,14 +2803,14 @@ The dataset is synthesized using a single summary format that captures the gener
           &quot;neuroscience&quot;,
           &quot;robotics&quot;
         ],
-        &quot;background_information&quot;: &quot;The Ghost of Christmas Past, Present, and Yet to Come show Scrooge the consequences of his behavior. He learns to value kindness, generosity, and community over wealth.&quot;,
+        &quot;background_information&quot;: &quot;The Ghost of Christmas Past, Present, and Yet to Come is a play about the fentanyl crisis in Washington and Oregon.&quot;,
         &quot;reference_coverage&quot;: 1.0,
         &quot;relevant_reference_count&quot;: 1,
         &quot;reference_count&quot;: 1,
-        &quot;min_reference_similarity&quot;: 0.72686276333944,
-        &quot;max_reference_similarity&quot;: 0.72686276333944,
-        &quot;mean_reference_similarity&quot;: 0.72686276333944,
-        &quot;intra_inter_similarity_ratio&quot;: 0.72686276333944,
+        &quot;min_reference_similarity&quot;: 0.719726715014384,
+        &quot;max_reference_similarity&quot;: 0.719726715014384,
+        &quot;mean_reference_similarity&quot;: 0.719726715014384,
+        &quot;intra_inter_similarity_ratio&quot;: 0.719726715014384,
         &quot;claim_count&quot;: 1,
         &quot;claims&quot;: [
           {
@@ -2667,7 +2821,7 @@ The dataset is synthesized using a single summary format that captures the gener
                 &quot;text&quot;: &quot;The Ghost of Christmas Past, Present, and Yet to Come show Scrooge the consequences of his behavior. He learns to value kindness, generosity, and community over wealth.&quot;
               }
             ],
-            &quot;score&quot;: 85,
+            &quot;score&quot;: 95,
             &quot;source_ids&quot;: [
               &quot;2&quot;
             ]
@@ -2676,7 +2830,7 @@ The dataset is synthesized using a single summary format that captures the gener
         &quot;assertions&quot;: [],
         &quot;assertion_count&quot;: 0
       },
-      &quot;question&quot;: &quot;What are some key themes in the story &#x27;The Ghost of Christmas Past, Present, and Yet to Come&#x27;?&quot;,
+      &quot;question&quot;: &quot;What are some of the key themes and messages in the play &#x27;The Ghost of Christmas Past, Present, and Yet to Come&#x27;?&quot;,
       &quot;source&quot;: &quot;candidate&quot;
     }
   ]
@@ -2698,7 +2852,7 @@ The dataset is synthesized using a single summary format that captures the gener
       &quot;sample_id&quot;: &quot;scrooge-1&quot;,
       &quot;metric_name&quot;: &quot;context_precision&quot;,
       &quot;value&quot;: 10.0,
-      &quot;reason&quot;: &quot;The generated answer is a direct repetition of the reference answer, which does not satisfy the context_precision criterion. The reference answer provides additional relevant details about Scrooge&#x27;s character and motivations.&quot;,
+      &quot;reason&quot;: &quot;The generated answer accurately reflects the information provided in the reference answer. It states that Scrooge is a miser who loves money more than people, which aligns with the context of the question.&quot;,
       &quot;metadata&quot;: {
         &quot;trial&quot;: 0,
         &quot;question_text&quot;: &quot;Who is Scrooge?&quot;,
@@ -2711,7 +2865,7 @@ The dataset is synthesized using a single summary format that captures the gener
       &quot;sample_id&quot;: &quot;scrooge-1&quot;,
       &quot;metric_name&quot;: &quot;context_recall&quot;,
       &quot;value&quot;: 10.0,
-      &quot;reason&quot;: &quot;The generated answer is a direct translation of the reference answer, which states that Scrooge is a miser who loves money more than people. The generated answer does not provide any additional context or information beyond what is present in the reference answer.&quot;,
+      &quot;reason&quot;: &quot;The generated answer is a direct quote from the reference answer, which provides context for Scrooge&#x27;s character. The answer accurately reflects that Scrooge is a miser who loves money more than people.&quot;,
       &quot;metadata&quot;: {
         &quot;trial&quot;: 0,
         &quot;question_text&quot;: &quot;Who is Scrooge?&quot;,
@@ -2737,7 +2891,7 @@ The dataset is synthesized using a single summary format that captures the gener
       &quot;sample_id&quot;: &quot;scrooge-1&quot;,
       &quot;metric_name&quot;: &quot;answer_relevancy&quot;,
       &quot;value&quot;: 10.0,
-      &quot;reason&quot;: &quot;The generated answer is a direct quote from the reference answer, which provides additional relevant details about Scrooge. The answer re-iterates the key information (miser, loves money more than people) and maintains the same tone as the reference answer.&quot;,
+      &quot;reason&quot;: &quot;The generated answer is a direct quote from the reference answer, which provides additional relevant details about Scrooge. The answer re-iterates and reinforces the key points made in the reference answer.&quot;,
       &quot;metadata&quot;: {
         &quot;trial&quot;: 0,
         &quot;question_text&quot;: &quot;Who is Scrooge?&quot;,

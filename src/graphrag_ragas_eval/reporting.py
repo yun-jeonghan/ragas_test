@@ -435,6 +435,32 @@ def render_smoke_report(
             else "No aggregate metrics were found."
         ),
     ]
+    benchmarkqed_alert = ""
+    if assertion_data:
+        assertion_stats = _safe_dict(assertion_data.get("stats"))
+        total_assertions = int(assertion_stats.get("total_assertions") or 0)
+        valid_assertions = int(assertion_stats.get("valid_assertions") or 0)
+        if total_assertions == 0:
+            benchmarkqed_alert = (
+                '<div class="note warning" style="margin-top: 14px;">'
+                "Assertion generation did not yield any usable assertions in this run."
+                " That means the BenchmarkQED side is still only partially wired for this dataset."
+                "</div>"
+            )
+        elif valid_assertions == 0:
+            benchmarkqed_alert = (
+                '<div class="note warning" style="margin-top: 14px;">'
+                "Assertions were generated, but none were validated as usable."
+                " Check the assertion scoring and filtering path."
+                "</div>"
+            )
+    ragas_alert = ""
+    if retrieval_data and len(_safe_list(retrieval_data.get("results"))) == 0:
+        ragas_alert = (
+            '<div class="note warning" style="margin-top: 14px;">'
+            "Retrieval prep produced no rows, so the RAGAS side cannot score retrieved contexts yet."
+            "</div>"
+        )
 
     artifact_cards = []
     if generated_questions:
@@ -815,7 +841,7 @@ def render_smoke_report(
     <header class="hero">
       <h1>{html.escape(title)}</h1>
       <p class="subtitle">
-        BenchmarkQED smoke in one place: AutoD prepares the corpus summary, AutoQ generates questions, and AutoE evaluates the saved answers with Ragas.
+        BenchmarkQED prepares the benchmark-side generation artifacts and RAGAS evaluates retrieval and answer quality.
       </p>
       <div class="chips">
         <span class="chip"><span>generated</span><strong>{html.escape(now)}</strong></span>
@@ -842,13 +868,31 @@ def render_smoke_report(
       </section>
 
       <section>
-        <h2>BenchmarkQED Results</h2>
+        <h2>BenchmarkQED</h2>
+        <p class="small">
+          Generation-side artifacts: AutoD summarizes the corpus, AutoQ creates questions, and Assertion Prep shows whether those questions produced usable assertions.
+        </p>
         <div class="wide-grid">
           {_artifact_card("AutoD", autod_bullets if autod_data else ["No AutoD payload available."], autod_data or {})}
           {_artifact_card("AutoQ", autoq_bullets if autoq_data else ["No AutoQ payload available."], autoq_data or {})}
           {(_artifact_card("Assertion Prep", _assertion_prep_bullets(assertion_data), assertion_data)) if assertion_data else ""}
+        </div>
+        {benchmarkqed_alert}
+      </section>
+
+      <section>
+        <h2>RAGAS</h2>
+        <p class="small">
+          Evaluation-side artifacts: Retrieval Prep normalizes search output into the retrieval-eval format, and AutoE reports metric scores on those rows.
+        </p>
+        <div class="wide-grid">
+          {_artifact_card("Retrieval Prep", [
+              f"{len(_safe_list(retrieval_data.get('results')))} retrieval row(s) prepared." if retrieval_data else "No retrieval payload available.",
+              "This normalizes current search results into the vendor retrieval-evaluation shape.",
+          ], retrieval_data) if retrieval_data else '<article class="artifact-card"><h3>Retrieval Prep</h3><ul class="bullet-list"><li>No retrieval payload available.</li></ul></article>'}
           {_artifact_card("AutoE", autoe_bullets, evaluation_data)}
         </div>
+        {ragas_alert}
       </section>
 
       <section>
