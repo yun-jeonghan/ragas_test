@@ -1,5 +1,7 @@
 # upstream benchmark-qed 구조
 
+비교용 메모는 [`docs/benchmarkqed-vs-ragas.md`](./benchmarkqed-vs-ragas.md)를 먼저 보면 더 빠르다.
+
 BenchmarkQED는 RAG 벤치마크를 자동화하는 도구 묶음이다.
 이 저장소에서는 vendor/benchmark-qed 서브모듈의 실제 코드를 직접 호출하는 얇은 어댑터만 둔다.
 
