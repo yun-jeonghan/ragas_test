@@ -72,10 +72,18 @@ def test_run_benchmark_qed_smoke_orchestrates_all_steps(monkeypatch, tmp_path: P
 
         return _inner
 
+    class _FakeChatModel:
+        async def completion_async(self, messages, **kwargs):  # type: ignore[no-untyped-def]
+            return type("Response", (), {"content": "Model lens: fake."})()
+
+    def _fake_model_factory_runtime(runtime):  # type: ignore[no-untyped-def]
+        return _FakeChatModel(), object()
+
     monkeypatch.setattr("graphrag_ragas_eval.benchmark_qed.smoke.summarize_dataset", _record("summarize_dataset"))
     monkeypatch.setattr("graphrag_ragas_eval.benchmark_qed.smoke.generate_queries", _record("generate_queries"))
     monkeypatch.setattr("graphrag_ragas_eval.benchmark_qed.smoke.evaluate_answers", _record("evaluate_answers"))
     monkeypatch.setattr("graphrag_ragas_eval.benchmark_qed.smoke.render_smoke_report", _record("render_smoke_report"))
+    monkeypatch.setattr("graphrag_ragas_eval.benchmark_qed.smoke.build_vendor_model_factory_runtime", _fake_model_factory_runtime)
 
     result = run_benchmark_qed_smoke(
         BenchmarkQEDSmokePlan(
