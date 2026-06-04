@@ -7,3 +7,9 @@
 [submodule "vendor/benchmark-qed"]
 	path = vendor/benchmark-qed
 	url = https://github.com/microsoft/benchmark-qed.git
+[submodule "vendor/graphrag"]
+	path = vendor/graphrag
+	url = https://github.com/microsoft/graphrag.git
+[submodule "vendor/ograg2"]
+	path = vendor/ograg2
+	url = https://github.com/microsoft/ograg2.git
