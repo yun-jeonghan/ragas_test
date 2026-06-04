@@ -91,7 +91,7 @@ Ragas는 RAG 품질을 여러 metric으로 평가하는 라이브러리다. 여�
 - `benchmark_qed/`
   - BenchmarkQED 워크플로우 래퍼
   - AutoD / AutoQ / Assertion / Retrieval reference / Retrieval score
-- `eval/`
+- `ragas/`
   - Ragas metric 평가
 - `adapters/`
   - BenchmarkQED와 Ragas 사이의 데이터 형태 변환

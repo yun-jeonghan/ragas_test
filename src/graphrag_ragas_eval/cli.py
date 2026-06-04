@@ -19,9 +19,14 @@ from .benchmark_qed.retrieval import (
 )
 from .benchmark_qed.smoke import BenchmarkQEDSmokePlan, run_benchmark_qed_smoke
 from .config import DEFAULT_CHAT_MODEL, DEFAULT_EMBEDDING_MODEL, ProjectPaths
-from .integrations import evaluate_kg_correctness, evaluate_kggen_mine, evaluate_ragas
+from .integrations import evaluate_kg_correctness, evaluate_kggen_mine
 from .ingest import PdfExtractionPolicy, load_pdf_extraction_policy, normalize_source_tree
-from .eval import DEFAULT_RAGAS_METRICS
+from .ragas import (
+    DEFAULT_RAGAS_METRICS,
+    RagasQuestionGenerationPlan,
+    evaluate_ragas,
+    generate_ragas_questions,
+)
 from .generation.builder import GenerationMode, QuestionGenerationPlan, generate_questions
 from .graphrag.loaders import load_graphrag_tables
 from .graphrag.workspace import GraphRAGWorkspace, ensure_graph_rag_project, run_graph_rag_index, stage_documents
@@ -34,6 +39,7 @@ from .schemas import GraphRAGTableSet
 app = typer.Typer(no_args_is_help=True, add_completion=False)
 graphrag_app = typer.Typer(no_args_is_help=True, add_completion=False)
 benchmark_qed_app = typer.Typer(no_args_is_help=True, add_completion=False)
+ragas_app = typer.Typer(no_args_is_help=True, add_completion=False)
 kg_gen_app = typer.Typer(no_args_is_help=True, add_completion=False)
 kg_gen_mine_app = typer.Typer(no_args_is_help=True, add_completion=False)
 kg_correctness_app = typer.Typer(no_args_is_help=True, add_completion=False)
@@ -49,6 +55,32 @@ def _build_pdf_policy(pdf_mode: str | None = None) -> PdfExtractionPolicy:
     if pdf_mode is not None:
         runtime_env["GREV_PDF_EXTRACTOR_MODE"] = pdf_mode
     return load_pdf_extraction_policy(runtime_env)
+
+
+def _run_ragas_evaluation(
+    *,
+    benchmark: Path,
+    search_results: Path,
+    output: Path,
+    model: str | None,
+    provider: str | None,
+    base_url: str | None,
+    api_key: str | None,
+    metrics: list[str],
+) -> None:
+    run = evaluate_ragas(
+        benchmark=benchmark,
+        search_results=search_results,
+        provider=provider,
+        model=model,
+        base_url=base_url,
+        api_key=api_key,
+        metrics=tuple(metrics),
+        prefix="GREV_RAGAS",
+    )
+    run.write_json(output)
+    typer.echo(f"wrote evaluation results to {output}")
+    typer.echo(f"aggregate: {run.aggregate()}")
 
 
 @graphrag_app.command("stage")
@@ -191,19 +223,64 @@ def evaluate(
     api_key: str | None = typer.Option(None, help="OpenAI 또는 vLLM API key"),
     metrics: list[str] = typer.Option(list(DEFAULT_RAGAS_METRICS), help="평가할 metric 이름"),
 ) -> None:
-    run = evaluate_ragas(
+    _run_ragas_evaluation(
         benchmark=benchmark,
         search_results=search_results,
-        provider=provider,
+        output=output,
         model=model,
+        provider=provider,
         base_url=base_url,
         api_key=api_key,
-        metrics=tuple(metrics),
-        prefix="GREV_RAGAS",
+        metrics=metrics,
     )
-    run.write_json(output)
-    typer.echo(f"wrote evaluation results to {output}")
-    typer.echo(f"aggregate: {run.aggregate()}")
+
+
+@ragas_app.command("evaluate")
+def ragas_evaluate(
+    benchmark: Path = typer.Option(..., exists=True, file_okay=True, dir_okay=False, help="평가 질문셋 JSON 또는 JSONL"),
+    search_results: Path = typer.Option(..., exists=True, file_okay=True, dir_okay=False, help="GraphRAG 검색 결과 JSON"),
+    output: Path = typer.Option(Path("data/results/evaluation.json"), file_okay=True, dir_okay=False, help="평가 결과 저장 경로"),
+    model: str | None = typer.Option(None, help="Ragas에서 사용할 LLM 모델"),
+    provider: str | None = typer.Option(None, help="openai 또는 vllm"),
+    base_url: str | None = typer.Option(None, help="OpenAI-compatible endpoint, vLLM용"),
+    api_key: str | None = typer.Option(None, help="OpenAI 또는 vLLM API key"),
+    metrics: list[str] = typer.Option(list(DEFAULT_RAGAS_METRICS), help="평가할 metric 이름"),
+) -> None:
+    _run_ragas_evaluation(
+        benchmark=benchmark,
+        search_results=search_results,
+        output=output,
+        model=model,
+        provider=provider,
+        base_url=base_url,
+        api_key=api_key,
+        metrics=metrics,
+    )
+
+
+@ragas_app.command("generate-questions")
+def ragas_generate_questions(
+    source: Path = typer.Option(..., exists=True, file_okay=True, dir_okay=True, help="문서 또는 문서 디렉터리"),
+    output: Path = typer.Option(Path("data/benchmarks/ragas-questions.json"), file_okay=True, dir_okay=False, help="질문 생성 결과 저장 경로"),
+    testset_size: int = typer.Option(10, min=1, help="생성할 테스트셋 크기"),
+    model: str | None = typer.Option(None, help="Ragas에서 사용할 LLM 모델"),
+    provider: str | None = typer.Option(None, help="openai 또는 vllm"),
+    base_url: str | None = typer.Option(None, help="OpenAI-compatible endpoint, vLLM용"),
+    api_key: str | None = typer.Option(None, help="OpenAI 또는 vLLM API key"),
+) -> None:
+    payload = generate_ragas_questions(
+        RagasQuestionGenerationPlan(
+            source=source,
+            output=output,
+            testset_size=testset_size,
+            provider=provider,
+            model=model,
+            base_url=base_url,
+            api_key=api_key,
+        )
+    )
+    typer.echo(f"wrote ragas testset to {output}")
+    typer.echo(f"questions: {len(payload.get('questions', []))}")
 
 
 @benchmark_qed_app.command("autod")
@@ -628,6 +705,7 @@ def _main() -> None:
 
 
 app.add_typer(graphrag_app, name="graphrag")
+app.add_typer(ragas_app, name="ragas")
 app.add_typer(benchmark_qed_app, name="benchmark-qed")
 app.add_typer(kg_gen_app, name="kg-gen")
 kg_gen_app.add_typer(kg_gen_mine_app, name="mine")

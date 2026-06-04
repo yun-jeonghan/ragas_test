@@ -10,7 +10,7 @@ from typing import Any
 
 import yaml
 
-from ..eval import DEFAULT_RAGAS_METRICS
+from ..ragas import DEFAULT_RAGAS_METRICS
 from ..reporting import render_smoke_report
 from ..llm import load_llm_runtime_config
 from ..upstream_benchmark_qed import build_vendor_model_factory_runtime, ensure_vendor_path

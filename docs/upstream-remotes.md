@@ -8,7 +8,7 @@
 
 ## 로컬 대응
 
-- `src/graphrag_ragas_eval/integrations/ragas.py`
+- `src/graphrag_ragas_eval/ragas/integration.py`
   - upstream `ragas` 패키지 API를 직접 호출하는 경계
 - `src/graphrag_ragas_eval/benchmark_qed/`
   - upstream `benchmark-qed`의 AutoD / AutoQ / AutoE 흐름에 맞춘 로컬 호출부

@@ -8,7 +8,8 @@ from typing import Any
 
 import pandas as pd
 
-from ..eval import DEFAULT_RAGAS_METRICS, EvaluationRun
+from ..ragas import DEFAULT_RAGAS_METRICS
+from ..ragas.runner import EvaluationRun
 from ..schemas import BenchmarkSample, EvaluationScore, GraphRAGSearchResult, SearchMode
 from ..upstream_benchmark_qed import (
     build_vendor_model_factory_runtime,

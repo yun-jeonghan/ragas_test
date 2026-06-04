@@ -23,4 +23,3 @@ GRAPH_METRICS: tuple[str, ...] = (
 class MetricPlan:
     ragas_metrics: tuple[str, ...] = DEFAULT_RAGAS_METRICS
     graph_metrics: tuple[str, ...] = GRAPH_METRICS
-

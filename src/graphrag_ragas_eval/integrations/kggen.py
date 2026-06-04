@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from ..eval import EvaluationRun
+from ..ragas.runner import EvaluationRun
 from ..kggen import KGGenMinePlan, evaluate_mine
 
 

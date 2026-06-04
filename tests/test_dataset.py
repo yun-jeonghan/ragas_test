@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from graphrag_ragas_eval.eval.dataset import load_benchmark_samples, to_ragas_rows
+from graphrag_ragas_eval.ragas.dataset import load_benchmark_samples, to_ragas_rows
 
 
 def test_load_benchmark_samples_json(tmp_path: Path) -> None:
@@ -31,4 +31,3 @@ def test_to_ragas_rows() -> None:
     rows = to_ragas_rows(samples)
     assert rows[0]["user_input"] == "Who is Scrooge?"
     assert rows[0]["reference"] == "Scrooge is a miser."
-

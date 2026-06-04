@@ -82,7 +82,7 @@ Responsibilities:
 - Combine stage, init, and index into one repeatable flow.
 - Return the workspace path and staged file list for downstream steps.
 
-### src/graphrag_ragas_eval/eval/dataset.py
+### src/graphrag_ragas_eval/ragas/dataset.py
 
 Benchmark dataset loading and conversion.
 
@@ -92,7 +92,7 @@ Responsibilities:
 - Convert examples into Ragas samples.
 - Keep reference answer and reference context alignment explicit.
 
-### src/graphrag_ragas_eval/eval/ragas_runner.py
+### src/graphrag_ragas_eval/ragas/runner.py
 
 Ragas evaluation orchestration.
 
@@ -102,7 +102,17 @@ Responsibilities:
 - Select and run metrics.
 - Persist raw scores and aggregates.
 
-### src/graphrag_ragas_eval/eval/replay.py
+### src/graphrag_ragas_eval/ragas/generation.py
+
+Ragas testset generation wrapper.
+
+Responsibilities:
+
+- Load source documents.
+- Build Ragas testset generation inputs.
+- Persist generated questions as JSON.
+
+### src/graphrag_ragas_eval/ragas/replay.py
 
 Helpers for loading saved GraphRAG search results.
 

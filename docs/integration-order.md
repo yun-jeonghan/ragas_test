@@ -21,7 +21,7 @@
 
 ## 3. 라이브러리별 호출부 분리
 
-- `integrations/ragas.py`
+- `ragas/integration.py`
   - Ragas metric 생성
   - LLM / embeddings 주입
   - sample 단위 score 계산

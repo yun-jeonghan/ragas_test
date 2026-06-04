@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from graphrag_ragas_eval.eval.ragas_runner import EvaluationRun
-from graphrag_ragas_eval.eval.replay import load_search_results
+from graphrag_ragas_eval.ragas.runner import EvaluationRun
+from graphrag_ragas_eval.ragas.replay import load_search_results
 from graphrag_ragas_eval.schemas import EvaluationScore
 
 
@@ -49,4 +49,3 @@ def test_evaluation_run_aggregate() -> None:
     aggregate = run.aggregate()
     assert aggregate["faithfulness"] == 0.5
     assert aggregate["answer_relevancy"] == 1.0
-

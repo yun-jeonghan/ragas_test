@@ -15,7 +15,7 @@ if "pandas" not in sys.modules:
     fake_pandas.read_parquet = lambda *args, **kwargs: None
     sys.modules["pandas"] = fake_pandas
 
-from graphrag_ragas_eval.eval.ragas_runner import RagasRunner
+from graphrag_ragas_eval.ragas.runner import RagasRunner
 from graphrag_ragas_eval.graphrag_runner import ingest_and_index_documents
 from graphrag_ragas_eval.llm import build_ragas_embeddings, build_ragas_llm, load_llm_runtime_config
 from graphrag_ragas_eval.schemas import BenchmarkSample, GraphRAGSearchResult, RetrievedContext, SearchMode
@@ -242,7 +242,7 @@ def test_cpu_index_and_evaluate_smoke(monkeypatch, tmp_path: Path) -> None:
             return SimpleNamespace(value=0.5)
 
     monkeypatch.setattr(
-        "graphrag_ragas_eval.eval.ragas_runner._resolve_metric_class",
+        "graphrag_ragas_eval.ragas.runner._resolve_metric_class",
         lambda metric_name: FakeMetric,
     )
 

@@ -3,10 +3,9 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Sequence
 
-from ..eval import EvaluationRun
 from ..llm import build_ragas_embeddings, build_ragas_llm, load_llm_runtime_config
-from ..eval.ragas_runner import RagasRunner
 from ..adapters import load_benchmark_samples, load_search_results
+from .runner import EvaluationRun, RagasRunner
 
 
 def evaluate_ragas(
