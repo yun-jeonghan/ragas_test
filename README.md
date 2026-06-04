@@ -11,7 +11,7 @@ GraphRAG로 만든 그래프 기반 검색과 생성 결과를 Ragas로 평가�
 
 ## upstream 기준
 
-- `vendor/ragas` - <https://github.com/explodinggradients/ragas.git>
+- `vendor/ragas` - <https://github.com/yun-jeonghan/ragas> (upstream origin: <https://github.com/explodinggradients/ragas.git>)
 - `vendor/benchmark-qed` - <https://github.com/microsoft/benchmark-qed.git>
 - `vendor/kg-gen` - <https://github.com/stair-lab/kg-gen>
 
@@ -39,7 +39,7 @@ GraphRAG로 만든 그래프 기반 검색과 생성 결과를 Ragas로 평가�
 - grev kg-correctness evaluate - 위 명령의 호환 별칭
 - grev report smoke - JSON 결과를 HTML 리포트로 렌더링
 
-자세한 실행 예시는 command.md를 보시면 됩니다.
+자세한 실행 예시는 command.md를 보시면 됩니다. Ragas wrapper 전용 설정과 clone 가이드는 `src/graphrag_ragas_eval/ragas/README.md` 를 보시면 됩니다.
 
 ## 설치
 

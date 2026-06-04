@@ -3,7 +3,7 @@
 	url = https://github.com/stair-lab/kg-gen
 [submodule "vendor/ragas"]
 	path = vendor/ragas
-	url = https://github.com/explodinggradients/ragas.git
+	url = git@github.com:yun-jeonghan/ragas.git
 [submodule "vendor/benchmark-qed"]
 	path = vendor/benchmark-qed
 	url = https://github.com/microsoft/benchmark-qed.git

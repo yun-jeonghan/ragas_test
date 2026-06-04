@@ -1,6 +1,7 @@
 # 질문 생성
 
 이 프로젝트의 질문 생성은 서브 레포를 염두에 두고 설계합니다.
+이 문서는 benchmark-qed 스타일 질문 생성 문맥이고, ragas testset generation 설정은 `src/graphrag_ragas_eval/ragas/README.md` 를 보시면 됩니다.
 
 ## 의도
 

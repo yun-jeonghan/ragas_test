@@ -2,7 +2,8 @@
 
 이 저장소는 아래 upstream 레포를 `vendor/` 서브모듈로 고정해서 참고합니다.
 
-- `vendor/ragas` -> <https://github.com/explodinggradients/ragas.git>
+- `vendor/ragas` -> <https://github.com/yun-jeonghan/ragas>
+  - upstream 원본은 <https://github.com/explodinggradients/ragas.git>
 - `vendor/benchmark-qed` -> <https://github.com/microsoft/benchmark-qed.git>
 - `vendor/kg-gen` -> <https://github.com/stair-lab/kg-gen>
 

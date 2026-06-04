@@ -16,6 +16,8 @@
 - GREV_RAGAS_EMBEDDINGS_EXTRA_BODY
 - GREV_RAGAS_MAX_TOKENS
 - GREV_RAGAS_EMBEDDINGS_MAX_SEQ_LENGTH
+- GREV_RAGAS_TESTSET_SIZE
+- GREV_RAGAS_QUESTION_MODES
 
 기본은 로컬 Ollama입니다. RAM을 아끼는 기본 조합은 `qwen2.5:0.5b` + `nomic-embed-text` 입니다.
 더 가벼운 chat 모델이 필요하면 `qwen2.5:0.5b` 대신 `smollm2:135m` 로 바꾸면 됩니다.
@@ -28,6 +30,20 @@ chat/completions와 embeddings를 같은 서버에 띄우면 둘 다 같은 BASE
 Qwen 계열에서 생각 과정을 끄고 싶으면 `GREV_RAGAS_EXTRA_BODY={"chat_template_kwargs":{"enable_thinking":false}}` 형태로 넣으면 됩니다.
 answer_relevancy 같은 metric은 embeddings 설정도 필요합니다.
 `GREV_*_MAX_TOKENS` 는 chat/completions의 최대 생성 길이 제한으로 쓰입니다. 이 저장소는 기본값을 256으로 둬서 스모크 실행이 길게 늘어지지 않게 합니다.
+
+`GREV_RAGAS_TESTSET_SIZE` 는 `grev ragas generate-questions` 의 기본 생성 개수입니다. CLI에서 값을 주지 않으면 이 값이 들어갑니다.
+`GREV_RAGAS_QUESTION_MODES` 는 ragas testset generation에서 사용할 query synthesizer를 고릅니다.
+값은 콤마로 구분합니다. 예를 들면 아래처럼 쓸 수 있습니다.
+
+- `default` 또는 빈 값: ragas 기본 분포 그대로 사용
+- `single-hop-specific`
+- `multi-hop-abstract`
+- `multi-hop-specific`
+- `single-hop`
+- `multi-hop`
+
+`multi-hop` 은 abstract + specific 두 synthesizer를 함께 넣는 축약형입니다.
+모드를 직접 지정하면 해당 synthesizer만 사용합니다.
 
 CPU 로컬 embedding 테스트를 하려면 `GREV_*_EMBEDDINGS_PROVIDER=local` 을 쓰면 됩니다.
 이때 주요 값은 아래입니다.

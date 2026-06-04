@@ -8,7 +8,7 @@ from types import SimpleNamespace
 
 from typer.testing import CliRunner
 
-from graphrag_ragas_eval.cli import app
+from graphrag_ragas_eval.cli import app, _load_ragas_question_generation_defaults
 from graphrag_ragas_eval.ragas.generation import RagasQuestionGenerationPlan, generate_ragas_questions
 
 
@@ -35,9 +35,10 @@ def test_generate_ragas_questions_writes_payload(monkeypatch, tmp_path: Path) ->
             captured["llm"] = llm
             captured["embeddings"] = embedding_model
 
-        def generate_with_langchain_docs(self, docs, testset_size):  # type: ignore[no-untyped-def]
+        def generate_with_langchain_docs(self, docs, testset_size, **kwargs):  # type: ignore[no-untyped-def]
             captured["docs"] = docs
             captured["testset_size"] = testset_size
+            captured["kwargs"] = kwargs
             return _FakeDataset()
 
     fake_testset = types.ModuleType("ragas.testset")
@@ -66,6 +67,7 @@ def test_generate_ragas_questions_writes_payload(monkeypatch, tmp_path: Path) ->
     assert captured["llm"] == "fake-llm"
     assert captured["embeddings"] == "fake-embeddings"
     assert captured["testset_size"] == 2
+    assert captured["kwargs"] == {}
     assert len(captured["docs"]) == 2
     assert payload["metadata"]["generator"] == "ragas"
     assert payload["metadata"]["suite"] == "ragas"
@@ -109,3 +111,13 @@ def test_ragas_generate_questions_cli_dispatch(monkeypatch, tmp_path: Path) -> N
     assert captured["plan"].output == output
     assert captured["plan"].testset_size == 3
     assert "wrote ragas testset to" in result.stdout
+
+
+def test_ragas_generate_questions_env_defaults(monkeypatch) -> None:
+    monkeypatch.setenv("GREV_RAGAS_TESTSET_SIZE", "7")
+    monkeypatch.setenv("GREV_RAGAS_QUESTION_MODES", "single-hop-specific,multi-hop")
+
+    testset_size, question_modes = _load_ragas_question_generation_defaults()
+
+    assert testset_size == 7
+    assert question_modes == ("single-hop-specific", "multi-hop")

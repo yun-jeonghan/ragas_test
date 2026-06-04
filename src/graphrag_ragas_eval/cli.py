@@ -50,6 +50,28 @@ def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
 
+def _parse_ragas_question_modes(raw: str | None) -> tuple[str, ...] | None:
+    if raw is None:
+        return None
+    cleaned = raw.strip()
+    if not cleaned:
+        return None
+    if cleaned.lower() in {"default", "all"}:
+        return None
+    modes = tuple(mode.strip() for mode in cleaned.split(",") if mode.strip())
+    return modes or None
+
+
+def _load_ragas_question_generation_defaults() -> tuple[int, tuple[str, ...] | None]:
+    raw_size = os.environ.get("GREV_RAGAS_TESTSET_SIZE")
+    if raw_size is None or not raw_size.strip():
+        testset_size = 10
+    else:
+        testset_size = int(raw_size)
+    question_modes = _parse_ragas_question_modes(os.environ.get("GREV_RAGAS_QUESTION_MODES"))
+    return testset_size, question_modes
+
+
 def _build_pdf_policy(pdf_mode: str | None = None) -> PdfExtractionPolicy:
     runtime_env = dict(os.environ)
     if pdf_mode is not None:
@@ -262,17 +284,19 @@ def ragas_evaluate(
 def ragas_generate_questions(
     source: Path = typer.Option(..., exists=True, file_okay=True, dir_okay=True, help="문서 또는 문서 디렉터리"),
     output: Path = typer.Option(Path("data/benchmarks/ragas-questions.json"), file_okay=True, dir_okay=False, help="질문 생성 결과 저장 경로"),
-    testset_size: int = typer.Option(10, min=1, help="생성할 테스트셋 크기"),
+    testset_size: int | None = typer.Option(None, min=1, help="생성할 테스트셋 크기"),
     model: str | None = typer.Option(None, help="Ragas에서 사용할 LLM 모델"),
     provider: str | None = typer.Option(None, help="openai 또는 vllm"),
     base_url: str | None = typer.Option(None, help="OpenAI-compatible endpoint, vLLM용"),
     api_key: str | None = typer.Option(None, help="OpenAI 또는 vLLM API key"),
 ) -> None:
+    env_testset_size, env_question_modes = _load_ragas_question_generation_defaults()
     payload = generate_ragas_questions(
         RagasQuestionGenerationPlan(
             source=source,
             output=output,
-            testset_size=testset_size,
+            testset_size=testset_size if testset_size is not None else env_testset_size,
+            question_modes=env_question_modes,
             provider=provider,
             model=model,
             base_url=base_url,

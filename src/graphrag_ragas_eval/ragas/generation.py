@@ -14,6 +14,7 @@ class RagasQuestionGenerationPlan:
     source: Path
     output: Path
     testset_size: int = 10
+    question_modes: tuple[str, ...] | None = None
     provider: str | None = None
     model: str | None = None
     base_url: str | None = None
@@ -59,6 +60,69 @@ def _dataset_to_records(dataset: Any) -> list[dict[str, Any]]:
     return [{"value": repr(dataset)}]
 
 
+def _normalize_question_modes(question_modes: tuple[str, ...] | None) -> tuple[str, ...] | None:
+    if not question_modes:
+        return None
+
+    normalized: list[str] = []
+    for mode in question_modes:
+        cleaned = mode.strip().lower().replace("_", "-")
+        if not cleaned:
+            continue
+        if cleaned in {"default", "all"}:
+            return None
+        if cleaned not in normalized:
+            normalized.append(cleaned)
+    return tuple(normalized) or None
+
+
+def _build_query_distribution(llm: Any, question_modes: tuple[str, ...] | None) -> list[tuple[Any, float]] | None:
+    normalized_modes = _normalize_question_modes(question_modes)
+    if normalized_modes is None:
+        return None
+
+    try:
+        from ragas.testset.synthesizers.multi_hop import (
+            MultiHopAbstractQuerySynthesizer,
+            MultiHopSpecificQuerySynthesizer,
+        )
+        from ragas.testset.synthesizers.single_hop.specific import (
+            SingleHopSpecificQuerySynthesizer,
+        )
+    except ImportError as exc:  # pragma: no cover - runtime dependency error path
+        raise RuntimeError("openai or ragas is not installed") from exc
+
+    synthesizers: list[Any] = []
+    for mode in normalized_modes:
+        if mode == "single-hop-specific":
+            synthesizers.append(SingleHopSpecificQuerySynthesizer(llm=llm))
+        elif mode == "multi-hop-abstract":
+            synthesizers.append(MultiHopAbstractQuerySynthesizer(llm=llm))
+        elif mode == "multi-hop-specific":
+            synthesizers.append(MultiHopSpecificQuerySynthesizer(llm=llm))
+        elif mode == "single-hop":
+            synthesizers.append(SingleHopSpecificQuerySynthesizer(llm=llm))
+        elif mode == "multi-hop":
+            synthesizers.extend(
+                [
+                    MultiHopAbstractQuerySynthesizer(llm=llm),
+                    MultiHopSpecificQuerySynthesizer(llm=llm),
+                ]
+            )
+        else:
+            raise ValueError(
+                "Unsupported ragas question mode: "
+                f"{mode}. Expected default, single-hop, multi-hop, "
+                "single-hop-specific, multi-hop-abstract, or multi-hop-specific."
+            )
+
+    if not synthesizers:
+        return None
+
+    probability = 1 / len(synthesizers)
+    return [(synthesizer, probability) for synthesizer in synthesizers]
+
+
 def generate_ragas_questions(plan: RagasQuestionGenerationPlan) -> dict[str, Any]:
     runtime_env = {}
     if plan.provider is not None:
@@ -85,7 +149,15 @@ def generate_ragas_questions(plan: RagasQuestionGenerationPlan) -> dict[str, Any
         raise RuntimeError("openai or ragas is not installed") from exc
 
     generator = TestsetGenerator(llm=llm, embedding_model=embeddings)
-    dataset = generator.generate_with_langchain_docs(langchain_docs, testset_size=plan.testset_size)
+    query_distribution = _build_query_distribution(llm, plan.question_modes)
+    if query_distribution is None:
+        dataset = generator.generate_with_langchain_docs(langchain_docs, testset_size=plan.testset_size)
+    else:
+        dataset = generator.generate_with_langchain_docs(
+            langchain_docs,
+            testset_size=plan.testset_size,
+            query_distribution=query_distribution,
+        )
     questions = _dataset_to_records(dataset)
 
     payload = {
@@ -94,6 +166,7 @@ def generate_ragas_questions(plan: RagasQuestionGenerationPlan) -> dict[str, Any
             "source": str(plan.source),
             "output": str(plan.output),
             "testset_size": plan.testset_size,
+            "question_modes": list(plan.question_modes) if plan.question_modes else None,
             **plan.metadata,
         },
         "questions": questions,
