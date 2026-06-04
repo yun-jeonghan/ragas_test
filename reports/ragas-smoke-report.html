@@ -1,0 +1,1019 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ragas Smoke Report</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #eef3ff;
+      --panel: rgba(255, 255, 255, 0.94);
+      --panel-strong: #ffffff;
+      --text: #182033;
+      --muted: #60708f;
+      --accent: #2457ff;
+      --accent-soft: #e8efff;
+      --border: #d9e0ef;
+      --shadow: 0 14px 40px rgba(31, 41, 55, 0.08);
+      --success: #0e8b54;
+      --warning: #915f00;
+    }
+    * { box-sizing: border-box; }
+    html, body { min-height: 100%; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, "Noto Sans KR", "Helvetica Neue", Arial, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(36, 87, 255, 0.11), transparent 30%),
+        linear-gradient(180deg, #eef3ff 0%, #f8fbff 18%, #f8fbff 100%);
+      color: var(--text);
+      line-height: 1.55;
+    }
+    .wrap {
+      max-width: 1220px;
+      margin: 0 auto;
+      padding: 36px 18px 64px;
+    }
+    .hero {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      padding: 28px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }
+    .hero h1 {
+      margin: 0 0 10px;
+      font-size: clamp(2rem, 4vw, 3rem);
+      line-height: 1.08;
+      letter-spacing: -0.03em;
+    }
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      max-width: 70ch;
+    }
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+    .chip {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      border: 1px solid rgba(36, 87, 255, 0.12);
+      font-size: 0.92rem;
+      font-weight: 700;
+    }
+    .chip strong { font-weight: 800; }
+    main {
+      margin-top: 22px;
+      display: grid;
+      gap: 18px;
+    }
+    section, .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 22px;
+      box-shadow: var(--shadow);
+    }
+    h2 {
+      margin: 0 0 14px;
+      font-size: 1.28rem;
+      letter-spacing: -0.02em;
+    }
+    h3 {
+      margin: 0 0 10px;
+      font-size: 1.02rem;
+      letter-spacing: -0.01em;
+    }
+    h4 {
+      margin: 0 0 8px;
+      font-size: 0.96rem;
+    }
+    p { margin-top: 0; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 14px;
+    }
+    .wide-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 14px;
+    }
+    .metric-card, .artifact-card, .result-card, .score-card {
+      background: var(--panel-strong);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 16px;
+    }
+    .metric-title {
+      color: var(--muted);
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .metric-value {
+      margin-top: 6px;
+      font-size: 1.8rem;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+    }
+    .metric-desc {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+    .note {
+      border-left: 4px solid var(--accent);
+      background: #f5f8ff;
+      padding: 14px 16px;
+      border-radius: 14px;
+      color: #26314a;
+    }
+    .note.compact { padding: 12px 14px; }
+    .note strong { color: var(--text); }
+    .small { color: var(--muted); font-size: 0.92rem; }
+    .bullet-list {
+      margin: 0;
+      padding-left: 20px;
+      color: var(--text);
+    }
+    .bullet-list li + li { margin-top: 6px; }
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: white;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 860px;
+    }
+    th, td {
+      border-bottom: 1px solid var(--border);
+      padding: 12px 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      position: sticky;
+      top: 0;
+      background: #f3f6ff;
+      color: #31426b;
+      font-size: 0.92rem;
+      z-index: 1;
+    }
+    tr:last-child td { border-bottom: none; }
+    pre {
+      margin: 0;
+      padding: 14px;
+      border-radius: 14px;
+      background: #0f172a;
+      color: #d8e4ff;
+      overflow: auto;
+      font-size: 0.87rem;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    code {
+      background: #eef3ff;
+      color: #1d3fab;
+      padding: 0.15em 0.35em;
+      border-radius: 6px;
+    }
+    details {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: white;
+      overflow: hidden;
+    }
+    details + details {
+      margin-top: 12px;
+    }
+    summary {
+      cursor: pointer;
+      list-style: none;
+      padding: 14px 16px;
+      font-weight: 700;
+      background: #fafcff;
+    }
+    summary::-webkit-details-marker { display: none; }
+    details[open] summary {
+      border-bottom: 1px solid var(--border);
+      background: #f5f8ff;
+    }
+    details > :not(summary) {
+      padding: 16px;
+    }
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .detail-grid div {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px;
+      background: #fbfcff;
+    }
+    .detail-grid span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.84rem;
+      margin-bottom: 4px;
+    }
+    .detail-grid strong {
+      display: block;
+      overflow-wrap: anywhere;
+    }
+    .stack {
+      display: grid;
+      gap: 12px;
+    }
+    .block {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px;
+      background: #fff;
+    }
+    .block pre {
+      margin-top: 8px;
+      max-height: 320px;
+    }
+    .chart-wrap {
+      overflow-x: auto;
+      margin-bottom: 14px;
+    }
+    .chart-wrap svg {
+      width: 100%;
+      min-width: 360px;
+      height: auto;
+      display: block;
+    }
+    .chart-axis {
+      stroke: #ccd6ee;
+      stroke-width: 2;
+    }
+    .chart-label {
+      fill: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .chart-value {
+      fill: var(--text);
+      font-size: 13px;
+      font-weight: 800;
+    }
+    .artifact-card h3,
+    .result-card h3 {
+      margin-bottom: 8px;
+    }
+    .artifact-card ul {
+      margin-bottom: 12px;
+    }
+    .result-card header p {
+      margin-bottom: 0;
+      color: var(--muted);
+    }
+    .result-answer {
+      margin: 12px 0;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px;
+      background: #fafcff;
+    }
+    .result-answer span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.84rem;
+    }
+    .result-answer p {
+      margin: 4px 0 0;
+      font-weight: 600;
+    }
+    .result-preview h4 {
+      margin: 0 0 8px;
+    }
+    .context-preview {
+      margin: 0;
+      padding-left: 18px;
+    }
+    .context-preview li + li { margin-top: 8px; }
+    .context-preview .source {
+      display: block;
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-bottom: 2px;
+    }
+    .context-preview .excerpt {
+      display: block;
+      color: var(--text);
+    }
+    .interpretation {
+      white-space: pre-wrap;
+      margin: 0;
+      font-size: 0.98rem;
+    }
+    footer {
+      color: var(--muted);
+      font-size: 0.9rem;
+      text-align: center;
+      margin-top: 24px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="hero">
+      <h1>Ragas Smoke Report</h1>
+      <p class="subtitle">
+        BenchmarkQED generates benchmark artifacts and runs its own AutoE and retrieval scoring paths. Ragas supplies the metric vocabulary that AutoE uses in this repo.
+      </p>
+      <div class="chips">
+        <span class="chip"><span>generated</span><strong>2026-06-04 12:51 UTC</strong></span>
+        <span class="chip"><span>scores</span><strong>4</strong></span>
+        <span class="chip"><span>results</span><strong>1</strong></span>
+        <span class="chip"><span>aggregate metrics</span><strong>4</strong></span>
+        
+      </div>
+    </header>
+
+    <main>
+      <section>
+        <h2>Overview</h2>
+        <p class="small">
+          This is a smoke report, so the numbers are for wiring validation first and quality judgment second.
+          Use it to confirm that the BenchmarkQED pipeline, the Ragas metric vocabulary, and report rendering all line up.
+        </p>
+        <div class="grid">
+          
+      <article class="metric-card">
+        <div class="metric-title">scores</div>
+        <div class="metric-value">4</div>
+        <p class="metric-desc">평가 항목 설명이 아직 등록되지 않았습니다.</p>
+      </article>
+    
+      <article class="metric-card">
+        <div class="metric-title">results</div>
+        <div class="metric-value">1</div>
+        <p class="metric-desc">평가 항목 설명이 아직 등록되지 않았습니다.</p>
+      </article>
+    
+      <article class="metric-card">
+        <div class="metric-title">aggregate metrics</div>
+        <div class="metric-value">4</div>
+        <p class="metric-desc">평가 항목 설명이 아직 등록되지 않았습니다.</p>
+      </article>
+    
+        </div>
+        <div class="note" style="margin-top: 14px;">
+          The metric descriptions below are short guides for reading the scores, not hard thresholds.
+        </div>
+      </section>
+
+      <section>
+        <h2>BenchmarkQED</h2>
+        <p class="small">
+          BenchmarkQED-side artifacts: AutoD summarizes the corpus, AutoQ creates questions, Assertion Prep shows whether those questions produced usable assertions, Assertion Scores shows the assertion evaluation rows if they were run, Retrieval Prep normalizes search output for retrieval scoring, and AutoE reports metric scores.
+        </p>
+        <div class="wide-grid">
+          
+      <article class="artifact-card">
+        <h3>AutoD</h3>
+        <ul class="bullet-list"><li>No AutoD payload available.</li></ul>
+        
+      <details>
+        <summary>Full JSON view</summary>
+        <pre>{}</pre>
+      </details>
+    
+      </article>
+    
+          
+      <article class="artifact-card">
+        <h3>AutoQ</h3>
+        <ul class="bullet-list"><li>No AutoQ payload available.</li></ul>
+        
+      <details>
+        <summary>Full JSON view</summary>
+        <pre>{}</pre>
+      </details>
+    
+      </article>
+    
+          
+          
+          
+          
+      <article class="artifact-card">
+        <h3>AutoE</h3>
+        <ul class="bullet-list"><li>4 score row(s) across 4 metric(s).</li><li>Results rows: 1.</li><li>Top metric: context_recall = 1</li></ul>
+        
+      <details>
+        <summary>Full JSON view</summary>
+        <pre>{
+  &quot;scores&quot;: [
+    {
+      &quot;sample_id&quot;: &quot;scrooge-1&quot;,
+      &quot;metric_name&quot;: &quot;context_precision&quot;,
+      &quot;value&quot;: 0.0,
+      &quot;reason&quot;: null,
+      &quot;metadata&quot;: {
+        &quot;question&quot;: &quot;Who is Scrooge?&quot;,
+        &quot;search_mode&quot;: &quot;local&quot;,
+        &quot;answer&quot;: &quot;Scrooge is a miser who loves money more than people.&quot;
+      }
+    },
+    {
+      &quot;sample_id&quot;: &quot;scrooge-1&quot;,
+      &quot;metric_name&quot;: &quot;context_recall&quot;,
+      &quot;value&quot;: 1.0,
+      &quot;reason&quot;: null,
+      &quot;metadata&quot;: {
+        &quot;question&quot;: &quot;Who is Scrooge?&quot;,
+        &quot;search_mode&quot;: &quot;local&quot;,
+        &quot;answer&quot;: &quot;Scrooge is a miser who loves money more than people.&quot;
+      }
+    },
+    {
+      &quot;sample_id&quot;: &quot;scrooge-1&quot;,
+      &quot;metric_name&quot;: &quot;faithfulness&quot;,
+      &quot;value&quot;: 0.5,
+      &quot;reason&quot;: null,
+      &quot;metadata&quot;: {
+        &quot;question&quot;: &quot;Who is Scrooge?&quot;,
+        &quot;search_mode&quot;: &quot;local&quot;,
+        &quot;answer&quot;: &quot;Scrooge is a miser who loves money more than people.&quot;
+      }
+    },
+    {
+      &quot;sample_id&quot;: &quot;scrooge-1&quot;,
+      &quot;metric_name&quot;: &quot;answer_relevancy&quot;,
+      &quot;value&quot;: 0.0,
+      &quot;reason&quot;: null,
+      &quot;metadata&quot;: {
+        &quot;question&quot;: &quot;Who is Scrooge?&quot;,
+        &quot;search_mode&quot;: &quot;local&quot;,
+        &quot;answer&quot;: &quot;Scrooge is a miser who loves money more than people.&quot;
+      }
+    }
+  ],
+  &quot;results&quot;: [
+    {
+      &quot;sample_id&quot;: &quot;scrooge-1&quot;,
+      &quot;question&quot;: &quot;Who is Scrooge?&quot;,
+      &quot;search_mode&quot;: &quot;local&quot;,
+      &quot;answer&quot;: &quot;Scrooge is a miser who loves money more than people.&quot;,
+      &quot;retrieved_contexts&quot;: [
+        {
+          &quot;text&quot;: &quot;Scrooge is a miser who loves money more than people.&quot;,
+          &quot;source&quot;: &quot;scrooge.txt&quot;,
+          &quot;score&quot;: 1.0,
+          &quot;metadata&quot;: {}
+        }
+      ],
+      &quot;citations&quot;: [
+        &quot;scrooge.txt&quot;
+      ],
+      &quot;metadata&quot;: {
+        &quot;backend&quot;: &quot;sample&quot;
+      }
+    }
+  ],
+  &quot;aggregate&quot;: {
+    &quot;context_precision&quot;: 0.0,
+    &quot;context_recall&quot;: 1.0,
+    &quot;faithfulness&quot;: 0.5,
+    &quot;answer_relevancy&quot;: 0.0
+  }
+}</pre>
+      </details>
+    
+      </article>
+    
+        </div>
+        
+        
+        
+      </section>
+
+      <section>
+        <h2>Ragas</h2>
+        <p class="small">
+          Ragas provides the metric vocabulary used by this repo. BenchmarkQED AutoE uses these metric names in smoke runs, but this report does not execute a standalone Ragas pipeline.
+        </p>
+        <div class="grid">
+          
+      <article class="metric-card">
+        <div class="metric-title">context_precision</div>
+        <div class="metric-value">0</div>
+        <p class="metric-desc">검색된 컨텍스트 중 답변에 실제로 도움이 되는 비율</p>
+      </article>
+    
+      <article class="metric-card">
+        <div class="metric-title">context_recall</div>
+        <div class="metric-value">1</div>
+        <p class="metric-desc">정답을 뒷받침하는 컨텍스트를 얼마나 빠짐없이 찾았는지</p>
+      </article>
+    
+      <article class="metric-card">
+        <div class="metric-title">faithfulness</div>
+        <div class="metric-value">0.5</div>
+        <p class="metric-desc">답변이 검색 컨텍스트에 얼마나 충실한지</p>
+      </article>
+    
+      <article class="metric-card">
+        <div class="metric-title">answer_relevancy</div>
+        <div class="metric-value">0</div>
+        <p class="metric-desc">질문과 답변이 얼마나 직접적으로 연결되는지</p>
+      </article>
+    
+          
+        </div>
+        <div class="note" style="margin-top: 14px;">
+          The metric names below are the Ragas metrics surfaced in this smoke via BenchmarkQED AutoE.
+        </div>
+      </section>
+
+      <section>
+        <h2>Aggregate Metrics</h2>
+        
+      <div class="chart-wrap">
+        <svg viewBox="0 0 500 220" role="img" aria-label="Aggregate metric bar chart">
+          <defs>
+            <linearGradient id="barGradient" x1="0%" x2="0%" y1="0%" y2="100%">
+              <stop offset="0%" stop-color="#4e7cff" />
+              <stop offset="100%" stop-color="#1743d1" />
+            </linearGradient>
+          </defs>
+          <line x1="24" y1="145" x2="482" y2="145" class="chart-axis" />
+          
+              <g>
+                <rect x="40" y="145" width="66" height="0" rx="12" fill="url(#barGradient)" />
+                <text x="73" y="137" text-anchor="middle" class="chart-value">0</text>
+                <text x="73" y="182" text-anchor="middle" class="chart-label">context precision</text>
+              </g>
+            
+              <g>
+                <rect x="150" y="25" width="66" height="120" rx="12" fill="url(#barGradient)" />
+                <text x="183" y="17" text-anchor="middle" class="chart-value">1</text>
+                <text x="183" y="182" text-anchor="middle" class="chart-label">context recall</text>
+              </g>
+            
+              <g>
+                <rect x="260" y="85" width="66" height="60" rx="12" fill="url(#barGradient)" />
+                <text x="293" y="77" text-anchor="middle" class="chart-value">0.5</text>
+                <text x="293" y="182" text-anchor="middle" class="chart-label">faithfulness</text>
+              </g>
+            
+              <g>
+                <rect x="370" y="145" width="66" height="0" rx="12" fill="url(#barGradient)" />
+                <text x="403" y="137" text-anchor="middle" class="chart-value">0</text>
+                <text x="403" y="182" text-anchor="middle" class="chart-label">answer relevancy</text>
+              </g>
+            
+        </svg>
+      </div>
+    
+        <div class="grid">
+          
+      <article class="metric-card">
+        <div class="metric-title">context_precision</div>
+        <div class="metric-value">0</div>
+        <p class="metric-desc">검색된 컨텍스트 중 답변에 실제로 도움이 되는 비율</p>
+      </article>
+    
+      <article class="metric-card">
+        <div class="metric-title">context_recall</div>
+        <div class="metric-value">1</div>
+        <p class="metric-desc">정답을 뒷받침하는 컨텍스트를 얼마나 빠짐없이 찾았는지</p>
+      </article>
+    
+      <article class="metric-card">
+        <div class="metric-title">faithfulness</div>
+        <div class="metric-value">0.5</div>
+        <p class="metric-desc">답변이 검색 컨텍스트에 얼마나 충실한지</p>
+      </article>
+    
+      <article class="metric-card">
+        <div class="metric-title">answer_relevancy</div>
+        <div class="metric-value">0</div>
+        <p class="metric-desc">질문과 답변이 얼마나 직접적으로 연결되는지</p>
+      </article>
+    
+        </div>
+      </section>
+
+      <section>
+        <h2>Detailed Scores</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>sample_id</th>
+                <th>metric</th>
+                <th>value</th>
+                <th>question</th>
+                <th>search mode</th>
+                <th>reason preview</th>
+              </tr>
+            </thead>
+            <tbody>
+              
+      <tr>
+        <td>scrooge-1</td>
+        <td>context_precision</td>
+        <td>0</td>
+        <td>Who is Scrooge?</td>
+        <td>local</td>
+        <td title="">No reason provided.</td>
+      </tr>
+    
+
+      <tr>
+        <td>scrooge-1</td>
+        <td>context_recall</td>
+        <td>1</td>
+        <td>Who is Scrooge?</td>
+        <td>local</td>
+        <td title="">No reason provided.</td>
+      </tr>
+    
+
+      <tr>
+        <td>scrooge-1</td>
+        <td>faithfulness</td>
+        <td>0.5</td>
+        <td>Who is Scrooge?</td>
+        <td>local</td>
+        <td title="">No reason provided.</td>
+      </tr>
+    
+
+      <tr>
+        <td>scrooge-1</td>
+        <td>answer_relevancy</td>
+        <td>0</td>
+        <td>Who is Scrooge?</td>
+        <td>local</td>
+        <td title="">No reason provided.</td>
+      </tr>
+    
+            </tbody>
+          </table>
+        </div>
+        <div class="stack" style="margin-top: 14px;">
+          
+      <details class="detail-card">
+        <summary>scrooge-1 · context_precision · 0.0</summary>
+        
+      <div class="detail-grid">
+        <div><span>Metric</span><strong>context_precision</strong></div>
+        <div><span>Sample</span><strong>scrooge-1</strong></div>
+        <div><span>Question</span><strong>Who is Scrooge?</strong></div>
+        <div><span>Search mode</span><strong>local</strong></div>
+      </div>
+      <div class="note compact">
+        <strong>Metric guide:</strong> 검색된 컨텍스트 중 답변에 실제로 도움이 되는 비율
+      </div>
+      <div class="stack">
+        <div class="block">
+          <h4>Reason</h4>
+          <pre>No reason provided.</pre>
+        </div>
+        <div class="block">
+          <h4>Metadata</h4>
+          <pre>{
+  &quot;question&quot;: &quot;Who is Scrooge?&quot;,
+  &quot;search_mode&quot;: &quot;local&quot;,
+  &quot;answer&quot;: &quot;Scrooge is a miser who loves money more than people.&quot;
+}</pre>
+        </div>
+      </div>
+    
+      </details>
+    
+
+      <details class="detail-card">
+        <summary>scrooge-1 · context_recall · 1.0</summary>
+        
+      <div class="detail-grid">
+        <div><span>Metric</span><strong>context_recall</strong></div>
+        <div><span>Sample</span><strong>scrooge-1</strong></div>
+        <div><span>Question</span><strong>Who is Scrooge?</strong></div>
+        <div><span>Search mode</span><strong>local</strong></div>
+      </div>
+      <div class="note compact">
+        <strong>Metric guide:</strong> 정답을 뒷받침하는 컨텍스트를 얼마나 빠짐없이 찾았는지
+      </div>
+      <div class="stack">
+        <div class="block">
+          <h4>Reason</h4>
+          <pre>No reason provided.</pre>
+        </div>
+        <div class="block">
+          <h4>Metadata</h4>
+          <pre>{
+  &quot;question&quot;: &quot;Who is Scrooge?&quot;,
+  &quot;search_mode&quot;: &quot;local&quot;,
+  &quot;answer&quot;: &quot;Scrooge is a miser who loves money more than people.&quot;
+}</pre>
+        </div>
+      </div>
+    
+      </details>
+    
+
+      <details class="detail-card">
+        <summary>scrooge-1 · faithfulness · 0.5</summary>
+        
+      <div class="detail-grid">
+        <div><span>Metric</span><strong>faithfulness</strong></div>
+        <div><span>Sample</span><strong>scrooge-1</strong></div>
+        <div><span>Question</span><strong>Who is Scrooge?</strong></div>
+        <div><span>Search mode</span><strong>local</strong></div>
+      </div>
+      <div class="note compact">
+        <strong>Metric guide:</strong> 답변이 검색 컨텍스트에 얼마나 충실한지
+      </div>
+      <div class="stack">
+        <div class="block">
+          <h4>Reason</h4>
+          <pre>No reason provided.</pre>
+        </div>
+        <div class="block">
+          <h4>Metadata</h4>
+          <pre>{
+  &quot;question&quot;: &quot;Who is Scrooge?&quot;,
+  &quot;search_mode&quot;: &quot;local&quot;,
+  &quot;answer&quot;: &quot;Scrooge is a miser who loves money more than people.&quot;
+}</pre>
+        </div>
+      </div>
+    
+      </details>
+    
+
+      <details class="detail-card">
+        <summary>scrooge-1 · answer_relevancy · 0.0</summary>
+        
+      <div class="detail-grid">
+        <div><span>Metric</span><strong>answer_relevancy</strong></div>
+        <div><span>Sample</span><strong>scrooge-1</strong></div>
+        <div><span>Question</span><strong>Who is Scrooge?</strong></div>
+        <div><span>Search mode</span><strong>local</strong></div>
+      </div>
+      <div class="note compact">
+        <strong>Metric guide:</strong> 질문과 답변이 얼마나 직접적으로 연결되는지
+      </div>
+      <div class="stack">
+        <div class="block">
+          <h4>Reason</h4>
+          <pre>No reason provided.</pre>
+        </div>
+        <div class="block">
+          <h4>Metadata</h4>
+          <pre>{
+  &quot;question&quot;: &quot;Who is Scrooge?&quot;,
+  &quot;search_mode&quot;: &quot;local&quot;,
+  &quot;answer&quot;: &quot;Scrooge is a miser who loves money more than people.&quot;
+}</pre>
+        </div>
+      </div>
+    
+      </details>
+    
+        </div>
+      </section>
+
+      <section>
+        <h2>Retrieved Contexts</h2>
+        <div class="stack">
+          
+      <article class="result-card">
+        <header>
+          <h3>scrooge-1</h3>
+          <p>Who is Scrooge?</p>
+        </header>
+        
+      <div class="detail-grid">
+        <div><span>Sample</span><strong>scrooge-1</strong></div>
+        <div><span>Search mode</span><strong>local</strong></div>
+      </div>
+      <div class="result-answer">
+        <span>Answer</span>
+        <p>Scrooge is a miser who loves money more than people.</p>
+      </div>
+      <div class="result-preview">
+        <h4>Retrieved context preview</h4>
+        <ul class="context-preview"><li><span class="source">scrooge.txt</span><span class="excerpt">Scrooge is a miser who loves money more than people.</span></li></ul>
+      </div>
+      
+      <details>
+        <summary>Full retrieved_contexts JSON</summary>
+        <pre>[
+  {
+    &quot;text&quot;: &quot;Scrooge is a miser who loves money more than people.&quot;,
+    &quot;source&quot;: &quot;scrooge.txt&quot;,
+    &quot;score&quot;: 1.0,
+    &quot;metadata&quot;: {}
+  }
+]</pre>
+      </details>
+    
+      
+      <details>
+        <summary>Full result metadata</summary>
+        <pre>{
+  &quot;backend&quot;: &quot;sample&quot;
+}</pre>
+      </details>
+    
+    
+      </article>
+    
+        </div>
+      </section>
+
+      <section>
+        <h2>Interpretation</h2>
+        <div class="note">
+          <div class="interpretation">Model lens: qwen2.5:0.5b via ollama (http://127.0.0.1:11434/v1).
+This is a smoke run, so 4 score row(s) and 4 aggregate metric(s) should be read as a sanity check rather than a benchmark.
+context_precision = 0. 검색된 컨텍스트 중 답변에 실제로 도움이 되는 비율.
+context_recall = 1. 정답을 뒷받침하는 컨텍스트를 얼마나 빠짐없이 찾았는지.
+faithfulness = 0.5. 답변이 검색 컨텍스트에 얼마나 충실한지.
+answer_relevancy = 0. 질문과 답변이 얼마나 직접적으로 연결되는지.
+If the chat model is qwen2.5:0.5b, this report is best interpreted as a local smoke lens: useful for catching wiring mistakes, not for proving final quality.</div>
+        </div>
+      </section>
+
+      <section>
+        <h2>Supporting Artifacts</h2>
+        <div class="grid">
+          
+      <article class="artifact-card">
+        <h3>AutoD Summary</h3>
+        <ul class="bullet-list"><li>No AutoD payload available.</li></ul>
+        
+      <details>
+        <summary>Full JSON view</summary>
+        <pre>{}</pre>
+      </details>
+    
+      </article>
+    
+          
+      <article class="artifact-card">
+        <h3>AutoQ Questions</h3>
+        <ul class="bullet-list"><li>No AutoQ payload available.</li></ul>
+        
+      <details>
+        <summary>Full JSON view</summary>
+        <pre>{}</pre>
+      </details>
+    
+      </article>
+    
+          
+      <article class="artifact-card">
+        <h3>AutoE Evaluation</h3>
+        <ul class="bullet-list"><li>4 score row(s) across 4 metric(s).</li><li>Results rows: 1.</li><li>Top metric: context_recall = 1</li></ul>
+        
+      <details>
+        <summary>Full JSON view</summary>
+        <pre>{
+  &quot;scores&quot;: [
+    {
+      &quot;sample_id&quot;: &quot;scrooge-1&quot;,
+      &quot;metric_name&quot;: &quot;context_precision&quot;,
+      &quot;value&quot;: 0.0,
+      &quot;reason&quot;: null,
+      &quot;metadata&quot;: {
+        &quot;question&quot;: &quot;Who is Scrooge?&quot;,
+        &quot;search_mode&quot;: &quot;local&quot;,
+        &quot;answer&quot;: &quot;Scrooge is a miser who loves money more than people.&quot;
+      }
+    },
+    {
+      &quot;sample_id&quot;: &quot;scrooge-1&quot;,
+      &quot;metric_name&quot;: &quot;context_recall&quot;,
+      &quot;value&quot;: 1.0,
+      &quot;reason&quot;: null,
+      &quot;metadata&quot;: {
+        &quot;question&quot;: &quot;Who is Scrooge?&quot;,
+        &quot;search_mode&quot;: &quot;local&quot;,
+        &quot;answer&quot;: &quot;Scrooge is a miser who loves money more than people.&quot;
+      }
+    },
+    {
+      &quot;sample_id&quot;: &quot;scrooge-1&quot;,
+      &quot;metric_name&quot;: &quot;faithfulness&quot;,
+      &quot;value&quot;: 0.5,
+      &quot;reason&quot;: null,
+      &quot;metadata&quot;: {
+        &quot;question&quot;: &quot;Who is Scrooge?&quot;,
+        &quot;search_mode&quot;: &quot;local&quot;,
+        &quot;answer&quot;: &quot;Scrooge is a miser who loves money more than people.&quot;
+      }
+    },
+    {
+      &quot;sample_id&quot;: &quot;scrooge-1&quot;,
+      &quot;metric_name&quot;: &quot;answer_relevancy&quot;,
+      &quot;value&quot;: 0.0,
+      &quot;reason&quot;: null,
+      &quot;metadata&quot;: {
+        &quot;question&quot;: &quot;Who is Scrooge?&quot;,
+        &quot;search_mode&quot;: &quot;local&quot;,
+        &quot;answer&quot;: &quot;Scrooge is a miser who loves money more than people.&quot;
+      }
+    }
+  ],
+  &quot;results&quot;: [
+    {
+      &quot;sample_id&quot;: &quot;scrooge-1&quot;,
+      &quot;question&quot;: &quot;Who is Scrooge?&quot;,
+      &quot;search_mode&quot;: &quot;local&quot;,
+      &quot;answer&quot;: &quot;Scrooge is a miser who loves money more than people.&quot;,
+      &quot;retrieved_contexts&quot;: [
+        {
+          &quot;text&quot;: &quot;Scrooge is a miser who loves money more than people.&quot;,
+          &quot;source&quot;: &quot;scrooge.txt&quot;,
+          &quot;score&quot;: 1.0,
+          &quot;metadata&quot;: {}
+        }
+      ],
+      &quot;citations&quot;: [
+        &quot;scrooge.txt&quot;
+      ],
+      &quot;metadata&quot;: {
+        &quot;backend&quot;: &quot;sample&quot;
+      }
+    }
+  ],
+  &quot;aggregate&quot;: {
+    &quot;context_precision&quot;: 0.0,
+    &quot;context_recall&quot;: 1.0,
+    &quot;faithfulness&quot;: 0.5,
+    &quot;answer_relevancy&quot;: 0.0
+  }
+}</pre>
+      </details>
+    
+      </article>
+    
+          
+      <article class="artifact-card">
+        <h3>Generated Questions</h3>
+        <ul class="bullet-list"><li>1 question(s) in the generated payload.</li><li>Open the JSON view for the full sample list.</li></ul>
+        
+      <details>
+        <summary>Full JSON view</summary>
+        <pre>{
+  &quot;metadata&quot;: {
+    &quot;generator&quot;: &quot;ragas&quot;,
+    &quot;source&quot;: &quot;examples/sample_docs&quot;,
+    &quot;output&quot;: &quot;/tmp/ragas_questions.json&quot;,
+    &quot;testset_size&quot;: 1
+  },
+  &quot;questions&quot;: [
+    {
+      &quot;user_input&quot;: &quot;What are some ways to improve your social life?&quot;,
+      &quot;reference_contexts&quot;: [
+        &quot;Scrooge is a miser who loves money more than people.\nAt first, he treats kindness like a waste and generosity like a weakness.\nHe keeps his office cold, his manners sharp, and his heart closed.\nHe is careful, disciplined, and respected in the narrow way that people respect a locked door.\n\nThe story follows him over a long Christmas Eve, and that matters because the night gives him time to see the life he has built from a distance.\nJacob Marley, his former partner, appears as a warning.\nMarley is chained by the consequences of a life spent chasing profit alone.\nHe tells Scrooge that three spirits will come and that the visits are not meant to frighten him for sport, but to show him what he has become and what he may yet become.\n\nThe first spirit takes Scrooge back into his own past.\nHe sees himself as a lonely child, then as a young man trying to find purpose, then as someone slowly choosing work, status, and control over friendship and love.\nHe remembers his schoolroom, the long winters, and the awkward silence of being left behind while other boys went home.\nHe remembers a sister who loved him, a teacher who offered patience, and a fiancée who left because he cared more about money than about her.\nHe remembers how easy it was to justify bad choices when each choice seemed practical at the time.\nThis part of the journey is painful because it proves that his cruelty did not appear all at once.\nIt grew little by little, from repeated habits and repeated excuses.\n\nThe second spirit shows him the present world.\nHe sees Bob Cratchit and the Cratchit family making the best of a small home, modest food, and limited money.\nThey are poor, but they are not empty.\nThey are warm with each other, and that warmth gives the household a dignity Scrooge has never bothered to understand.\nHe sees Tiny Tim, weak in body but strong in spirit, and that image stays with him.\nHe also sees how the town thinks of him.\nSome people fear him.\nSome mock him.\nSome simply keep their distance.\nThe spirit shows that money can buy silence, but it cannot buy admiration, affection, or peace.\n\nLater, Scrooge is shown more of the world beyond his office.\nHe sees families gathering for the holiday.\nHe sees workers, neighbors, shopkeepers, and strangers trading greetings, food, and small acts of care.\nHe watches a baker hand a warm loaf to a boy who has nothing in his pocket.\nHe watches a widow accept help without shame because her neighbors know that dignity can survive dependence if the gift is given with respect.\nHe watches a schoolmaster speak gently to children who have little but curiosity.\nThe scene matters because it shows a different kind of wealth.\nIt is not measured in coin.\nIt is measured in attention, memory, patience, and the willingness to share what little one has.\nThat contrast makes Scrooge uneasy, because he can see now that he has been wealthy in the narrow sense and poor in nearly every other sense.\n\nThe spirit then turns him toward the institutions that shape a town.\nHe sees a charity table, a parish office, a clinic, and a counting room.\nEach place handles need differently.\nOne gives alms.\nOne keeps records.\nOne treats pain.\nOne protects profit.\nScrooge realizes that a healthy community depends on all of them, but it fails when one system is allowed to harden into indifference.\nThe lesson is not just that generosity feels good.\nIt is that social life itself weakens when everyone starts acting as if other people are only numbers.\n\nThe third spirit is the hardest to bear.\nIt does not speak much.\nIt simply shows a future shaped by the same cold habits Scrooge has already been living.\nPeople speak of his death without grief.\nSome speak with indifference.\nSome speak with relief.\nNo one has a reason to remember him fondly because he has not given anyone much reason to care.\nThe grave is not just a warning about mortality.\nIt is a warning about meaning.\nIf a life leaves nothing behind except fear and accounts, then the person who lived it has already become a kind of ghost before death arrives.\n\nThat vision breaks something in him.\nHe begs for another chance.\nHe wakes up on Christmas morning with a fierce, almost absurd sense of relief and gratitude.\nHe does not merely promise to change.\nHe starts changing immediately.\nHe sends help to the Cratchits.\nHe joins the holiday rather than hiding from it.\nHe laughs.\nHe speaks more gently.\nHe gives more freely.\nHe takes an interest in the people around him instead of measuring them only by their usefulness.\nHe treats other people as if they matter, because now he understands that they always did.\n\nAs the day goes on, his change becomes visible in ordinary actions.\nHe speaks to his clerk with respect.\nHe keeps his windows open to the street and lets the noise of life come in.\nHe buys gifts without calculation.\nHe joins a family meal and takes pleasure in being included.\nHe begins to understand that friendship is not a transaction and that gratitude is not weakness.\nThe town does not become perfect because Scrooge changes, but one person’s conversion makes the surrounding world feel less hard.\n\nThe real lesson of Scrooge&#x27;s transformation is not that a bad person can become good in one dramatic night.\nIt is that habits can be reversed when someone finally sees the damage clearly enough.\nGenerosity becomes a daily practice.\nKindness becomes a way of paying attention.\nAnd redemption, in the end, looks less like a miracle and more like repeated choices made in the right direction.\n&quot;
+      ],
+      &quot;reference&quot;: &quot;To improve your social life, you can start by making friends with people who share similar interests or hobbies. You can also join clubs or organizations that align with your passions and interests. Additionally, try to be a good listener and contribute to conversations in a respectful manner. Finally, make an effort to give back to the community through volunteering or helping others.&quot;,
+      &quot;persona_name&quot;: &quot;Scrooge&quot;,
+      &quot;query_style&quot;: &quot;POOR_GRAMMAR&quot;,
+      &quot;query_length&quot;: &quot;LONG&quot;,
+      &quot;synthesizer_name&quot;: &quot;single_hop_specific_query_synthesizer&quot;
+    }
+  ]
+}</pre>
+      </details>
+    
+      </article>
+    
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      Rendered by <code>graphrag_ragas_eval.reporting.render_smoke_report</code>.
+    </footer>
+  </div>
+</body>
+</html>
