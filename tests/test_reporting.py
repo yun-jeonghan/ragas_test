@@ -17,6 +17,7 @@ def test_render_smoke_report(tmp_path: Path) -> None:
     autoq_questions = tmp_path / "autoq.json"
     assertion_prep = tmp_path / "assertions.json"
     assertion_scores = tmp_path / "assertion-scores.json"
+    retrieval_results = tmp_path / "retrieval.json"
     output = tmp_path / "report.html"
 
     evaluation.write_text(
@@ -85,6 +86,23 @@ def test_render_smoke_report(tmp_path: Path) -> None:
         ),
         encoding="utf-8",
     )
+    retrieval_results.write_text(
+        json.dumps(
+            {
+                "metadata": {"component": "RetrievalPrep"},
+                "results": [
+                    {
+                        "question_id": "scrooge-1",
+                        "question_text": "Who is Scrooge?",
+                        "context": [
+                            {"chunk_id": "text-unit-1", "text": "Scrooge is a miser."},
+                        ],
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
 
     html = render_smoke_report(
         evaluation=evaluation,
@@ -94,16 +112,18 @@ def test_render_smoke_report(tmp_path: Path) -> None:
         autoq_questions=autoq_questions,
         assertion_prep=assertion_prep,
         assertion_scores=assertion_scores,
+        retrieval_results=retrieval_results,
         title="Smoke",
     )
 
     assert output.exists()
     assert "Smoke" in html
+    assert "Overview" in html
+    assert "AI 설명" in html
     assert "BenchmarkQED" in html
     assert "Ragas" in html
     assert "Ragas provides the metric vocabulary used by this repo" in html
     assert "<details" in html
-    assert "Interpretation" in html
     assert "Assertion Prep" in html
     assert "Assertion Scores" in html
     assert "Retrieval Prep" in html

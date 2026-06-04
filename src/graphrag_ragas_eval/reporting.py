@@ -556,54 +556,6 @@ def render_smoke_report(
             "</div>"
         )
 
-    artifact_cards = []
-    if generated_questions:
-        artifact_cards.append(
-            _artifact_card(
-                "Generated Questions",
-                [
-                    f"{len(_safe_list((generated_data or {}).get('questions')))} question(s) in the generated payload.",
-                    "Open the JSON view for the full sample list.",
-                ],
-                generated_data or {},
-            )
-        )
-    if retrieval_data:
-        artifact_cards.append(
-            _artifact_card(
-                "Retrieval Prep",
-                [
-                    f"{len(_safe_list(retrieval_data.get('results')))} retrieval row(s) prepared.",
-                    "This normalizes current search results into the vendor retrieval-evaluation shape.",
-                ],
-                retrieval_data,
-            )
-        )
-    if autod_data:
-        artifact_cards.append(_artifact_card("AutoD Summary", autod_bullets, autod_data))
-    if autoq_data:
-        artifact_cards.append(_artifact_card("AutoQ Questions", autoq_bullets, autoq_data))
-    if assertion_data:
-        artifact_cards.append(
-            _artifact_card(
-                "Assertion Prep",
-                _assertion_prep_bullets(assertion_data),
-                assertion_data,
-            )
-        )
-    if assertion_scores_data:
-        artifact_cards.append(
-            _artifact_card(
-                "Assertion Scores",
-                [
-                    f"{len(_safe_list(assertion_scores_data.get('scores')))} score row(s) evaluated.",
-                    "This evaluates prepared assertions against the answer set.",
-                ],
-                assertion_scores_data,
-            )
-        )
-    artifact_cards.append(_artifact_card("AutoE Evaluation", autoe_bullets, evaluation_data))
-
     html_text = f"""<!doctype html>
 <html lang="ko">
 <head>
@@ -946,7 +898,7 @@ def render_smoke_report(
     <header class="hero">
       <h1>{html.escape(title)}</h1>
       <p class="subtitle">
-        BenchmarkQED generates benchmark artifacts and runs its own AutoE and retrieval scoring paths. Ragas supplies the metric vocabulary that AutoE uses in this repo.
+        The report is grouped into Overview, AI 설명, BenchmarkQED, and Ragas so the benchmark artifacts and metric output stay visually separated.
       </p>
       <div class="chips">
         <span class="chip"><span>generated</span><strong>{html.escape(now)}</strong></span>
@@ -973,9 +925,22 @@ def render_smoke_report(
       </section>
 
       <section>
+        <h2>AI 설명</h2>
+        <p class="small">
+          This section explains the runtime lens used for the run. It is the place to look for model, provider, and endpoint context before reading any numbers.
+        </p>
+        <div class="chips" style="margin-top: 0;">
+          {''.join(runtime_chips) if runtime_chips else '<span class="chip"><span>runtime</span><strong>not recorded</strong></span>'}
+        </div>
+        <div class="note" style="margin-top: 14px;">
+          <div class="interpretation">{html.escape(interpretation_text)}</div>
+        </div>
+      </section>
+
+      <section>
         <h2>BenchmarkQED</h2>
         <p class="small">
-          BenchmarkQED-side artifacts: AutoD summarizes the corpus, AutoQ creates questions, Assertion Prep shows whether those questions produced usable assertions, Assertion Scores shows the assertion evaluation rows if they were run, Retrieval Prep normalizes search output for retrieval scoring, and AutoE reports metric scores.
+          BenchmarkQED-side artifacts cover corpus summarization, question generation, assertion preparation, assertion scoring, and retrieval preparation. These are the benchmark inputs that feed the metric layer.
         </p>
         <div class="wide-grid">
           {_artifact_card("AutoD", autod_bullets if autod_data else ["No AutoD payload available."], autod_data or {})}
@@ -989,7 +954,6 @@ def render_smoke_report(
               f"{len(_safe_list(retrieval_data.get('results')))} retrieval row(s) prepared." if retrieval_data else "No retrieval payload available.",
               "This normalizes current search results into the vendor retrieval-evaluation shape.",
           ], retrieval_data or {})) if retrieval_data else ""}
-          {_artifact_card("AutoE", autoe_bullets, evaluation_data)}
         </div>
         {benchmarkqed_alert}
         {assertion_scores_alert}
@@ -999,7 +963,7 @@ def render_smoke_report(
       <section>
         <h2>Ragas</h2>
         <p class="small">
-          Ragas provides the metric vocabulary used by this repo. BenchmarkQED AutoE uses these metric names in smoke runs, but this report does not execute a standalone Ragas pipeline.
+          Ragas provides the metric vocabulary used by this repo. Aggregate metrics, score rows, and generated question payloads are grouped here because they belong to the metric and evaluation layer.
         </p>
         <div class="grid">
           {''.join(_metric_card(metric_name, aggregate.get(metric_name, 0)) for metric_name in aggregate)}
@@ -1008,19 +972,22 @@ def render_smoke_report(
         <div class="note" style="margin-top: 14px;">
           The metric names below are the Ragas metrics surfaced in this smoke via BenchmarkQED AutoE.
         </div>
-      </section>
-
-      <section>
-        <h2>Aggregate Metrics</h2>
+        <div class="wide-grid" style="margin-top: 14px;">
+          {(_artifact_card("Generated Questions", [
+              f"{len(_safe_list((generated_data or {}).get('questions')))} question(s) in the generated payload.",
+              "Open the JSON view for the full sample list.",
+          ], generated_data or {})) if generated_questions else ""}
+          {_artifact_card("AutoE Evaluation", autoe_bullets, evaluation_data)}
+        </div>
+        <div class="note" style="margin-top: 14px;">
+          Aggregates and per-sample rows come from the Ragas evaluation layer, even when BenchmarkQED is the source of the surrounding benchmark flow.
+        </div>
+        <h3 style="margin: 18px 0 12px;">Metrics</h3>
         {_render_metric_chart(aggregate)}
         <div class="grid">
           {''.join(aggregate_cards) if aggregate_cards else '<p class="small">No aggregate metrics were found.</p>'}
         </div>
-      </section>
-
-      <section>
-        <h2>Detailed Scores</h2>
-        <div class="table-wrap">
+        <div class="table-wrap" style="margin-top: 14px;">
           <table>
             <thead>
               <tr>
@@ -1040,53 +1007,8 @@ def render_smoke_report(
         <div class="stack" style="margin-top: 14px;">
           {score_details if score_details else '<p class="small">No score details were found.</p>'}
         </div>
-      </section>
-
-      <section>
-        <h2>Retrieved Contexts</h2>
-        <div class="stack">
+        <div class="stack" style="margin-top: 14px;">
           {result_cards if result_cards else '<p class="small">No search results were found.</p>'}
-        </div>
-      </section>
-
-      <section>
-        <h2>Interpretation</h2>
-        <div class="note">
-          <div class="interpretation">{html.escape(interpretation_text)}</div>
-        </div>
-      </section>
-
-      <section>
-        <h2>Supporting Artifacts</h2>
-        <div class="grid">
-          {_artifact_card("AutoD Summary", [
-              f"{len(autod_documents)} document(s) summarized.",
-              f"{len(autod_themes)} theme(s) extracted.",
-              autod_data.get("corpus_summary") if autod_data else None,
-              autod_bq.get("summary") if autod_bq else None,
-          ] if autod_data else ["No AutoD payload available."], autod_data or {})}
-          {_artifact_card("AutoQ Questions", [
-              f"{len(autoq_questions_payload)} question(s) generated.",
-              f"Modes: {', '.join(map(str, _safe_list((autoq_data or {}).get('metadata', {}).get('modes')))) or 'not recorded'}.",
-              (
-                  f"First question: {autoq_questions_payload[0].get('question')}"
-                  if autoq_questions_payload and isinstance(autoq_questions_payload[0], dict)
-                  else "No question payload was returned."
-              ),
-          ] if autoq_data else ["No AutoQ payload available."], autoq_data or {})}
-          {_artifact_card("AutoE Evaluation", [
-              f"{len(scores)} score row(s) across {len(aggregate)} metric(s).",
-              f"Results rows: {len(results)}.",
-              (
-                  f"Top metric: {max(aggregate.items(), key=lambda item: float(item[1]))[0]} = {_format_metric_value(max(aggregate.values(), key=lambda value: float(value)))}"
-                  if aggregate
-                  else "No aggregate metrics were found."
-              ),
-          ], evaluation_data)}
-          {(_artifact_card("Generated Questions", [
-              f"{len(_safe_list((generated_data or {}).get('questions')))} question(s) in the generated payload.",
-              "Open the JSON view for the full sample list.",
-          ], generated_data or {})) if generated_questions and generated_questions != autoq_questions else ""}
         </div>
       </section>
     </main>
