@@ -47,6 +47,124 @@ class GraphRAGWorkspace:
         return self.root / "settings.yaml"
 
 
+def _resolve_graphrag_api_key() -> str:
+    """Resolve the key GraphRAG should see for init/index runs.
+
+    GraphRAG's generated config always points at ${GRAPHRAG_API_KEY}. When
+    that variable is missing, its config loader falls back to the literal
+    placeholder from the generated .env file, which then bubbles up as
+    "<API_KEY>" in LiteLLM errors. Prefer an explicitly provided key, but
+    fall back to the local Ollama-compatible default so the wrapper works
+    out of the box on this repo's smoke tests.
+    """
+
+    for name in (
+        "GRAPHRAG_API_KEY",
+        "GREV_GRAPHRAG_API_KEY",
+        "GREV_RAGAS_API_KEY",
+        "GREV_BENCHMARKQED_API_KEY",
+        "GREV_KGGEN_MINE_API_KEY",
+    ):
+        value = os.environ.get(name)
+        if value:
+            return value
+    return "sk-ollama"
+
+
+def _resolve_graphrag_api_base() -> str:
+    """Resolve the OpenAI-compatible endpoint GraphRAG should call."""
+
+    for name in (
+        "GRAPHRAG_API_BASE",
+        "GREV_GRAPHRAG_API_BASE",
+        "GREV_RAGAS_BASE_URL",
+        "GREV_BENCHMARKQED_BASE_URL",
+        "GREV_KGGEN_MINE_BASE_URL",
+    ):
+        value = os.environ.get(name)
+        if value:
+            return value
+    return "http://127.0.0.1:11434/v1"
+
+
+def _graph_rag_subprocess_env() -> dict[str, str]:
+    env = os.environ.copy()
+    env["GRAPHRAG_API_KEY"] = _resolve_graphrag_api_key()
+    env["GRAPHRAG_API_BASE"] = _resolve_graphrag_api_base()
+    return env
+
+
+def _write_graph_rag_env_file(workspace: GraphRAGWorkspace, api_key: str) -> None:
+    api_base = _resolve_graphrag_api_base()
+    dotenv = workspace.root / ".env"
+    dotenv.parent.mkdir(parents=True, exist_ok=True)
+    if dotenv.exists():
+        lines = dotenv.read_text(encoding="utf-8").splitlines()
+    else:
+        lines = []
+
+    updated: list[str] = []
+    replaced = False
+    for line in lines:
+        if line.startswith("GRAPHRAG_API_KEY="):
+            updated.append(f"GRAPHRAG_API_KEY={api_key}")
+            replaced = True
+        elif line.startswith("GRAPHRAG_API_BASE="):
+            updated.append(f"GRAPHRAG_API_BASE={api_base}")
+        else:
+            updated.append(line)
+    if not replaced:
+        updated.append(f"GRAPHRAG_API_KEY={api_key}")
+    if not any(line.startswith("GRAPHRAG_API_BASE=") for line in updated):
+        updated.append(f"GRAPHRAG_API_BASE={api_base}")
+
+    dotenv.write_text("\n".join(updated).rstrip() + "\n", encoding="utf-8", errors="strict")
+
+
+def _write_graph_rag_settings_file(workspace: GraphRAGWorkspace) -> None:
+    settings = workspace.settings_path
+    if not settings.exists():
+        return
+
+    lines = settings.read_text(encoding="utf-8").splitlines()
+    updated: list[str] = []
+    in_completion = False
+    in_embedding = False
+    completion_api_base_written = False
+    embedding_api_base_written = False
+
+    for line in lines:
+        stripped = line.strip()
+        indent = len(line) - len(line.lstrip(" "))
+
+        if stripped.startswith("completion_models:"):
+            in_completion = True
+            in_embedding = False
+            updated.append(line)
+            continue
+        if stripped.startswith("embedding_models:"):
+            in_completion = False
+            in_embedding = True
+            updated.append(line)
+            continue
+
+        if in_completion and indent >= 4 and stripped.startswith("auth_method:") and not completion_api_base_written:
+            updated.append(line)
+            updated.append("    api_base: ${GRAPHRAG_API_BASE}")
+            completion_api_base_written = True
+            continue
+
+        if in_embedding and indent >= 4 and stripped.startswith("auth_method:") and not embedding_api_base_written:
+            updated.append(line)
+            updated.append("    api_base: ${GRAPHRAG_API_BASE}")
+            embedding_api_base_written = True
+            continue
+
+        updated.append(line)
+
+    settings.write_text("\n".join(updated).rstrip() + "\n", encoding="utf-8", errors="strict")
+
+
 def _safe_relative_name(path: Path, base_dir: Path) -> str:
     relative = path.relative_to(base_dir)
     return "__".join(relative.parts)
@@ -98,6 +216,8 @@ def ensure_graph_rag_project(
     force: bool = False,
 ) -> None:
     workspace.root.mkdir(parents=True, exist_ok=True)
+    api_key = _resolve_graphrag_api_key()
+    api_base = _resolve_graphrag_api_base()
     cmd = [
         "graphrag",
         "init",
@@ -110,7 +230,9 @@ def ensure_graph_rag_project(
     ]
     if force:
         cmd.append("--force")
-    subprocess.run(cmd, check=True)
+    subprocess.run(cmd, check=True, env=_graph_rag_subprocess_env())
+    _write_graph_rag_env_file(workspace, api_key)
+    _write_graph_rag_settings_file(workspace)
 
 
 def run_graph_rag_index(
@@ -129,4 +251,4 @@ def run_graph_rag_index(
     ]
     if skip_validation:
         cmd.append("--skip-validation")
-    subprocess.run(cmd, check=True)
+    subprocess.run(cmd, check=True, env=_graph_rag_subprocess_env())

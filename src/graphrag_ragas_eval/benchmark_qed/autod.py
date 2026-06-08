@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import json
 import os
+import shutil
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -12,7 +13,6 @@ from ..upstream_benchmark_qed import (
     build_vendor_model_factory_runtime,
     ensure_vendor_path,
     model_dump_json_safe,
-    write_documents_csv,
 )
 
 
@@ -40,33 +40,48 @@ def summarize_dataset(plan: AutoDPlan) -> dict[str, Any]:
     ]
     workdir = plan.output.parent / f".{plan.output.stem}.benchmark-qed"
     workdir.mkdir(parents=True, exist_ok=True)
-    input_csv = write_documents_csv(source_rows, workdir / "input.csv")
+    input_dir = workdir / "input"
+    # benchmark-qed reads staged TXT files from "input/" after it switches into the workdir.
+    input_dir.mkdir(parents=True, exist_ok=True)
+    files = [plan.source] if plan.source.is_file() else [path for path in sorted(plan.source.rglob("*")) if path.is_file()]
+    for path in files:
+        if path.suffix.lower() != ".txt":
+            continue
+        target = input_dir / path.relative_to(plan.source if plan.source.is_dir() else plan.source.parent)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(path, target)
 
     from benchmark_qed.autod.data_processor.embedding import TextEmbedder
     from benchmark_qed.autod.sampler.sample_gen import acreate_clustered_sample
     from benchmark_qed.autod.summarization.global_summarizer import GlobalSummarizer
+    from graphrag_storage.file_storage import FileStorage
     import tiktoken
 
     text_embedder = TextEmbedder(embedding_model)
-    clustered_sample = asyncio.run(
-        acreate_clustered_sample(
-            input_path=str(input_csv),
-            output_path=str(workdir / "sample"),
-            text_embedder=text_embedder,
-            num_clusters=max(1, min(plan.target_size, len(source_rows) or 1)),
-            num_samples_per_cluster=1,
-            input_type="csv",
-            text_tag="text",
-            metadata_tags=None,
-            chunk_size=600,
-            chunk_overlap=100,
-            file_encoding="utf-8",
-            token_encoding="o200k_base",
-            random_seed=42,
-            input_storage=None,
-            output_storage=None,
+    cwd = Path.cwd()
+    try:
+        os.chdir(workdir)
+        clustered_sample = asyncio.run(
+            acreate_clustered_sample(
+                input_path=".",
+                output_path="sample",
+                text_embedder=text_embedder,
+                num_clusters=max(1, min(plan.target_size, len(source_rows) or 1)),
+                num_samples_per_cluster=1,
+                input_type="text",
+                text_tag="text",
+                metadata_tags=None,
+                chunk_size=600,
+                chunk_overlap=100,
+                file_encoding="utf-8",
+                token_encoding="o200k_base",
+                random_seed=42,
+                input_storage=FileStorage(base_dir="input"),
+                output_storage=None,
+            )
         )
-    )
+    finally:
+        os.chdir(cwd)
 
     token_encoder = tiktoken.get_encoding("o200k_base")
     summarizer = GlobalSummarizer(llm=chat_model, token_encoder=token_encoder)

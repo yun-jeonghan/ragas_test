@@ -2,6 +2,7 @@ from pathlib import Path
 from types import SimpleNamespace
 
 from graphrag_ragas_eval.benchmark_qed.autod import AutoDPlan, summarize_dataset
+from graphrag_ragas_eval.benchmark_qed.autoq import _yaml_safe_value
 from graphrag_ragas_eval.documents import load_documents
 
 
@@ -55,3 +56,16 @@ def test_load_documents_and_summarize(tmp_path: Path, monkeypatch) -> None:
     assert output.exists()
     assert payload["documents"][0]["summary"] == "First sentence. Second sentence."
     assert payload["benchmark_qed"]["summary"] == "First sentence. Second sentence."
+
+
+def test_yaml_safe_value_preserves_secretstr_contents() -> None:
+    from graphrag_ragas_eval.upstream_benchmark_qed import ensure_vendor_path
+
+    ensure_vendor_path()
+    from benchmark_qed.config.llm_config import LLMConfig
+
+    config = LLMConfig(api_key="sk-test-123", model="gpt-4o-mini")
+    payload = _yaml_safe_value(config)
+
+    assert payload["api_key"] == "sk-test-123"
+    assert payload["model"] == "gpt-4o-mini"

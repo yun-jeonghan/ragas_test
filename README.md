@@ -41,6 +41,103 @@ GraphRAG로 만든 그래프 기반 검색과 생성 결과를 Ragas로 평가�
 
 자세한 실행 예시는 command.md를 보시면 됩니다. Ragas wrapper 전용 설정과 clone 가이드는 `src/graphrag_ragas_eval/ragas/README.md` 를 보시면 됩니다.
 
+## 파이프라인 스크립트
+
+이 레포는 fixture 복사 없이 외부 입력을 그대로 받아서 도는 쉘 파이프라인을 따로 제공합니다.
+각 스크립트는 입력 경로와 출력 경로를 인자로 받고, 실패가 있어도 `summary.jsonl` 과 HTML report 는 끝까지 생성합니다.
+
+### BenchmarkQED + GraphRAG 파이프라인
+
+입력:
+
+- `SOURCE_DIR` - `.txt` 문서가 들어있는 디렉터리
+- `BENCHMARK_JSON` - 질문셋 JSON 또는 JSONL
+- `RESULTS_JSON` - GraphRAG 검색 결과 JSON
+- `ONTOLOGY_JSON` - GraphRAG ontology JSON
+- `OUTPUT_DIR` - 실행 결과를 저장할 디렉터리
+
+실행:
+
+```sh
+./scripts/benchmark_pipeline.sh SOURCE_DIR BENCHMARK_JSON RESULTS_JSON ONTOLOGY_JSON OUTPUT_DIR
+```
+
+생성물:
+
+- `OUTPUT_DIR/summary.jsonl`
+- `OUTPUT_DIR/logs/`
+- `OUTPUT_DIR/runs/benchmark-qed/`
+- `OUTPUT_DIR/runs/retrieval-smoke/`
+- `OUTPUT_DIR/runs/assertion-score/`
+- `OUTPUT_DIR/reports/benchmark-pipeline.html`
+
+이 파이프라인은 아래를 순서대로 실행합니다.
+
+- `graphrag normalize`
+- `graphrag stage`
+- `graphrag init`
+- `graphrag index`
+- `benchmark generate-questions`
+- `benchmark-qed autod`
+- `benchmark-qed autoq`
+- `benchmark-qed autoe`
+- `benchmark-qed smoke`
+- `benchmark-qed retrieval-smoke`
+- `benchmark-qed retrieval-reference`
+- `benchmark-qed retrieval-score`
+- `benchmark-qed assertion-score`
+- `benchmark-qed assertion-report`
+- `evaluate`
+- `ragas evaluate`
+- `kg-gen mine evaluate`
+- `kg-correctness evaluate`
+- `ograg2 evaluate`
+
+### Ragas 파이프라인
+
+입력:
+
+- `SOURCE_DIR` - `.txt` 문서가 들어있는 디렉터리
+- `BENCHMARK_JSON` - 평가 질문셋 JSON 또는 JSONL
+- `RESULTS_JSON` - 검색 결과 JSON
+- `OUTPUT_DIR` - 실행 결과를 저장할 디렉터리
+
+실행:
+
+```sh
+./scripts/ragas_pipeline.sh SOURCE_DIR BENCHMARK_JSON RESULTS_JSON OUTPUT_DIR
+```
+
+생성물:
+
+- `OUTPUT_DIR/summary.jsonl`
+- `OUTPUT_DIR/logs/`
+- `OUTPUT_DIR/runs/ragas-generate-questions/`
+- `OUTPUT_DIR/runs/ragas-evaluate/`
+- `OUTPUT_DIR/reports/ragas-pipeline.html`
+
+### 통합 report
+
+BenchmarkQED 파이프라인과 Ragas 파이프라인 summary를 합쳐 하나의 HTML report로 만들 수 있습니다.
+
+```sh
+./scripts/integrated_report.sh BENCHMARK_SUMMARY_JSONL RAGAS_SUMMARY_JSONL OUTPUT_HTML
+```
+
+### legacy wrapper
+
+기존에 `scripts/ragas_smoke.sh` 를 쓰던 경우에는 같은 인자 형식으로 그대로 호출해도 됩니다.
+이제 내부적으로는 `ragas_pipeline.sh` 로 넘깁니다.
+
+### 실행 전 체크
+
+- `GREV_*` env 값이 입력된 모델/endpoint와 맞는지 확인
+- `SOURCE_DIR` 에 TXT 문서가 실제로 있는지 확인
+- `BENCHMARK_JSON` 과 `RESULTS_JSON` 이 같은 question/sample id 를 쓰는지 확인
+- `ONTOLOGY_JSON` 이 필요한 경우 해당 GraphRAG 인덱싱에서 쓸 수 있는지 확인
+
+실행 후에는 각 `summary.jsonl` 을 보고 실패한 단계부터 다시 보면 됩니다.
+
 ## 설치
 
 이 프로젝트는 Python 3.11 이상을 기준으로 합니다.

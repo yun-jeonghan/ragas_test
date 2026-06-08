@@ -1,11 +1,15 @@
 from __future__ import annotations
 
 import json
+import shutil
 from dataclasses import dataclass, field
+from enum import Enum
 from pathlib import Path
 from typing import Any
 
 import yaml
+from graphrag_storage.storage_config import StorageConfig
+from pydantic import BaseModel, SecretStr
 
 from ..documents import load_documents
 from ..llm import load_llm_runtime_config
@@ -13,7 +17,6 @@ from ..upstream_benchmark_qed import (
     build_vendor_llm_config,
     ensure_vendor_path,
     model_dump_json_safe,
-    write_documents_csv,
 )
 
 
@@ -22,7 +25,7 @@ class AutoQPlan:
     source: Path
     output: Path
     num_questions: int = 10
-    modes: tuple[str, ...] = ("local", "global")
+    modes: tuple[str, ...] = ("local",)
     metadata: dict[str, Any] = field(default_factory=dict)
 
 
@@ -37,6 +40,22 @@ def _vendor_generation_types(modes: tuple[str, ...]) -> list[str]:
     return selected or ["data_local", "data_global"]
 
 
+def _yaml_safe_value(value: Any) -> Any:
+    if isinstance(value, SecretStr):
+        return value.get_secret_value()
+    if isinstance(value, BaseModel):
+        return {key: _yaml_safe_value(item) for key, item in value.model_dump(mode="python", by_alias=True).items()}
+    if isinstance(value, dict):
+        return {key: _yaml_safe_value(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_yaml_safe_value(item) for item in value]
+    if isinstance(value, Path):
+        return str(value)
+    if isinstance(value, Enum):
+        return value.value
+    return value
+
+
 def _mode_name(mode: Any) -> str:
     return str(getattr(mode, "value", mode))
 
@@ -49,15 +68,24 @@ def _normalize_question(item: dict[str, Any], *, source: str) -> dict[str, Any]:
     return normalized
 
 
+def _stage_text_inputs(source: Path, dest: Path) -> None:
+    dest.mkdir(parents=True, exist_ok=True)
+    files = [source] if source.is_file() else [path for path in sorted(source.rglob("*")) if path.is_file()]
+    for path in files:
+        if path.suffix.lower() != ".txt":
+            continue
+        target = dest / path.relative_to(source if source.is_dir() else source.parent)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(path, target)
+
+
 def generate_queries(plan: AutoQPlan):
     ensure_vendor_path()
     documents = load_documents(plan.source)
-    source_rows = [
-        {"id": document.id, "title": document.title, "text": document.text}
-        for document in documents
-    ]
     workdir = plan.output.parent / f".{plan.output.stem}.benchmark-qed"
-    input_csv = write_documents_csv(source_rows, workdir / "input.csv")
+    input_dir = workdir / "input"
+    # benchmark-qed expects its input storage to be rooted at "input/" inside the workdir.
+    _stage_text_inputs(plan.source, input_dir)
     output_dir = workdir / "output"
     output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -71,7 +99,11 @@ def generate_queries(plan: AutoQPlan):
     )
 
     config = QuestionGenerationConfig(
-        input=InputConfig(dataset_path=input_csv),
+        input=InputConfig(
+            dataset_path=Path("."),
+            input_type="text",
+            storage=StorageConfig(type="file", base_dir="input"),
+        ),
         concurrent_requests=1,
         encoding=EncodingModelConfig(
             # BenchmarkQED expects a tiktoken encoding name here, not the embedding model id.
@@ -80,7 +112,7 @@ def generate_queries(plan: AutoQPlan):
             chunk_overlap=100,
         ),
         sampling=SamplingConfig(
-            num_clusters=max(1, min(len(source_rows) or 1, plan.num_questions)),
+            num_clusters=max(1, min(len(documents) or 1, plan.num_questions)),
             num_samples_per_cluster=1,
             random_seed=42,
         ),
@@ -90,11 +122,7 @@ def generate_queries(plan: AutoQPlan):
 
     config_path = workdir / "settings.yaml"
     config_path.write_text(
-        yaml.safe_dump(
-            config.model_dump(mode="json", by_alias=True),
-            sort_keys=False,
-            allow_unicode=True,
-        ),
+        yaml.safe_dump(_yaml_safe_value(config), sort_keys=False, allow_unicode=True),
         encoding="utf-8",
     )
 
@@ -107,7 +135,7 @@ def generate_queries(plan: AutoQPlan):
         generation_type_map[mode_name]
         for mode in plan.modes
         if (mode_name := _mode_name(mode)) in generation_type_map
-    ] or [GenerationType.data_local, GenerationType.data_global]
+    ] or [GenerationType.data_local]
 
     upstream_autoq(
         configuration_path=config_path,

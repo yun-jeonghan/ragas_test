@@ -27,10 +27,11 @@ from .ragas import (
     evaluate_ragas,
     generate_ragas_questions,
 )
-from .generation.builder import GenerationMode, QuestionGenerationPlan, generate_questions
+from .generation.builder import GenerationMode, QuestionGenerationPlan, generate_questions as build_questions
 from .graphrag.loaders import load_graphrag_tables
 from .graphrag.workspace import GraphRAGWorkspace, ensure_graph_rag_project, run_graph_rag_index, stage_documents
 from .graphrag_runner import ingest_and_index_documents
+from .ograg2 import Ograg2EvaluationPlan, run_ograg2_evaluation
 from .ontology_handler import materialize_graph_rag_prompts
 from .post_processor import split_long_nodes_and_append_edges
 from .reporting import render_assertion_report, render_smoke_report
@@ -43,6 +44,7 @@ ragas_app = typer.Typer(no_args_is_help=True, add_completion=False)
 kg_gen_app = typer.Typer(no_args_is_help=True, add_completion=False)
 kg_gen_mine_app = typer.Typer(no_args_is_help=True, add_completion=False)
 kg_correctness_app = typer.Typer(no_args_is_help=True, add_completion=False)
+ograg2_app = typer.Typer(no_args_is_help=True, add_completion=False)
 report_app = typer.Typer(no_args_is_help=True, add_completion=False)
 
 
@@ -103,6 +105,50 @@ def _run_ragas_evaluation(
     run.write_json(output)
     typer.echo(f"wrote evaluation results to {output}")
     typer.echo(f"aggregate: {run.aggregate()}")
+
+
+@ograg2_app.command("evaluate", context_settings={"allow_extra_args": True, "ignore_unknown_options": True})
+def ograg2_evaluate(
+    ctx: typer.Context,
+    config_file: Path = typer.Option(
+        Path("vendor/ograg2/configs/demo_config.yaml"),
+        exists=True,
+        file_okay=True,
+        dir_okay=False,
+        help="ograg2 config YAML",
+    ),
+    results_dir: Path | None = typer.Option(
+        None,
+        file_okay=False,
+        dir_okay=True,
+        help="results/ prefix를 바꿀 결과 디렉터리",
+    ),
+    rewrite: bool = typer.Option(False, help="기존 평가 결과를 덮어쓸지 여부"),
+    force_map_ontology: bool = typer.Option(False, help="ontology mapping을 강제로 다시 수행"),
+    only_map_ontology: bool = typer.Option(False, help="ontology mapping만 수행"),
+    force_create_kg_triples: bool = typer.Option(False, help="KG triples 생성을 강제로 다시 수행"),
+    force_personal_openai: bool = typer.Option(False, help="Azure 대신 personal OpenAI 키를 사용"),
+    force_personal_openai_emb_only: bool = typer.Option(
+        False,
+        help="embedding만 personal OpenAI 키를 사용",
+    ),
+) -> None:
+    result = run_ograg2_evaluation(
+        Ograg2EvaluationPlan(
+            config_file=config_file,
+            results_dir=results_dir,
+            rewrite=rewrite,
+            force_map_ontology=force_map_ontology,
+            only_map_ontology=only_map_ontology,
+            force_create_kg_triples=force_create_kg_triples,
+            force_personal_openai=force_personal_openai,
+            force_personal_openai_emb_only=force_personal_openai_emb_only,
+            extra_args=tuple(ctx.args),
+        )
+    )
+    typer.echo(f"wrote og-rag2 evaluation from {result.config_file}")
+    typer.echo(f"cwd: {result.cwd}")
+    typer.echo(f"command: {' '.join(result.command)}")
 
 
 @graphrag_app.command("stage")
@@ -323,7 +369,7 @@ def benchmark_qed_autoq(
     source: Path = typer.Option(..., exists=True, file_okay=True, dir_okay=True, help="문서 또는 문서 디렉터리"),
     output: Path = typer.Option(Path("data/benchmark-qed/autoq-questions.json"), file_okay=True, dir_okay=False, help="AutoQ 결과 저장 경로"),
     num_questions: int = typer.Option(10, min=1, help="생성할 질문 개수"),
-    modes: list[str] = typer.Option(["local", "global"], help="local, global, multi-hop, unanswerable"),
+    modes: list[str] = typer.Option(["local"], help="local, global, multi-hop, unanswerable"),
 ) -> None:
     mode_map = {
         "local": GenerationMode.LOCAL,
@@ -651,7 +697,7 @@ def generate_questions(
         modes=selected_modes or (GenerationMode.LOCAL, GenerationMode.GLOBAL),
         subrepo_name="benchmark",
     )
-    samples = generate_questions(plan)
+    samples = build_questions(plan)
     typer.echo(f"wrote {len(samples)} questions to {output}")
 
 
@@ -731,6 +777,7 @@ def _main() -> None:
 app.add_typer(graphrag_app, name="graphrag")
 app.add_typer(ragas_app, name="ragas")
 app.add_typer(benchmark_qed_app, name="benchmark-qed")
+app.add_typer(ograg2_app, name="ograg2")
 app.add_typer(kg_gen_app, name="kg-gen")
 kg_gen_app.add_typer(kg_gen_mine_app, name="mine")
 app.add_typer(kg_correctness_app, name="kg-correctness")
