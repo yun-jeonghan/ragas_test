@@ -7,6 +7,12 @@ REPO_ROOT=$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)
 GREV_BIN=${GREV_BIN:-grev}
 REPORT_RENDERER=${REPORT_RENDERER:-"$SCRIPT_DIR/render_pipeline_report.py"}
 
+if [ -f "$REPO_ROOT/.env" ]; then
+  set -a
+  . "$REPO_ROOT/.env"
+  set +a
+fi
+
 if [ "$#" -lt 4 ]; then
   printf '%s\n' "Usage: ragas_pipeline.sh SOURCE_DIR BENCHMARK_JSON RESULTS_JSON OUTPUT_DIR" >&2
   exit 1
@@ -32,6 +38,11 @@ RAGAS_EVAL_DIR="$OUTPUT_DIR/runs/ragas-evaluate"
 REPORT_DIR="$OUTPUT_DIR/reports"
 SUMMARY_FILE="$OUTPUT_DIR/summary.jsonl"
 PIPELINE_REPORT="$REPORT_DIR/ragas-pipeline.html"
+
+if [ -z "${GREV_RAGAS_MODEL:-}" ] || [ -z "${GREV_RAGAS_EMBEDDINGS_MODEL:-}" ]; then
+  printf '%s\n' "Missing env. Set GREV_RAGAS_MODEL and GREV_RAGAS_EMBEDDINGS_MODEL before running ragas_pipeline.sh." >&2
+  exit 1
+fi
 
 run_count=0
 fail_count=0

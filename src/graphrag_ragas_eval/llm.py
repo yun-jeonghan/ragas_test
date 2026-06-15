@@ -11,7 +11,6 @@ from typing import Any
 from .config import (
     DEFAULT_CHAT_MODEL,
     DEFAULT_EMBEDDING_MODEL,
-    DEFAULT_LOCAL_BASE_URL,
     DEFAULT_LOCAL_PROVIDER,
 )
 
@@ -103,14 +102,6 @@ def _parse_int(value: str | None) -> int | None:
     if not normalized:
         return None
     return int(normalized)
-
-
-def _default_base_url_for_provider(provider: str) -> str:
-    if provider == "ollama":
-        return DEFAULT_LOCAL_BASE_URL
-    return "http://127.0.0.1:8000/v1"
-
-
 def _openai_client(base_url: str | None, api_key: str | None) -> Any:
     from openai import AsyncOpenAI
 
@@ -192,12 +183,6 @@ def load_llm_runtime_config(
         max_tokens = 256
     if embeddings_max_seq_length is None:
         embeddings_max_seq_length = 128
-
-    if provider in {"vllm", "ollama"} and base_url is None:
-        base_url = _default_base_url_for_provider(provider)
-
-    if embeddings_provider in {"vllm", "ollama"} and embeddings_base_url is None:
-        embeddings_base_url = _default_base_url_for_provider(embeddings_provider)
 
     return LLMRuntimeConfig(
         provider=provider,

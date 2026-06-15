@@ -39,12 +39,17 @@ GraphRAG로 만든 그래프 기반 검색과 생성 결과를 Ragas로 평가�
 - grev kg-correctness evaluate - 위 명령의 호환 별칭
 - grev report smoke - JSON 결과를 HTML 리포트로 렌더링
 
+`grev eval run` 기반 ontology eval harness 는 별도 레포 `/home/openclaw/projects/ontology-eval-harness` 로 분리되었습니다. 이 레포에는 더 이상 해당 CLI 나 스키마 문서가 포함되지 않습니다.
+
 자세한 실행 예시는 command.md를 보시면 됩니다. Ragas wrapper 전용 설정과 clone 가이드는 `src/graphrag_ragas_eval/ragas/README.md` 를 보시면 됩니다.
 
 ## 파이프라인 스크립트
 
 이 레포는 fixture 복사 없이 외부 입력을 그대로 받아서 도는 쉘 파이프라인을 따로 제공합니다.
 각 스크립트는 입력 경로와 출력 경로를 인자로 받고, 실패가 있어도 `summary.jsonl` 과 HTML report 는 끝까지 생성합니다.
+하드코딩하지 말것: 모델명, endpoint, key 값은 문서에 박지 말고 `.env` 나 쉘 env 로만 주입합니다.
+
+기능별 최신 성공 여부를 보려면 `test_progress.md` 를 확인하고, 전체 행렬과 pytest 상태를 다시 돌리려면 `scripts/update_test_progress.sh` 를 실행하면 됩니다.
 
 ### BenchmarkQED + GraphRAG 파이프라인
 
@@ -170,13 +175,7 @@ BenchmarkQED 파이프라인과 Ragas 파이프라인 summary를 합쳐 하나�
 
 ## LLM 전환
 
-현재는 로컬 Ollama를 기본으로 씁니다.
-
-- 테스트와 검증은 로컬 Ollama
-- 더 가벼운 chat 모델이 필요하면 `smollm2:135m`
-- 나중에 실서빙이나 다른 로컬 추론 엔진으로 옮길 때는 vLLM OpenAI-compatible endpoint
-
-전환할 때는 .env.example 기준으로 아래만 바꾸면 됩니다.
+전환할 때는 `.env.example` 기준으로 아래만 바꾸면 됩니다.
 
 - Ragas 평가용: `GREV_RAGAS_PROVIDER`, `GREV_RAGAS_MODEL`, `GREV_RAGAS_BASE_URL`, `GREV_RAGAS_API_KEY`
 - Ragas embeddings: `GREV_RAGAS_EMBEDDINGS_PROVIDER`, `GREV_RAGAS_EMBEDDINGS_MODEL`, `GREV_RAGAS_EMBEDDINGS_BASE_URL`, `GREV_RAGAS_EMBEDDINGS_API_KEY`
@@ -214,8 +213,8 @@ BenchmarkQED 파이프라인과 Ragas 파이프라인 summary를 합쳐 하나�
 
 CPU 테스트를 할 때는 이렇게 생각하면 됩니다.
 
-- LLM: Ollama나 vLLM CPU처럼 OpenAI-compatible 서버가 있으면 `GREV_RAGAS_BASE_URL` 만 로컬 주소로 바꿉니다.
-- embeddings: `GREV_RAGAS_EMBEDDINGS_PROVIDER=local` 로 두고 `GREV_RAGAS_EMBEDDINGS_MODEL=intfloat/multilingual-e5-small`, `GREV_RAGAS_EMBEDDINGS_DEVICE=cpu` 를 넣습니다. BenchmarkQED도 같은 방식으로 `GREV_BENCHMARKQED_EMBEDDINGS_PROVIDER=local` 을 쓰면 됩니다.
+- LLM: OpenAI-compatible 서버가 있으면 `GREV_RAGAS_BASE_URL` 만 해당 주소로 바꿉니다.
+- embeddings: `GREV_RAGAS_EMBEDDINGS_PROVIDER=local` 로 두고 local embedding 모델과 `GREV_RAGAS_EMBEDDINGS_DEVICE=cpu` 를 넣습니다. BenchmarkQED도 같은 방식으로 `GREV_BENCHMARKQED_EMBEDDINGS_PROVIDER=local` 을 쓰면 됩니다.
 - E5 계열은 기본으로 `query: ` / `passage: ` 접두사를 자동으로 붙입니다. 필요하면 `GREV_*_EMBEDDINGS_QUERY_PREFIX`, `GREV_*_EMBEDDINGS_DOCUMENT_PREFIX` 로 덮어쓸 수 있습니다.
 - 스모크를 안정적으로 돌리려면 `GREV_*_MAX_TOKENS=256`, `GREV_*_EMBEDDINGS_MAX_SEQ_LENGTH=128` 을 권장합니다.
 
@@ -226,47 +225,6 @@ PDF 쪽은 다음만 바꾸면 됩니다.
 - `GREV_PDF_DESCRIPTION_BACKEND`
 - `GREV_PDF_MINERU_COMMAND`
 - `GREV_PDF_MINERU_OUTPUT_ARTIFACT`
-
-### 최소 `.env` 템플릿
-
-아래 값만 채우면 가장 먼저 돌아가는 구성이 됩니다. 나머지는 `EXTRA_BODY`만 필요할 때 추가하세요.
-
-```env
-# Ragas LLM
-GREV_RAGAS_PROVIDER=vllm
-GREV_RAGAS_MODEL=your-llm-model-name
-GREV_RAGAS_BASE_URL=http://your-host:8000/v1
-GREV_RAGAS_API_KEY=vllm
-GREV_RAGAS_MAX_TOKENS=256
-
-# Ragas embeddings
-GREV_RAGAS_EMBEDDINGS_PROVIDER=vllm
-GREV_RAGAS_EMBEDDINGS_MODEL=your-embedding-model-name
-GREV_RAGAS_EMBEDDINGS_BASE_URL=http://your-host:8001/v1
-GREV_RAGAS_EMBEDDINGS_API_KEY=vllm
-GREV_RAGAS_EMBEDDINGS_MAX_SEQ_LENGTH=128
-
-# BenchmarkQED LLM
-GREV_BENCHMARKQED_PROVIDER=vllm
-GREV_BENCHMARKQED_MODEL=your-llm-model-name
-GREV_BENCHMARKQED_BASE_URL=http://your-host:8000/v1
-GREV_BENCHMARKQED_API_KEY=vllm
-GREV_BENCHMARKQED_MAX_TOKENS=256
-
-# BenchmarkQED embeddings
-GREV_BENCHMARKQED_EMBEDDINGS_PROVIDER=vllm
-GREV_BENCHMARKQED_EMBEDDINGS_MODEL=your-embedding-model-name
-GREV_BENCHMARKQED_EMBEDDINGS_BASE_URL=http://your-host:8001/v1
-GREV_BENCHMARKQED_EMBEDDINGS_API_KEY=vllm
-GREV_BENCHMARKQED_EMBEDDINGS_MAX_SEQ_LENGTH=128
-
-# PDF extraction
-GREV_PDF_EXTRACTOR_MODE=chandra_only
-GREV_PDF_OCR_BACKEND=chandra
-```
-
-여기서 보통 바꾸는 건 `MODEL`, `BASE_URL`, `API_KEY` 입니다.
-`MODEL`은 서버가 실제로 서빙하는 이름, `BASE_URL`은 `/v1`까지 포함한 주소, `API_KEY`는 서버 종류에 따라 비워두거나 토큰을 넣으면 됩니다.
 
 ## 문서 입력 흐름
 

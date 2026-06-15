@@ -32,7 +32,7 @@
 
 ## `.env` 구성
 
-`ragas` 는 `GREV_RAGAS_*` prefix 를 읽습니다. 같은 prefix 아래에서 chat 모델과 embedding 모델을 각각 독립적으로 바꿀 수 있습니다.
+`ragas` 는 `GREV_RAGAS_*` prefix 를 읽습니다. 같은 prefix 아래에서 chat 모델과 embedding 모델을 각각 독립적으로 바꿀 수 있습니다. 모델명과 endpoint 는 md 에 박지 말고 `.env` 나 쉘 env 로만 주입합니다.
 
 ### 평가용 LLM
 
@@ -43,15 +43,7 @@
 - `GREV_RAGAS_EXTRA_BODY`
 - `GREV_RAGAS_MAX_TOKENS`
 
-예시:
-
-```env
-GREV_RAGAS_PROVIDER=ollama
-GREV_RAGAS_MODEL=qwen2.5:0.5b
-GREV_RAGAS_BASE_URL=http://127.0.0.1:11434/v1
-GREV_RAGAS_API_KEY=ollama
-GREV_RAGAS_MAX_TOKENS=256
-```
+예시 값은 `.env.example` 을 참고하세요.
 
 ### 평가용 embeddings
 
@@ -66,15 +58,7 @@ GREV_RAGAS_MAX_TOKENS=256
 - `GREV_RAGAS_EMBEDDINGS_DOCUMENT_PREFIX`
 - `GREV_RAGAS_EMBEDDINGS_NORMALIZE`
 
-예시:
-
-```env
-GREV_RAGAS_EMBEDDINGS_PROVIDER=ollama
-GREV_RAGAS_EMBEDDINGS_MODEL=nomic-embed-text
-GREV_RAGAS_EMBEDDINGS_BASE_URL=http://127.0.0.1:11434/v1
-GREV_RAGAS_EMBEDDINGS_API_KEY=ollama
-GREV_RAGAS_EMBEDDINGS_MAX_SEQ_LENGTH=128
-```
+예시 값은 `.env.example` 을 참고하세요.
 
 ### 질문 생성용 설정
 

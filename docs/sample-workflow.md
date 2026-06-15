@@ -37,7 +37,7 @@ BenchmarkQED 경로까지 한 번에 훑는 스모크는 아래처럼 한 번에
 - `grev benchmark-qed autoq --source examples/sample_docs --output data/benchmark-qed/autoq-questions.json --num-questions 1 --modes local`
 - `grev benchmark-qed autoe --benchmark data/benchmarks/sample_benchmark.json --search-results data/results/sample_search_results.json --output data/benchmark-qed/autoe-evaluation.json --metrics context_precision`
 - `grev report smoke --evaluation data/results/sample_evaluation.json --output reports/pdf-smoke-test-report.html`
-- `grev benchmark-qed smoke --source examples/sample_docs --benchmark data/benchmarks/sample_benchmark.json --search-results data/results/sample_search_results.json --output-dir /tmp/grev-benchmark-qed-smoke --report-output /home/openclaw/projects/graphrag-ragas-eval/reports/benchmark-qed-smoke.html`
+- `grev benchmark-qed smoke --source examples/sample_docs --benchmark data/benchmarks/sample_benchmark.json --search-results data/results/sample_search_results.json --output-dir /tmp/grev-benchmark-qed-smoke --report-output /home/openclaw/projects/graphrag-eval/reports/benchmark-qed-smoke.html`
 
 이 방식의 장점은 다음과 같습니다.
 

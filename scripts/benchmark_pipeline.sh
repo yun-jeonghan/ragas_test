@@ -8,6 +8,30 @@ GREV_BIN=${GREV_BIN:-grev}
 GRAPHRAG_BIN=${GRAPHRAG_BIN:-graphrag}
 REPORT_RENDERER=${REPORT_RENDERER:-"$SCRIPT_DIR/render_pipeline_report.py"}
 
+if [ -f "$REPO_ROOT/.env" ]; then
+  set -a
+  . "$REPO_ROOT/.env"
+  set +a
+fi
+
+GRAPHRAG_CHAT_MODEL=${GREV_GRAPHRAG_MODEL:-${GREV_RAGAS_MODEL:-${GREV_BENCHMARKQED_MODEL:-}}}
+GRAPHRAG_EMBEDDING_MODEL=${GREV_GRAPHRAG_EMBEDDING_MODEL:-${GREV_RAGAS_EMBEDDINGS_MODEL:-${GREV_BENCHMARKQED_EMBEDDINGS_MODEL:-}}}
+GRAPHRAG_API_BASE=${GRAPHRAG_API_BASE:-${GREV_GRAPHRAG_API_BASE:-${GREV_RAGAS_BASE_URL:-${GREV_BENCHMARKQED_BASE_URL:-}}}}
+GRAPHRAG_API_KEY=${GREV_GRAPHRAG_API_KEY:-${GREV_RAGAS_API_KEY:-${GREV_BENCHMARKQED_API_KEY:-}}}
+
+if [ -z "$GRAPHRAG_CHAT_MODEL" ] || [ -z "$GRAPHRAG_EMBEDDING_MODEL" ] || [ -z "$GRAPHRAG_API_BASE" ] || [ -z "$GRAPHRAG_API_KEY" ]; then
+  printf '%s\n' "Missing env. Set GREV_GRAPHRAG_MODEL/GREV_RAGAS_MODEL/GREV_BENCHMARKQED_MODEL, embedding variants, GRAPHRAG_API_BASE, and api key env before running." >&2
+  exit 1
+fi
+
+export GRAPHRAG_API_BASE
+export GREV_GRAPHRAG_API_KEY="$GRAPHRAG_API_KEY"
+export GREV_RAGAS_MODEL=${GREV_RAGAS_MODEL:-$GRAPHRAG_CHAT_MODEL}
+export GREV_BENCHMARKQED_MODEL=${GREV_BENCHMARKQED_MODEL:-$GRAPHRAG_CHAT_MODEL}
+export GREV_KGGEN_MINE_MODEL=${GREV_KGGEN_MINE_MODEL:-$GRAPHRAG_CHAT_MODEL}
+export GREV_RAGAS_EMBEDDINGS_MODEL=${GREV_RAGAS_EMBEDDINGS_MODEL:-$GRAPHRAG_EMBEDDING_MODEL}
+export GREV_BENCHMARKQED_EMBEDDINGS_MODEL=${GREV_BENCHMARKQED_EMBEDDINGS_MODEL:-$GRAPHRAG_EMBEDDING_MODEL}
+
 if [ "$#" -lt 5 ]; then
   printf '%s\n' "Usage: benchmark_pipeline.sh SOURCE_DIR BENCHMARK_JSON RESULTS_JSON ONTOLOGY_JSON OUTPUT_DIR" >&2
   exit 1
@@ -141,17 +165,17 @@ run_step \
 run_step \
   "graphrag init" \
   "$LOG_DIR/03-graphrag-init.log" \
-  "$GREV_BIN" graphrag init --source "$SOURCE_DIR" --workspace-root "$STANDARD_WORKSPACE" --clean --force
+  "$GREV_BIN" graphrag init --source "$SOURCE_DIR" --workspace-root "$STANDARD_WORKSPACE" --clean --force --model "$GRAPHRAG_CHAT_MODEL" --embedding "$GRAPHRAG_EMBEDDING_MODEL"
 
 run_step \
   "graphrag index standard" \
   "$LOG_DIR/04-graphrag-index-standard.log" \
-  "$GREV_BIN" graphrag index --source "$SOURCE_DIR" --workspace-root "$STANDARD_WORKSPACE" --force --method standard
+  "$GREV_BIN" graphrag index --source "$SOURCE_DIR" --workspace-root "$STANDARD_WORKSPACE" --force --method standard --model "$GRAPHRAG_CHAT_MODEL" --embedding "$GRAPHRAG_EMBEDDING_MODEL"
 
 run_step \
   "graphrag index ontology+postprocess" \
   "$LOG_DIR/05-graphrag-index-ontology.log" \
-  "$GREV_BIN" graphrag index --source "$SOURCE_DIR" --workspace-root "$ONTOLOGY_WORKSPACE" --force --method standard --ontology-path "$ONTOLOGY_JSON" --postprocess --description-limit 200
+  "$GREV_BIN" graphrag index --source "$SOURCE_DIR" --workspace-root "$ONTOLOGY_WORKSPACE" --force --method standard --ontology-path "$ONTOLOGY_JSON" --postprocess --description-limit 200 --model "$GRAPHRAG_CHAT_MODEL" --embedding "$GRAPHRAG_EMBEDDING_MODEL"
 
 run_step \
   "graphrag postprocess" \

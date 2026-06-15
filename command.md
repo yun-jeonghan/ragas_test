@@ -1,39 +1,40 @@
 # 실행 커맨드
 
 이 문서는 이 저장소를 처음부터 실행할 때 필요한 명령만 모아둡니다.
+모델명, endpoint, key 값은 이 문서에 하드코딩하지 말고 `.env.example` 과 쉘 env 로만 넣습니다.
 
 ## 0. 초기 설정
 
-    cd /home/openclaw/projects/graphrag-ragas-eval
+    cd /home/openclaw/projects/graphrag-eval
     python3 -m venv .venv
     . .venv/bin/activate
     pip install -e ".[dev]"
     pip install graphrag
     cp .env.example .env
 
-- `.env`에서 기본값은 로컬 Ollama 테스트용입니다.
+- `.env`의 기본 예시는 OpenRouter GPT-4o 기준입니다.
 
-GPU 서버의 vLLM endpoint를 쓸 때는 Ragas와 BenchmarkQED 값을 각각 맞춰 넣습니다.
+OpenRouter GPT-4o 기준으로 Ragas와 BenchmarkQED 값을 각각 맞춰 넣습니다.
 
-- `GREV_RAGAS_PROVIDER=vllm`
-- `GREV_RAGAS_MODEL=<vllm-model-name>`
-- `GREV_RAGAS_BASE_URL=http://<vllm-host>:8000/v1`
-- `GREV_RAGAS_API_KEY=vllm`
+- `GREV_RAGAS_PROVIDER=openrouter`
+- `GREV_RAGAS_MODEL=openai/gpt-4o`
+- `GREV_RAGAS_BASE_URL=https://openrouter.ai/api/v1`
+- `GREV_RAGAS_API_KEY=<openrouter-api-key>`
 - `GREV_RAGAS_MAX_TOKENS=256`
-- `GREV_RAGAS_EMBEDDINGS_PROVIDER=vllm`
-- `GREV_RAGAS_EMBEDDINGS_MODEL=<embedding-model-name>`
-- `GREV_RAGAS_EMBEDDINGS_BASE_URL=http://<vllm-host>:8000/v1`
-- `GREV_RAGAS_EMBEDDINGS_API_KEY=vllm`
+- `GREV_RAGAS_EMBEDDINGS_PROVIDER=openrouter`
+- `GREV_RAGAS_EMBEDDINGS_MODEL=openai/text-embedding-3-small`
+- `GREV_RAGAS_EMBEDDINGS_BASE_URL=https://openrouter.ai/api/v1`
+- `GREV_RAGAS_EMBEDDINGS_API_KEY=<openrouter-api-key>`
 - `GREV_RAGAS_EMBEDDINGS_MAX_SEQ_LENGTH=128`
-- `GREV_BENCHMARKQED_PROVIDER=vllm`
-- `GREV_BENCHMARKQED_MODEL=<vllm-model-name>`
-- `GREV_BENCHMARKQED_BASE_URL=http://<vllm-host>:8000/v1`
-- `GREV_BENCHMARKQED_API_KEY=vllm`
+- `GREV_BENCHMARKQED_PROVIDER=openrouter`
+- `GREV_BENCHMARKQED_MODEL=openai/gpt-4o`
+- `GREV_BENCHMARKQED_BASE_URL=https://openrouter.ai/api/v1`
+- `GREV_BENCHMARKQED_API_KEY=<openrouter-api-key>`
 - `GREV_BENCHMARKQED_MAX_TOKENS=256`
-- `GREV_BENCHMARKQED_EMBEDDINGS_PROVIDER=vllm`
-- `GREV_BENCHMARKQED_EMBEDDINGS_MODEL=<embedding-model-name>`
-- `GREV_BENCHMARKQED_EMBEDDINGS_BASE_URL=http://<vllm-host>:8000/v1`
-- `GREV_BENCHMARKQED_EMBEDDINGS_API_KEY=vllm`
+- `GREV_BENCHMARKQED_EMBEDDINGS_PROVIDER=openrouter`
+- `GREV_BENCHMARKQED_EMBEDDINGS_MODEL=openai/text-embedding-3-small`
+- `GREV_BENCHMARKQED_EMBEDDINGS_BASE_URL=https://openrouter.ai/api/v1`
+- `GREV_BENCHMARKQED_EMBEDDINGS_API_KEY=<openrouter-api-key>`
 - `GREV_BENCHMARKQED_EMBEDDINGS_MAX_SEQ_LENGTH=128`
 
 PDF 추출 모드도 `.env`에서 바로 고를 수 있습니다.
@@ -49,70 +50,70 @@ MinerU 하이브리드로 갈 때는:
 
 개별 prefix를 쓰고 싶으면 아래처럼 덮어쓸 수 있습니다.
 
-- `GREV_RAGAS_PROVIDER=vllm`
-- `GREV_RAGAS_MODEL=<vllm-model-name>`
-- `GREV_RAGAS_BASE_URL=http://<vllm-host>:8000/v1`
-- `GREV_RAGAS_API_KEY=vllm`
+- `GREV_RAGAS_PROVIDER=<provider>`
+- `GREV_RAGAS_MODEL=<chat-model-name>`
+- `GREV_RAGAS_BASE_URL=<openai-compatible-base-url>`
+- `GREV_RAGAS_API_KEY=<api-key>`
 - `GREV_RAGAS_MAX_TOKENS=256`
-- `GREV_BENCHMARKQED_PROVIDER=vllm`
-- `GREV_BENCHMARKQED_MODEL=<vllm-model-name>`
-- `GREV_BENCHMARKQED_BASE_URL=http://<vllm-host>:8000/v1`
-- `GREV_BENCHMARKQED_API_KEY=vllm`
+- `GREV_BENCHMARKQED_PROVIDER=<provider>`
+- `GREV_BENCHMARKQED_MODEL=<chat-model-name>`
+- `GREV_BENCHMARKQED_BASE_URL=<openai-compatible-base-url>`
+- `GREV_BENCHMARKQED_API_KEY=<api-key>`
 - `GREV_BENCHMARKQED_MAX_TOKENS=256`
 
 같은 서버에 embeddings 엔드포인트도 같이 열려 있으면 아래도 같은 값으로 맞추면 됩니다.
 
-- `GREV_RAGAS_EMBEDDINGS_PROVIDER=vllm`
+- `GREV_RAGAS_EMBEDDINGS_PROVIDER=<provider>`
 - `GREV_RAGAS_EMBEDDINGS_MODEL=<embedding-model-name>`
-- `GREV_RAGAS_EMBEDDINGS_BASE_URL=http://<vllm-host>:8000/v1`
-- `GREV_RAGAS_EMBEDDINGS_API_KEY=vllm`
-- `GREV_BENCHMARKQED_EMBEDDINGS_PROVIDER=vllm`
+- `GREV_RAGAS_EMBEDDINGS_BASE_URL=<openai-compatible-base-url>`
+- `GREV_RAGAS_EMBEDDINGS_API_KEY=<api-key>`
+- `GREV_BENCHMARKQED_EMBEDDINGS_PROVIDER=<provider>`
 - `GREV_BENCHMARKQED_EMBEDDINGS_MODEL=<embedding-model-name>`
-- `GREV_BENCHMARKQED_EMBEDDINGS_BASE_URL=http://<vllm-host>:8000/v1`
-- `GREV_BENCHMARKQED_EMBEDDINGS_API_KEY=vllm`
+- `GREV_BENCHMARKQED_EMBEDDINGS_BASE_URL=<openai-compatible-base-url>`
+- `GREV_BENCHMARKQED_EMBEDDINGS_API_KEY=<api-key>`
 
-- `GREV_RAGAS_PROVIDER=ollama`
-- `GREV_RAGAS_MODEL=qwen2.5:0.5b`
-- `GREV_RAGAS_BASE_URL=http://127.0.0.1:11434/v1`
-- `GREV_RAGAS_API_KEY=ollama`
+- `GREV_RAGAS_PROVIDER=<provider>`
+- `GREV_RAGAS_MODEL=<chat-model-name>`
+- `GREV_RAGAS_BASE_URL=<openai-compatible-base-url>`
+- `GREV_RAGAS_API_KEY=<api-key>`
 
-vLLM로 바꿀 때는 아래처럼 바꿉니다.
+OpenRouter GPT-4o로 바꿀 때는 아래처럼 바꿉니다.
 
-- `GREV_RAGAS_PROVIDER=vllm`
-- `GREV_RAGAS_MODEL=<vllm-model-name>`
-- `GREV_RAGAS_BASE_URL=http://<vllm-host>:8000/v1`
-- `GREV_RAGAS_API_KEY=vllm`
+- `GREV_RAGAS_PROVIDER=openrouter`
+- `GREV_RAGAS_MODEL=openai/gpt-4o`
+- `GREV_RAGAS_BASE_URL=https://openrouter.ai/api/v1`
+- `GREV_RAGAS_API_KEY=<openrouter-api-key>`
 - `GREV_RAGAS_EXTRA_BODY={"chat_template_kwargs":{"enable_thinking":false}}`
 
 upstream benchmark-qed AutoE도 같은 방식으로 별도 설정을 씁니다.
 
-- `GREV_BENCHMARKQED_PROVIDER=ollama`
-- `GREV_BENCHMARKQED_MODEL=qwen2.5:0.5b`
-- `GREV_BENCHMARKQED_BASE_URL=http://127.0.0.1:11434/v1`
-- `GREV_BENCHMARKQED_API_KEY=ollama`
+- `GREV_BENCHMARKQED_PROVIDER=<provider>`
+- `GREV_BENCHMARKQED_MODEL=<chat-model-name>`
+- `GREV_BENCHMARKQED_BASE_URL=<openai-compatible-base-url>`
+- `GREV_BENCHMARKQED_API_KEY=<api-key>`
 
-vLLM로 바꿀 때는 아래처럼 바꿉니다.
+OpenRouter GPT-4o로 바꿀 때는 아래처럼 바꿉니다.
 
-- `GREV_BENCHMARKQED_PROVIDER=vllm`
-- `GREV_BENCHMARKQED_MODEL=<vllm-model-name>`
-- `GREV_BENCHMARKQED_BASE_URL=http://<vllm-host>:8000/v1`
-- `GREV_BENCHMARKQED_API_KEY=vllm`
+- `GREV_BENCHMARKQED_PROVIDER=openrouter`
+- `GREV_BENCHMARKQED_MODEL=openai/gpt-4o`
+- `GREV_BENCHMARKQED_BASE_URL=https://openrouter.ai/api/v1`
+- `GREV_BENCHMARKQED_API_KEY=<openrouter-api-key>`
 - `GREV_BENCHMARKQED_EXTRA_BODY={"chat_template_kwargs":{"enable_thinking":false}}`
 
 kg-gen MINE 스타일 판정도 같은 방식으로 별도 설정을 씁니다.
 
-- `GREV_KGGEN_MINE_PROVIDER=ollama`
-- `GREV_KGGEN_MINE_MODEL=qwen2.5:0.5b`
-- `GREV_KGGEN_MINE_BASE_URL=http://127.0.0.1:11434/v1`
-- `GREV_KGGEN_MINE_API_KEY=ollama`
+- `GREV_KGGEN_MINE_PROVIDER=<provider>`
+- `GREV_KGGEN_MINE_MODEL=<chat-model-name>`
+- `GREV_KGGEN_MINE_BASE_URL=<openai-compatible-base-url>`
+- `GREV_KGGEN_MINE_API_KEY=<api-key>`
 - `GREV_KGGEN_MINE_MAX_TOKENS=256`
 
-vLLM로 바꿀 때는 아래처럼 바꿉니다.
+OpenRouter GPT-4o로 바꿀 때는 아래처럼 바꿉니다.
 
-- `GREV_KGGEN_MINE_PROVIDER=vllm`
-- `GREV_KGGEN_MINE_MODEL=<vllm-model-name>`
-- `GREV_KGGEN_MINE_BASE_URL=http://<vllm-host>:8000/v1`
-- `GREV_KGGEN_MINE_API_KEY=vllm`
+- `GREV_KGGEN_MINE_PROVIDER=openrouter`
+- `GREV_KGGEN_MINE_MODEL=openai/gpt-4o`
+- `GREV_KGGEN_MINE_BASE_URL=https://openrouter.ai/api/v1`
+- `GREV_KGGEN_MINE_API_KEY=<openrouter-api-key>`
 - `GREV_KGGEN_MINE_EXTRA_BODY={"chat_template_kwargs":{"enable_thinking":false}}`
 
 ## 1. 문서 넣고 GraphRAG 인덱싱
@@ -166,19 +167,21 @@ MinerU 하이브리드 모드로 돌리려면:
       --search-results data/results/sample_search_results.json \
       --output data/results/evaluation.json
 
-vLLM endpoint를 명시해서 평가:
+OpenRouter GPT-4o 기준으로 평가:
 
     grev evaluate \
       --benchmark data/benchmarks/sample_benchmark.json \
       --search-results data/results/sample_search_results.json \
       --output data/results/evaluation.json \
-      --provider vllm \
-      --base-url http://127.0.0.1:8000/v1 \
-      --api-key vllm \
-      --model <vllm-model-name>
+      --provider openrouter \
+      --base-url https://openrouter.ai/api/v1 \
+      --api-key <openrouter-api-key> \
+      --model openai/gpt-4o
 
 `.env`에 이미 위 값들을 넣어두면 `--provider/--base-url/--api-key/--model` 플래그는 생략해도 됩니다.
 스모크에서는 `--metrics context_precision` 같이 1개만 주는 편이 가장 가볍습니다.
+
+`grev eval run` 기반 ontology eval harness 는 별도 레포 `/home/openclaw/projects/ontology-eval-harness` 로 분리되었습니다. 단일 평가, A/B 비교, human review CSV, regression detection 예시는 새 레포의 문서를 보시면 됩니다.
 
 ## 4. 질문 생성
 
@@ -217,5 +220,3 @@ kg-gen MINE 스타일 평가:
 - README.md - 전체 요약
 - docs/sample-workflow.md - 전체 흐름
 - docs/evaluation-modes.md - 평가 항목과 질문 모드
-- docs/question-generation.md - 질문 생성 방식
-- docs/graphrag-workspace.md - GraphRAG 작업공간 설명

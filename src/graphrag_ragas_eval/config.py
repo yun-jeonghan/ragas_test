@@ -4,8 +4,8 @@ from dataclasses import dataclass
 from pathlib import Path
 
 
-DEFAULT_LOCAL_PROVIDER = "ollama"
-DEFAULT_LOCAL_BASE_URL = "http://127.0.0.1:11434/v1"
+DEFAULT_LOCAL_PROVIDER = "openai"
+DEFAULT_LOCAL_BASE_URL: str | None = None
 DEFAULT_CHAT_MODEL = "qwen2.5:0.5b"
 DEFAULT_EMBEDDING_MODEL = "nomic-embed-text"
 

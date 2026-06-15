@@ -8,6 +8,8 @@ from graphrag_ragas_eval.graphrag.workspace import GraphRAGWorkspace, ensure_gra
 def test_graph_rag_workspace_injects_api_key_and_updates_dotenv(monkeypatch, tmp_path: Path) -> None:
     workspace = GraphRAGWorkspace(root=tmp_path / "workspace")
     captured: list[dict[str, object]] = []
+    api_key = "sk-test-graphrag"
+    api_base = "https://example.invalid/v1"
 
     def fake_run(cmd, check, env=None):
         captured.append({"cmd": list(cmd), "env": dict(env or {})})
@@ -16,23 +18,20 @@ def test_graph_rag_workspace_injects_api_key_and_updates_dotenv(monkeypatch, tmp
             (workspace.root / ".env").write_text("GRAPHRAG_API_KEY=<API_KEY>\n", encoding="utf-8")
         return None
 
-    monkeypatch.delenv("GRAPHRAG_API_KEY", raising=False)
-    monkeypatch.delenv("GREV_GRAPHRAG_API_KEY", raising=False)
-    monkeypatch.delenv("GREV_RAGAS_API_KEY", raising=False)
-    monkeypatch.delenv("GREV_BENCHMARKQED_API_KEY", raising=False)
-    monkeypatch.delenv("GREV_KGGEN_MINE_API_KEY", raising=False)
+    monkeypatch.setenv("GRAPHRAG_API_KEY", api_key)
+    monkeypatch.setenv("GRAPHRAG_API_BASE", api_base)
     monkeypatch.setattr("graphrag_ragas_eval.graphrag.workspace.subprocess.run", fake_run)
 
     ensure_graph_rag_project(workspace, model="qwen2.5:0.5b", embedding="nomic-embed-text", force=True)
     run_graph_rag_index(workspace, method="standard", skip_validation=True)
 
-    assert captured[0]["env"]["GRAPHRAG_API_KEY"] == "sk-ollama"
-    assert captured[0]["env"]["GRAPHRAG_API_BASE"] == "http://127.0.0.1:11434/v1"
-    assert captured[1]["env"]["GRAPHRAG_API_KEY"] == "sk-ollama"
-    assert captured[1]["env"]["GRAPHRAG_API_BASE"] == "http://127.0.0.1:11434/v1"
+    assert captured[0]["env"]["GRAPHRAG_API_KEY"] == api_key
+    assert captured[0]["env"]["GRAPHRAG_API_BASE"] == api_base
+    assert captured[1]["env"]["GRAPHRAG_API_KEY"] == api_key
+    assert captured[1]["env"]["GRAPHRAG_API_BASE"] == api_base
     assert (
         workspace.root / ".env"
-    ).read_text(encoding="utf-8") == "GRAPHRAG_API_KEY=sk-ollama\nGRAPHRAG_API_BASE=http://127.0.0.1:11434/v1\n"
+    ).read_text(encoding="utf-8") == f"GRAPHRAG_API_KEY={api_key}\nGRAPHRAG_API_BASE={api_base}\n"
 
 
 def test_graph_rag_workspace_writes_api_base_into_settings(monkeypatch, tmp_path: Path) -> None:
@@ -64,10 +63,8 @@ def test_graph_rag_workspace_writes_api_base_into_settings(monkeypatch, tmp_path
             )
         return None
 
-    monkeypatch.delenv("GRAPHRAG_API_KEY", raising=False)
-    monkeypatch.delenv("GRAPHRAG_API_BASE", raising=False)
-    monkeypatch.delenv("GREV_GRAPHRAG_API_BASE", raising=False)
-    monkeypatch.delenv("GREV_RAGAS_BASE_URL", raising=False)
+    monkeypatch.setenv("GRAPHRAG_API_KEY", "sk-test-graphrag")
+    monkeypatch.setenv("GRAPHRAG_API_BASE", "https://example.invalid/v1")
     monkeypatch.setattr("graphrag_ragas_eval.graphrag.workspace.subprocess.run", fake_run)
 
     ensure_graph_rag_project(workspace, model="qwen2.5:0.5b", embedding="nomic-embed-text", force=True)

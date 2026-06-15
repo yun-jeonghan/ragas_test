@@ -259,7 +259,7 @@ def _build_interpretation(
 
     aggregate = evaluation_data.get("aggregate", {})
     lines = [
-        f"Model lens: {getattr(runtime, 'model', 'qwen2.5:0.5b')} via {getattr(runtime, 'provider', 'ollama')}.",
+        f"Model lens: {getattr(runtime, 'model', 'qwen2.5:0.5b')} via {getattr(runtime, 'provider', 'unknown')}.",
         "This is a smoke run, so the numbers are mainly for wiring validation.",
     ]
     if aggregate:

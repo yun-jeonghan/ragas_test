@@ -3,10 +3,28 @@
 set -eu
 
 REPO_ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
-GREV_BIN=${GREV_BIN:-grev}
+LOCAL_GREV_BIN="$REPO_ROOT/scripts/grev_local.sh"
+if [ -x "$LOCAL_GREV_BIN" ]; then
+  GREV_BIN=${GREV_BIN:-"$LOCAL_GREV_BIN"}
+else
+  GREV_BIN=${GREV_BIN:-grev}
+fi
 GRAPHRAG_BIN=${GRAPHRAG_BIN:-graphrag}
-GRAPHRAG_CHAT_MODEL=${GREV_GRAPHRAG_MODEL:-${GREV_RAGAS_MODEL:-gpt-4o-mini}}
-GRAPHRAG_EMBEDDING_MODEL=${GREV_GRAPHRAG_EMBEDDING_MODEL:-${GREV_RAGAS_EMBEDDINGS_MODEL:-text-embedding-3-small}}
+GRAPHRAG_CHAT_MODEL=${GREV_GRAPHRAG_MODEL:-${GREV_RAGAS_MODEL:-${GREV_BENCHMARKQED_MODEL:-}}}
+GRAPHRAG_EMBEDDING_MODEL=${GREV_GRAPHRAG_EMBEDDING_MODEL:-${GREV_RAGAS_EMBEDDINGS_MODEL:-${GREV_BENCHMARKQED_EMBEDDINGS_MODEL:-}}}
+
+if [ -f "$REPO_ROOT/.env" ]; then
+  set -a
+  . "$REPO_ROOT/.env"
+  set +a
+  GRAPHRAG_CHAT_MODEL=${GREV_GRAPHRAG_MODEL:-${GREV_RAGAS_MODEL:-${GREV_BENCHMARKQED_MODEL:-}}}
+  GRAPHRAG_EMBEDDING_MODEL=${GREV_GRAPHRAG_EMBEDDING_MODEL:-${GREV_RAGAS_EMBEDDINGS_MODEL:-${GREV_BENCHMARKQED_EMBEDDINGS_MODEL:-}}}
+fi
+
+if [ -z "$GRAPHRAG_CHAT_MODEL" ] || [ -z "$GRAPHRAG_EMBEDDING_MODEL" ]; then
+  printf '%s\n' "Missing env. Set GREV_GRAPHRAG_MODEL/GREV_RAGAS_MODEL/GREV_BENCHMARKQED_MODEL and matching embedding vars before running." >&2
+  exit 1
+fi
 
 TEST_ROOT=${1:-"data/test_$(date +%Y%m%d_%H%M%S)"}
 case "$TEST_ROOT" in
@@ -51,9 +69,10 @@ OGRAG2_DIR="$OUTPUT_DIR/runs/ograg2"
 
 run_count=0
 fail_count=0
+STATUS_DIR="$OUTPUT_DIR/.step_status"
 
 mkdir -p "$SOURCE_INPUT_DIR" "$BENCHMARK_INPUT_DIR" "$RESULTS_INPUT_DIR" "$ASSERTION_INPUT_DIR" "$ONTOLOGY_INPUT_DIR"
-mkdir -p "$LOG_DIR" "$WORK_DIR" "$OUTPUT_DIR/runs" "$SMOKE_OUTPUT_DIR" "$RETRIEVAL_SMOKE_DIR" "$RETRIEVAL_REFERENCE_DIR" "$RETRIEVAL_SCORE_DIR" "$ASSERTION_SCORE_DIR" "$ASSERTION_REPORT_DIR" "$REPORT_SMOKE_DIR" "$GENERATE_QUESTIONS_DIR" "$RAGAS_QUESTIONS_DIR" "$RAGAS_EVAL_DIR" "$EVALUATE_DIR" "$KGGEN_DIR" "$KGCORRECTNESS_DIR" "$OGRAG2_DIR"
+mkdir -p "$LOG_DIR" "$WORK_DIR" "$OUTPUT_DIR/runs" "$SMOKE_OUTPUT_DIR" "$RETRIEVAL_SMOKE_DIR" "$RETRIEVAL_REFERENCE_DIR" "$RETRIEVAL_SCORE_DIR" "$ASSERTION_SCORE_DIR" "$ASSERTION_REPORT_DIR" "$REPORT_SMOKE_DIR" "$GENERATE_QUESTIONS_DIR" "$RAGAS_QUESTIONS_DIR" "$RAGAS_EVAL_DIR" "$EVALUATE_DIR" "$KGGEN_DIR" "$KGCORRECTNESS_DIR" "$OGRAG2_DIR" "$STATUS_DIR"
 : > "$SUMMARY_FILE"
 
 require_cmd() {
@@ -71,6 +90,34 @@ append_summary() {
     "$step_name" "$exit_code" "$log_file" >> "$SUMMARY_FILE"
 }
 
+step_status_file() {
+  printf '%s/%s.status' "$STATUS_DIR" "$(printf '%s' "$1" | sed 's/[^A-Za-z0-9_.-]/_/g')"
+}
+
+mark_step_status() {
+  printf '%s\n' "$2" > "$(step_status_file "$1")"
+}
+
+read_step_status() {
+  status_file=$(step_status_file "$1")
+  if [ -f "$status_file" ]; then
+    cat "$status_file"
+  fi
+}
+
+first_failed_dep_file() {
+  deps_file=$1
+  while IFS= read -r dep; do
+    [ -n "$dep" ] || continue
+    dep_status=$(read_step_status "$dep" || true)
+    if [ "$dep_status" = "failed" ]; then
+      printf '%s' "$dep"
+      return 0
+    fi
+  done < "$deps_file"
+  return 1
+}
+
 run_step() {
   step_name=$1
   log_file=$2
@@ -85,10 +132,43 @@ run_step() {
   append_summary "$step_name" "$rc" "$log_file"
   if [ "$rc" -eq 0 ]; then
     printf '  ok  %s\n' "$step_name"
+    mark_step_status "$step_name" passed
   else
     printf '  err %s (see %s)\n' "$step_name" "$log_file"
     fail_count=$((fail_count + 1))
+    mark_step_status "$step_name" failed
   fi
+}
+
+run_step_with_deps() {
+  step_name=$1
+  log_file=$2
+  shift 2
+
+  deps_file=$(mktemp "$STATUS_DIR/deps.XXXXXX")
+  while [ "$#" -gt 0 ]; do
+    if [ "$1" = "--" ]; then
+      shift
+      break
+    fi
+    printf '%s\n' "$1" >> "$deps_file"
+    shift
+  done
+
+  if failed_dep=$(first_failed_dep_file "$deps_file"); then
+    rm -f "$deps_file"
+    run_count=$((run_count + 1))
+    printf '\n[%02d] %s\n' "$run_count" "$step_name"
+    printf '  err %s (dependency failed: %s)\n' "$step_name" "$failed_dep"
+    printf 'dependency failed: %s\n' "$failed_dep" > "$log_file"
+    append_summary "$step_name" 1 "$log_file"
+    mark_step_status "$step_name" failed
+    fail_count=$((fail_count + 1))
+    return 0
+  fi
+
+  rm -f "$deps_file"
+  run_step "$step_name" "$log_file" "$@"
 }
 
 copy_inputs() {
@@ -239,29 +319,39 @@ run_step \
   "$LOG_DIR/14-benchmark-qed-retrieval-reference.log" \
   "$GREV_BIN" benchmark-qed retrieval-reference --questions "$BENCHMARK_INPUT_DIR/sample_benchmark.json" --clusters "$RETRIEVAL_SMOKE_DIR/clusters.json" --text-units "$ONTOLOGY_WORKSPACE/output/text_units.parquet" --output "$RETRIEVAL_REFERENCE_DIR/reference.json" --max-questions 1 --assessor-type rationale --semantic-neighbors 10 --centroid-neighbors 5 --concurrent-requests 4
 
-run_step \
+run_step_with_deps \
   "benchmark-qed retrieval-score" \
   "$LOG_DIR/15-benchmark-qed-retrieval-score.log" \
+  "benchmark-qed retrieval-reference" "benchmark-qed retrieval-smoke" \
+  -- \
   "$GREV_BIN" benchmark-qed retrieval-score --reference-dir "$RETRIEVAL_REFERENCE_DIR" --clusters "$RETRIEVAL_SMOKE_DIR/clusters.json" --retrieval-results "$RETRIEVAL_SMOKE_DIR/retrieval-results.json" --output "$RETRIEVAL_SCORE_DIR/retrieval-evaluation.json" --text-units "$ONTOLOGY_WORKSPACE/output/text_units.parquet" --question-sets default --rag-method-name benchmark-qed --reference-filename reference.json --relevance-threshold 2 --context-id-key chunk_id --context-text-key text --cluster-match-by id --significance-alpha 0.05 --significance-correction holm --fidelity-metric js --assessor-type rationale --concurrent-requests 4 --max-concurrent 4
 
-run_step \
+run_step_with_deps \
   "benchmark-qed assertion-score" \
   "$LOG_DIR/16-benchmark-qed-assertion-score.log" \
+  "benchmark-qed smoke" \
+  -- \
   "$GREV_BIN" benchmark-qed assertion-score --assertion-prep "$SMOKE_OUTPUT_DIR/assertion-prep.json" --answers "$ASSERTION_INPUT_DIR/answers.json" --output "$ASSERTION_SCORE_DIR/assertion-scores.json" --trials 1 --top-k-assertions 1
 
-run_step \
+run_step_with_deps \
   "benchmark-qed assertion-report" \
   "$LOG_DIR/17-benchmark-qed-assertion-report.log" \
+  "benchmark-qed assertion-score" \
+  -- \
   "$GREV_BIN" benchmark-qed assertion-report --assertion-scores "$ASSERTION_SCORE_DIR/assertion-scores.json" --output "$ASSERTION_REPORT_DIR/assertion-report.html" --title "BenchmarkQED Assertion Report"
 
-run_step \
+run_step_with_deps \
   "evaluate" \
   "$LOG_DIR/18-evaluate.log" \
+  "ragas generate-questions" \
+  -- \
   "$GREV_BIN" evaluate --benchmark "$BENCHMARK_INPUT_DIR/sample_benchmark.json" --search-results "$RESULTS_INPUT_DIR/sample_search_results.json" --output "$EVALUATE_DIR/evaluation.json" --metrics context_precision
 
-run_step \
+run_step_with_deps \
   "ragas evaluate" \
   "$LOG_DIR/19-ragas-evaluate.log" \
+  "ragas generate-questions" \
+  -- \
   "$GREV_BIN" ragas evaluate --benchmark "$BENCHMARK_INPUT_DIR/sample_benchmark.json" --search-results "$RESULTS_INPUT_DIR/sample_search_results.json" --output "$RAGAS_EVAL_DIR/evaluation.json" --metrics context_precision
 
 run_step \
@@ -274,9 +364,11 @@ run_step \
   "$LOG_DIR/21-kg-correctness.log" \
   "$GREV_BIN" kg-correctness evaluate --benchmark "$BENCHMARK_INPUT_DIR/sample_benchmark.json" --search-results "$RESULTS_INPUT_DIR/sample_search_results.json" --output "$KGCORRECTNESS_DIR/evaluation.json"
 
-run_step \
+run_step_with_deps \
   "report smoke" \
   "$LOG_DIR/22-report-smoke.log" \
+  "benchmark-qed smoke" "benchmark-qed autod" "benchmark-qed autoq" "benchmark-qed autoe" "benchmark generate-questions" \
+  -- \
   "$GREV_BIN" report smoke --evaluation "$SMOKE_OUTPUT_DIR/autoe-evaluation.json" --generated-questions "$GENERATE_QUESTIONS_DIR/generated_questions.json" --autod-summary "$SMOKE_OUTPUT_DIR/autod-summary.json" --autoq-questions "$SMOKE_OUTPUT_DIR/autoq-questions.json" --output "$REPORT_SMOKE_DIR/report.html" --title "GraphRAG + Ragas Smoke Report"
 
 run_step \

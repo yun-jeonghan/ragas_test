@@ -48,15 +48,7 @@ class GraphRAGWorkspace:
 
 
 def _resolve_graphrag_api_key() -> str:
-    """Resolve the key GraphRAG should see for init/index runs.
-
-    GraphRAG's generated config always points at ${GRAPHRAG_API_KEY}. When
-    that variable is missing, its config loader falls back to the literal
-    placeholder from the generated .env file, which then bubbles up as
-    "<API_KEY>" in LiteLLM errors. Prefer an explicitly provided key, but
-    fall back to the local Ollama-compatible default so the wrapper works
-    out of the box on this repo's smoke tests.
-    """
+    """Resolve the key GraphRAG should see for init/index runs."""
 
     for name in (
         "GRAPHRAG_API_KEY",
@@ -68,7 +60,9 @@ def _resolve_graphrag_api_key() -> str:
         value = os.environ.get(name)
         if value:
             return value
-    return "sk-ollama"
+    raise RuntimeError(
+        "Missing GraphRAG API key. Set GRAPHRAG_API_KEY or one of the GREV_*_API_KEY env vars."
+    )
 
 
 def _resolve_graphrag_api_base() -> str:
@@ -84,7 +78,9 @@ def _resolve_graphrag_api_base() -> str:
         value = os.environ.get(name)
         if value:
             return value
-    return "http://127.0.0.1:11434/v1"
+    raise RuntimeError(
+        "Missing GraphRAG API base. Set GRAPHRAG_API_BASE or one of the GREV_*_BASE_URL env vars."
+    )
 
 
 def _graph_rag_subprocess_env() -> dict[str, str]:
@@ -217,7 +213,6 @@ def ensure_graph_rag_project(
 ) -> None:
     workspace.root.mkdir(parents=True, exist_ok=True)
     api_key = _resolve_graphrag_api_key()
-    api_base = _resolve_graphrag_api_base()
     cmd = [
         "graphrag",
         "init",

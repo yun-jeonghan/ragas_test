@@ -289,8 +289,8 @@ def _fallback_interpretation(
     report_metadata: dict[str, Any] | None,
 ) -> str:
     model = (report_metadata or {}).get("chat_model") or (report_metadata or {}).get("model") or "qwen2.5:0.5b"
-    provider = (report_metadata or {}).get("provider") or "ollama"
-    base_url = (report_metadata or {}).get("base_url") or "http://127.0.0.1:11434/v1"
+    provider = (report_metadata or {}).get("provider") or "unknown"
+    base_url = (report_metadata or {}).get("base_url") or "not set"
     sample_count = len(scores)
     metric_count = len(aggregate)
     question_count = len(_safe_list((autoq_data or {}).get("questions")))
@@ -352,8 +352,8 @@ def _retrieval_interpretation(
 ) -> str:
     metadata = report_metadata or {}
     model = metadata.get("chat_model") or metadata.get("model") or "qwen2.5:0.5b"
-    provider = metadata.get("provider") or "ollama"
-    base_url = metadata.get("base_url") or "http://127.0.0.1:11434/v1"
+    provider = metadata.get("provider") or "unknown"
+    base_url = metadata.get("base_url") or "not set"
     reference_count = len(_safe_list((reference_data or {}).get("references")))
     retrieval_count = len(_safe_list((retrieval_data or {}).get("results")))
     summary_rows = len(_safe_list((evaluation_data or {}).get("summary")))
@@ -384,8 +384,8 @@ def _assertion_interpretation(
 ) -> str:
     metadata = report_metadata or {}
     model = metadata.get("chat_model") or metadata.get("model") or "qwen2.5:0.5b"
-    provider = metadata.get("provider") or "ollama"
-    base_url = metadata.get("base_url") or "http://127.0.0.1:11434/v1"
+    provider = metadata.get("provider") or "unknown"
+    base_url = metadata.get("base_url") or "not set"
     scores = _safe_list((assertion_data or {}).get("scores"))
     summary_by_assertion = _safe_list((assertion_data or {}).get("summary_by_assertion"))
     summary_by_question = _safe_list((assertion_data or {}).get("summary_by_question"))

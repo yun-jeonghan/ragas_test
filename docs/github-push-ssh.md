@@ -100,7 +100,7 @@ ssh -T git@github.com
 인증이 되면 저장소에서 푸시한다.
 
 ```bash
-git -C /home/openclaw/projects/graphrag-ragas-eval push origin main
+git -C /home/openclaw/projects/graphrag-eval push origin main
 ```
 
 ## 9. 실패 유형
@@ -132,4 +132,3 @@ ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILFlGKeOxTq201SEdl2d74anVsJa4/YMIdO64uodNGo2
 4. 공개키를 GitHub에 등록
 5. `ssh -T git@github.com` 로 검증
 6. `git push`
-
