@@ -8,6 +8,7 @@ from typing import Any
 import re
 
 from .models import ExtractionManifestEntry, NormalizedDocument
+from .markdown import preprocess_markdown_text
 from .pdf import PdfExtractionPolicy, extract_pdf_document
 
 
@@ -60,27 +61,40 @@ class DocumentNormalizer:
     def _normalize_plain_text(
         self, source_path: Path
     ) -> tuple[list[NormalizedDocument], list[ExtractionManifestEntry]]:
-        text = source_path.read_text(encoding="utf-8")
+        raw_text = source_path.read_text(encoding="utf-8")
+        metadata: dict[str, Any] = {"extraction": "direct"}
+        kind = source_path.suffix.lower().lstrip(".")
+        title = source_path.stem
+        text = raw_text
+        if source_path.suffix.lower() == ".md":
+            result = preprocess_markdown_text(raw_text)
+            text = result.text
+            kind = "markdown"
+            metadata.update(result.metadata)
+            metadata["extraction"] = "markdown"
+            if result.title:
+                title = result.title
         canonical_path = self._canonical_path(source_path).with_suffix(".txt")
         self._write_text(canonical_path, text)
         document = NormalizedDocument(
             id=canonical_path.stem,
-            title=canonical_path.stem,
+            title=title,
             text=text,
             source_path=source_path,
             canonical_path=canonical_path,
-            kind=source_path.suffix.lower().lstrip("."),
-            metadata={"extraction": "direct"},
+            kind=kind,
+            metadata=metadata,
         )
         entry = ExtractionManifestEntry(
             source_path=source_path,
             canonical_path=canonical_path,
             kind=document.kind,
-            strategy="direct",
+            strategy=metadata.get("extraction", "direct"),
             page_count=0,
             text_page_count=0,
             ocr_page_count=0,
             text_chars=len(text),
+            metadata=metadata,
         )
         return [document], [entry]
 

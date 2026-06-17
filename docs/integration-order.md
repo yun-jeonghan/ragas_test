@@ -5,7 +5,7 @@
 - `vendor/benchmark-qed` -> <https://github.com/microsoft/benchmark-qed.git>
 - `vendor/kg-gen` -> <https://github.com/stair-lab/kg-gen>
 
-이제부터는 “흉내 내는 코드”를 더하지 말고, 실제 라이브러리 호출부와 포맷 어댑터만 구현하는 순서로 간다.
+이제부터는 임시 흉내 구현을 더하지 말고, 실제 라이브러리 호출부와 포맷 어댑터만 구현하는 순서로 간다.
 
 ## 1. 라이브러리 경계 확정
 
@@ -52,7 +52,7 @@
 
 ## 6. 테스트
 
-- 라이브러리 호출부는 mock client로 최소 1개씩 검증
+- 라이브러리 호출부는 테스트 더블로 최소 1개씩 검증
 - submodule `vendor/kg-gen`의 MINE 입력/출력과 대응되는지 확인
 - compile/test가 통과한 뒤에만 문서와 예시를 갱신
 

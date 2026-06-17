@@ -12,9 +12,9 @@
     pip install graphrag
     cp .env.example .env
 
-- `.env`의 기본 예시는 OpenRouter GPT-4o 기준입니다.
+- `.env`의 기본 예시는 OpenRouter 또는 local Ollama 조합입니다.
 
-OpenRouter GPT-4o 기준으로 Ragas와 BenchmarkQED 값을 각각 맞춰 넣습니다.
+기본값으로는 Ragas와 BenchmarkQED 값을 각각 맞춰 넣습니다.
 
 - `GREV_RAGAS_PROVIDER=openrouter`
 - `GREV_RAGAS_MODEL=openai/gpt-4o`
@@ -71,11 +71,6 @@ MinerU 하이브리드로 갈 때는:
 - `GREV_BENCHMARKQED_EMBEDDINGS_MODEL=<embedding-model-name>`
 - `GREV_BENCHMARKQED_EMBEDDINGS_BASE_URL=<openai-compatible-base-url>`
 - `GREV_BENCHMARKQED_EMBEDDINGS_API_KEY=<api-key>`
-
-- `GREV_RAGAS_PROVIDER=<provider>`
-- `GREV_RAGAS_MODEL=<chat-model-name>`
-- `GREV_RAGAS_BASE_URL=<openai-compatible-base-url>`
-- `GREV_RAGAS_API_KEY=<api-key>`
 
 OpenRouter GPT-4o로 바꿀 때는 아래처럼 바꿉니다.
 
@@ -148,7 +143,12 @@ MinerU 하이브리드 모드로 돌리려면:
 
 사용자 온톨로지와 후처리를 함께 쓰려면:
 
-    grev graphrag index +      --source examples/sample_docs +      --workspace-root workspaces/graphrag +      --ontology-path workspaces/graphrag/config/user_ontology.json +      --postprocess +      --description-limit 200
+    grev graphrag index \
+      --source examples/sample_docs \
+      --workspace-root workspaces/graphrag \
+      --ontology-path workspaces/graphrag/config/user_ontology.json \
+      --postprocess \
+      --description-limit 200
 
 인덱싱이 끝난 뒤 후처리만 다시 돌리려면:
 

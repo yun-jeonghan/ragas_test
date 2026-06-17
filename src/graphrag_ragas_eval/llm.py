@@ -6,6 +6,7 @@ import os
 import sys
 import types
 from dataclasses import dataclass
+from urllib.parse import urlparse
 from typing import Any
 
 from .config import (
@@ -102,15 +103,30 @@ def _parse_int(value: str | None) -> int | None:
     if not normalized:
         return None
     return int(normalized)
+
+
+def _validate_openai_compatible_base_url(base_url: str | None, *, env_name: str) -> None:
+    if not base_url:
+        raise RuntimeError(
+            f"{env_name} is required. Use OpenRouter or local Ollama, for example "
+            "https://openrouter.ai/api/v1 or http://127.0.0.1:11434/v1."
+        )
+
+    parsed = urlparse(base_url)
+    host = (parsed.hostname or "").lower()
+    if host not in {"openrouter.ai", "localhost", "127.0.0.1"}:
+        raise RuntimeError(
+            f"Unsupported base URL for {env_name}: {base_url}. "
+            "Use OpenRouter or local Ollama only."
+        )
+
+
 def _openai_client(base_url: str | None, api_key: str | None) -> Any:
     from openai import AsyncOpenAI
 
     kwargs: dict[str, Any] = {}
-    if base_url:
-        kwargs["base_url"] = base_url
-        kwargs["api_key"] = api_key or "EMPTY"
-    else:
-        kwargs["api_key"] = api_key
+    kwargs["base_url"] = base_url
+    kwargs["api_key"] = api_key or "EMPTY"
     return AsyncOpenAI(**kwargs)
 
 
@@ -207,6 +223,7 @@ def load_llm_runtime_config(
 def build_ragas_llm(config: LLMRuntimeConfig | None = None) -> Any:
     runtime = config or load_llm_runtime_config()
     _ensure_ragas_import_shims()
+    _validate_openai_compatible_base_url(runtime.base_url, env_name="GREV_RAGAS_BASE_URL")
 
     try:
         from ragas.llms import llm_factory
@@ -260,7 +277,13 @@ def build_ragas_embeddings(config: LLMRuntimeConfig | None = None) -> Any:
     except ImportError as exc:  # pragma: no cover - runtime dependency error path
         raise RuntimeError("openai or ragas is not installed") from exc
 
-    client = _openai_client(runtime.embeddings_base_url, runtime.embeddings_api_key or runtime.api_key)
+    embeddings_base_url = runtime.embeddings_base_url or runtime.base_url
+    embeddings_api_key = runtime.embeddings_api_key or runtime.api_key
+    _validate_openai_compatible_base_url(
+        embeddings_base_url,
+        env_name="GREV_RAGAS_EMBEDDINGS_BASE_URL",
+    )
+    client = _openai_client(embeddings_base_url, embeddings_api_key)
 
     if runtime.embeddings_extra_body:
         original_create = client.embeddings.create
