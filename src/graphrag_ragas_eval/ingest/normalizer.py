@@ -7,8 +7,14 @@ from pathlib import Path
 from typing import Any
 import re
 
+from .markdown import (
+    DEFAULT_MARKDOWN_CHUNK_OVERLAP,
+    DEFAULT_MARKDOWN_CHUNK_SIZE,
+    MarkdownChunk,
+    preprocess_markdown_text,
+    split_markdown_text,
+)
 from .models import ExtractionManifestEntry, NormalizedDocument
-from .markdown import preprocess_markdown_text
 from .pdf import PdfExtractionPolicy, extract_pdf_document
 
 
@@ -68,12 +74,67 @@ class DocumentNormalizer:
         text = raw_text
         if source_path.suffix.lower() == ".md":
             result = preprocess_markdown_text(raw_text)
-            text = result.text
-            kind = "markdown"
             metadata.update(result.metadata)
             metadata["extraction"] = "markdown"
             if result.title:
                 title = result.title
+            markdown_chunks = split_markdown_text(
+                result.text,
+                chunk_size=DEFAULT_MARKDOWN_CHUNK_SIZE,
+                chunk_overlap=DEFAULT_MARKDOWN_CHUNK_OVERLAP,
+            )
+            if not markdown_chunks:
+                markdown_chunks = [
+                    MarkdownChunk(
+                        text=result.text,
+                        index=1,
+                        total=1,
+                        metadata={
+                            **metadata,
+                            "chunk_index": 1,
+                            "chunk_count": 1,
+                            "chunk_size": DEFAULT_MARKDOWN_CHUNK_SIZE,
+                            "chunk_overlap": DEFAULT_MARKDOWN_CHUNK_OVERLAP,
+                        },
+                    )
+            ]
+            documents: list[NormalizedDocument] = []
+            manifest_entries: list[ExtractionManifestEntry] = []
+            total_chunks = len(markdown_chunks)
+            for chunk in markdown_chunks:
+                chunk_metadata = {**metadata, **chunk.metadata, "chunk_count": total_chunks}
+                if total_chunks == 1:
+                    canonical_path = self._canonical_path(source_path).with_suffix(".txt")
+                else:
+                    canonical_path = self._canonical_path(
+                        source_path, suffix=f"__chunk_{chunk.index:04d}"
+                    ).with_suffix(".txt")
+                self._write_text(canonical_path, chunk.text)
+                documents.append(
+                    NormalizedDocument(
+                        id=canonical_path.stem,
+                        title=title,
+                        text=chunk.text,
+                        source_path=source_path,
+                        canonical_path=canonical_path,
+                        kind="markdown",
+                        metadata=chunk_metadata,
+                    )
+                )
+                manifest_entries.append(
+                    ExtractionManifestEntry(
+                        source_path=source_path,
+                        canonical_path=canonical_path,
+                        kind="markdown",
+                        strategy=chunk_metadata.get("extraction", "markdown"),
+                        page_count=0,
+                        text_page_count=0,
+                        ocr_page_count=0,
+                        text_chars=len(chunk.text),
+                        metadata=chunk_metadata,
+                    )
+                )
+            return documents, manifest_entries
         canonical_path = self._canonical_path(source_path).with_suffix(".txt")
         self._write_text(canonical_path, text)
         document = NormalizedDocument(

@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from graphrag_ragas_eval.ingest.markdown import preprocess_markdown_text
+from graphrag_ragas_eval.ingest.markdown import preprocess_markdown_text, split_markdown_text
 from graphrag_ragas_eval.ingest.normalizer import normalize_source_tree
 
 
@@ -70,3 +70,23 @@ Body text.
     assert manifest.exists()
     manifest_df = pd.read_json(manifest, lines=True)
     assert manifest_df.iloc[0]["kind"] == "markdown"
+
+
+def test_split_markdown_text_uses_langchain_recursive_splitter() -> None:
+    text = "\n\n".join(
+        [
+            "# Heading",
+            " ".join(["문서 전처리"] * 80),
+            "## Details",
+            " ".join(["LangChain splitter"] * 80),
+        ]
+    )
+
+    chunks = split_markdown_text(text, chunk_size=120, chunk_overlap=20)
+
+    assert len(chunks) > 1
+    assert all(chunk.text.strip() for chunk in chunks)
+    assert chunks[0].index == 1
+    assert chunks[0].total == len(chunks)
+    assert any("Heading" in chunk.text for chunk in chunks)
+    assert any("Details" in chunk.text for chunk in chunks)

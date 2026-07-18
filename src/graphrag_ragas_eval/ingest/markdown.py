@@ -3,7 +3,11 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
+from langchain_text_splitters import Language, RecursiveCharacterTextSplitter
+
 _ZERO_WIDTH_CHARS = ("\ufeff", "\u200b", "\u200c", "\u200d", "\u2060")
+DEFAULT_MARKDOWN_CHUNK_SIZE = 1000
+DEFAULT_MARKDOWN_CHUNK_OVERLAP = 200
 
 
 @dataclass(frozen=True, slots=True)
@@ -11,6 +15,14 @@ class MarkdownPreprocessResult:
     text: str
     title: str | None = None
     frontmatter: dict[str, str] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass(frozen=True, slots=True)
+class MarkdownChunk:
+    text: str
+    index: int
+    total: int
     metadata: dict[str, Any] = field(default_factory=dict)
 
 
@@ -100,6 +112,46 @@ def preprocess_markdown_text(text: str) -> MarkdownPreprocessResult:
         frontmatter=frontmatter,
         metadata=metadata,
     )
+
+
+def split_markdown_text(
+    text: str,
+    *,
+    chunk_size: int = DEFAULT_MARKDOWN_CHUNK_SIZE,
+    chunk_overlap: int = DEFAULT_MARKDOWN_CHUNK_OVERLAP,
+) -> list[MarkdownChunk]:
+    """Split markdown with LangChain's RecursiveCharacterTextSplitter.
+
+    This keeps markdown structure-aware separators, but still defers the actual
+    chunk sizing logic to the LangChain splitter as requested.
+    """
+
+    preprocessed = preprocess_markdown_text(text)
+    if not preprocessed.text.strip():
+        return []
+
+    splitter = RecursiveCharacterTextSplitter.from_language(
+        Language.MARKDOWN,
+        chunk_size=chunk_size,
+        chunk_overlap=chunk_overlap,
+    )
+    chunks = [chunk.strip() for chunk in splitter.split_text(preprocessed.text) if chunk.strip()]
+    total = len(chunks)
+    return [
+        MarkdownChunk(
+            text=chunk,
+            index=index,
+            total=total,
+            metadata={
+                **preprocessed.metadata,
+                "chunk_index": index,
+                "chunk_count": total,
+                "chunk_size": chunk_size,
+                "chunk_overlap": chunk_overlap,
+            },
+        )
+        for index, chunk in enumerate(chunks, start=1)
+    ]
 
 
 def _normalize_unicode(text: str) -> str:

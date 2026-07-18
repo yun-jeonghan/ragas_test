@@ -3,6 +3,9 @@ __pycache__/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
+.env
+.env.*
+.test_progress_*
 dist/
 build/
 *.egg-info/
@@ -14,3 +17,4 @@ reports/*
 data/results/*
 !data/results/sample_search_results.json
 !data/results/sample_evaluation.json
+workspaces/**/.env
